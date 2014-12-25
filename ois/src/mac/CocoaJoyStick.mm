@@ -21,9 +21,9 @@
  3. This notice may not be removed or altered from any source distribution.
  */
 
-#include "mac/MacJoyStick.h"
+#include "mac/CocoaJoyStick.h"
 #include "mac/MacHIDManager.h"
-#include "mac/MacInputManager.h"
+#include "mac/CocoaInputManager.h"
 #include "OISEvents.h"
 #include "OISException.h"
 
@@ -32,14 +32,14 @@
 using namespace OIS;
 
 //--------------------------------------------------------------------------------------------------//
-MacJoyStick::MacJoyStick(const std::string &vendor, bool buffered, HidInfo* info, InputManager* creator, int devID) : 
+CocoaJoyStick::CocoaJoyStick(const std::string &vendor, bool buffered, HidInfo* info, InputManager* creator, int devID) : 
 JoyStick(vendor, buffered, devID, creator), mInfo(info)
 {
 	
 }
 
 //--------------------------------------------------------------------------------------------------//
-MacJoyStick::~MacJoyStick()
+CocoaJoyStick::~CocoaJoyStick()
 {
 	//TODO: check if the queue has been started first?
 	//(*mQueue)->stop(mQueue); 
@@ -53,7 +53,7 @@ MacJoyStick::~MacJoyStick()
 }
 
 //--------------------------------------------------------------------------------------------------//
-void MacJoyStick::_initialize()
+void CocoaJoyStick::_initialize()
 {
 	assert(mInfo && "Given HidInfo invalid");
 	assert(mInfo->interface && "Joystick interface invalid");
@@ -63,7 +63,7 @@ void MacJoyStick::_initialize()
 	mState.mAxes.clear();
 	
 	if ((*mInfo->interface)->open(mInfo->interface, 0) != KERN_SUCCESS)
-		OIS_EXCEPT(E_General, "MacJoyStick::_initialize() >> Could not initialize joy device!");
+		OIS_EXCEPT(E_General, "CocoaJoyStick::_initialize() >> Could not initialize joy device!");
 	
 	mState.clear();
 	
@@ -88,9 +88,9 @@ private:
 };
 
 //--------------------------------------------------------------------------------------------------//
-void MacJoyStick::capture()
+void CocoaJoyStick::capture()
 {
-	assert(mQueue && "Queue must be initialized before calling MacJoyStick::capture()");
+	assert(mQueue && "Queue must be initialized before calling CocoaJoyStick::capture()");
 	
 	AbsoluteTime zeroTime = {0,0}; 
 	
@@ -142,13 +142,13 @@ void MacJoyStick::capture()
 }
 
 //--------------------------------------------------------------------------------------------------//
-void MacJoyStick::setBuffered(bool buffered)
+void CocoaJoyStick::setBuffered(bool buffered)
 {
 	mBuffered = buffered;
 }
 
 //--------------------------------------------------------------------------------------------------//
-Interface* MacJoyStick::queryInterface(Interface::IType type)
+Interface* CocoaJoyStick::queryInterface(Interface::IType type)
 {
 	//Thought about using covariant return type here.. however,
 	//some devices may allow LED light changing, or other interface stuff
@@ -160,7 +160,7 @@ Interface* MacJoyStick::queryInterface(Interface::IType type)
 }
 
 //--------------------------------------------------------------------------------------------------//
-void MacJoyStick::_enumerateCookies()
+void CocoaJoyStick::_enumerateCookies()
 {
 	assert(mInfo && "Given HidInfo invalid");
 	assert(mInfo->interface && "Joystick interface invalid");
@@ -282,7 +282,7 @@ void MacJoyStick::_enumerateCookies()
 }
 
 //--------------------------------------------------------------------------------------------------//
-IOHIDQueueInterface** MacJoyStick::_createQueue(unsigned int depth)
+IOHIDQueueInterface** CocoaJoyStick::_createQueue(unsigned int depth)
 {	
 	assert(mInfo && "Given HidInfo invalid");
 	assert(mInfo->interface && "Joystick interface invalid");

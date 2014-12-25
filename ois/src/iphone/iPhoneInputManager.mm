@@ -88,11 +88,17 @@ using namespace OIS;
 @end
 
 //--------------------------------------------------------------------------------//
-iPhoneInputManager::iPhoneInputManager() : InputManager("iPhone Input Manager")
+iPhoneInputManager::iPhoneInputManager() : InputManager("iPhone Input Manager"),
+                                            mIsContentScalingSupported(false),
+                                            mContentScalingFactor(1.0)
 {
     mHideMouse = true;
 	bAccelerometerUsed = bMultiTouchUsed = false;
 
+    // Check for content scaling.  iOS 4 or later
+    if([[[UIDevice currentDevice] systemVersion] floatValue] >= 4.0)
+        mIsContentScalingSupported = true;
+    
 	// Setup our internal factories
 	mFactories.push_back(this);
 }
@@ -109,12 +115,15 @@ void iPhoneInputManager::_initialize( ParamList &paramList )
 {
 	_parseConfigSettings( paramList );
     
-    mDelegate = [[InputDelegate alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    
+    CGSize screenSize;
+    screenSize = [[UIScreen mainScreen] applicationFrame].size;
+    mDelegate = [[InputDelegate alloc] initWithFrame:CGRectMake(0, 0, screenSize.width, screenSize.height)];
+
     // Set flags that we want to accept multiple finger touches and be the only one to receive touch events
     [mDelegate setMultipleTouchEnabled:YES];
     [mDelegate setExclusiveTouch:YES];
     [mDelegate becomeFirstResponder];
+    [mDelegate setContentScaleFactor:mContentScalingFactor];
 
     [mWindow addSubview:mDelegate];
 }
@@ -140,6 +149,14 @@ void iPhoneInputManager::_parseConfigSettings( ParamList &paramList )
 	
 	if(mWindow == nil)
 		OIS_EXCEPT( E_General, "iPhoneInputManager::_parseConfigSettings >> Unable to find a window or event target" );
+
+    i = paramList.find("VIEW");
+	if(i != paramList.end())
+	{
+		UIView *view = (UIView *)strtoul(i->second.c_str(), 0, 10);
+		if(view != 0)
+			mContentScalingFactor = [view contentScaleFactor];
+    }
 }
 
 //--------------------------------------------------------------------------------//
