@@ -1,0 +1,292 @@
+<html><head><title>zziplib - sfx-make </title>
+ <meta name="formatter" content="mksite.pl" />
+ <meta name="src-dir" content="." />
+ <meta name="DC.date.issued" content="February 2003" />
+ <meta name="DC.title" content="SFX-Make" />
+ <meta name="DC.relation.isFormatOf" content="sfx-make.htm" />
+ <meta name="DC.date.modified" content="2014-12-25" />
+ <meta name="DC.date" content="February 2003" />
+ <meta name="DC.relation.section" content="zzip-parse.html" />
+ <meta name="DC.title.selected" content="Making a zip/exe" />
+ <meta name="DC.publisher" content="mo" />
+ <style type="text/css"><!--
+  /* sdocbook.css */
+  
+  .date
+  {
+    display: inline;
+  }
+ --></style>
+
+  <style>
+   a:link          { text-decoration : none ; color : #000080 ; }
+   a:visited       { text-decoration : none ; color : #200060 ; }
+   .justify        { text-align : justify ; }
+   .navlist        { background-color : #F0F0F0 ; 
+                     width : 9em ; speak : none ; }
+   .navprint       { pause-after : 200ms ; speak : spell-out ; }
+   body            { background-color : white ; }
+   .P              { text-align : justify ; margin-right: 1em ;
+                                            margin-left: 1em ; }
+   .BLOCKQUOTE     { text-align : justify ; margin-right: 3em ;
+                                            margin-left: 3em ; }
+   .PRE            {                       margin-right: 2em ;
+                                            margin-left: 2em ; }
+   .DT             { font-weight : bold ; }
+   .DD             { text-align : justify ; margin-right: 1em ; }
+  </style>
+</head><body>
+<!--mksite:sectioninfo--> <!--mksite:nosimplevars-->
+<table width="100%"><tr valign="top"><td class="navlist">
+<center><sub>
+  <!--mksite:printerfriendly--> 
+  <a href="sfx-make.print.html" title="printer friendly version">
+  <img alt="printer / text mode version" width="8" height="8" border="0" /></a>
+  </sub> &nbsp;
+     <big><big><big><b>
+     <font color="#800080"><sup>Z</sup>ZIP<sub>lib</sub></font>
+     </b></big></big></big>
+<br><big><b> 0.13.62 </b></big>
+</center>
+<hr><a href="zzip-index.html">Library</a>
+<br>-<a href="zzip-zip.html"> ZIP Access</a>
+<br>-<a href="zzip-file.html"> Transparently</a>
+<br>-<a href="zzip-sdl-rwops.html"> SDLrwops <small>Example</small></a>
+<br>-<a href="zzip-extio.html"> ext/io <small>Customization</small></a>
+<br>&nbsp;<a href="zzip-xor.html"> xor/io <small>Obfuscation</small></a>
+<br>&nbsp;<a href="zzip-crypt.html"> zip/no <small>Encryption</small></a>
+<small><a href="zzip-cryptoid.html">(2)</a></small>
+<br>-<a href="zzip-api.html"> Library API</a>
+<br>&nbsp;<a href="zzip-basics.html"> basics</a></u>
+&nbsp;<a href="zzip-extras.html"> extras</a></u>
+<br>=<a href="zzip-parse.html">Parsing ZIPs</a>
+<br>-<a href="64on32.html"> 64on32 extras</a>
+<br>-<a href="future.html"> Next To Come</a> <br> &nbsp;
+<small><a href="fseeko.html"> fseeko </a></small>
+<small><a href="mmapped.html"> mmapped </a></small>
+<small><a href="memdisk.html"> memdisk </a></small>
+<br>-<a href="configs.html"> Config Helpers</a>
+<br>-<b><a href="sfx-make.html"> Making a zip/exe</a></b>
+<br>=<a href="history.html">Hints And Links</a>
+<br>-<a href="referentials.html"> Referentials</a>
+<br>-<a href="functions.html"> Functions List..</a>
+<br> &nbsp; -<a href="zziplib.html"> zziplib.*</a>
+<br> &nbsp; -<a href="zzipmmapped.html"> zzipmmapped.*</a>
+<br> &nbsp; -<a href="zzipfseeko.html"> zzipfseeko.*</a>
+<!--START-->
+<br> &nbsp; -<a href="man/index.html"><small> unix man pages</small></a>
+<!--ENDS-->
+
+<br>&nbsp
+<br>&nbsp;
+<br><small><a href="faq.html"> faq </a></small>
+<small>&nbsp;<a href="notes.html"> notes </a></small>
+<small>&nbsp;<a href="zip-php.html"> zip-php </a></small>
+<hr><a href="download.html"> Download Area </a>
+<br>&nbsp;<a href="developer.html"> Developer Area </a>
+<br>&nbsp;<a href="http://sourceforge.net/projects/zziplib"> Sourceforge Project</a>
+<br>&nbsp;<a href="http://zziplib.sourceforge.net"> zziplib.sf.net 
+                                  <small><i>Home</i></small></a>
+
+<br>&nbsp;<a href="changes.html"> ChangeLog</a>
+<br><small><a href="copying.html"> LGPL/MPL license</a></small>
+<br>&nbsp;
+<hr>
+<center><!--START-->
+     <a href="http://sourceforge.net/project/?group_id=6389">
+        <img src="http://sourceforge.net/sflogo.php?group_id=6389&type=2"
+            border="0" alt="sourceforge.net" width="125" height="37">
+     </a>
+<br><small><a href="site.html">-sitemap-</a></small>
+</center><!--ENDS-->
+
+<p align="right"><small>
+generated 2014-12-26
+</small>
+<br> <small>(C)</small> Guido Draheim
+<br><i> guidod<small>@</small>gmx.de</i>
+</p>
+<!--mksite:emailfooter:guidod@gmx.de?subject=zzip:-->
+
+<p align="right"><small><small>
+   formatted by <a href="http://zziplib.sf.net/mksite">mksite.sh</a>
+</p>
+
+<p><b>as xml:</b></p>
+<hr><a href="zzip-index.xml">Library</a>
+<br>-<a href="64on32.xml"> 64on32 extras</a>
+<br>-<a href="future.xml"> Next To Come</a> <br> &nbsp;
+</td><td> 
+
+ 
+<table width="100%"><tr valign="bottom"><td><h2> SFX-Make &</td><td align="right"><i>                 combining an EXE with a ZIP archive</i></td></tr></table>
+
+<!--border-->
+
+
+<h3> How To </h3>
+<p class="P">
+  In this section we walk you through the steps of combining an EXE
+  with a ZIP archive. The basic scheme goes like this: the final
+  file will have an EXE starting at offset null, followed by the
+  data entries of a ZIP archive. The <em>last</em> part of the ZIP 
+  archive is the ZIP central-directory which ends at the end of the file.
+</p>
+<p class="P">
+  The basic problem lies in the fact that the zip central-directory
+  entries reference their data section with an offset from the 
+  start-of-file so that you can not just append a zip archive after 
+  an exe stub. The trick goes like adding the EXE as the first data
+  part of the ZIP archive - so that the offsets for each entry will
+  be correct when we are finished with it.
+</p>
+<p class="P">
+  Again, one can not just use a zip tool to put the EXE as the first
+  part - since each data part is preceded with an infoblock of a 
+  few bytes. The data of the first data part will therefore not
+  start at offset zero. We solve this problem with moving the data
+  a few bytes later - so that the final file will not start with a
+  "PK" magic (from the zip info header) but with an "MZ" or "ELF"
+  magic (from the exe info header).
+</p>
+
+
+<h3> Step 1: Creating The Zip Combination </h3>
+<p class="P">
+  Choose your exe file (example.exe) and wrap that file into a
+  zip container - ensure that the zip tool does <em>not</em>
+  use any compression algorithm on the data. This is usually
+  done with saying "zero compression level" as an option to
+  the zip tool. Also note that <em>no other</em> file is
+  wrapped as some zip tools reorder the entries from the 
+  order on the command line to alphabetic order. Here is an
+  example with infozip's `zip` (e.g. on linux):
+    <pre>    zip -0 -j example.zip example.exe    </pre>
+</p>
+<p class="P">
+  There is no zip tool that would reorder the data entries in
+  an existing zip archive. This mode is used here - the real
+  compressed data entries can now be added to the existing
+  zip archive that currently just wraps the exe part. With
+  specifying maximum compression ("-9" = compression level 9) 
+  and throwing away any subdirectory part ("-j" = junk path)
+  it might look like
+    <pre>   zip -9 -j example.zip data/*   </pre>
+</p>
+<p class="P">
+  Now we need to move the exe part by a few bytes to the
+  real start of the file. This can be done as easily as
+  writing the exe file again on to the start of the file.
+  However, one can not just use a shell-direction or
+  copy-operation since that would truncate (!!) the zip
+  file to the length of the exe part. The overwrite-operation
+  must be done without truncation. For maximum OS independence
+  the zziplib ships with a little tool in "test/zzipsetstub.c"
+  that you can reuse for this task:
+    <pre>   zzipsetstub example.zip example.exe  </pre>
+</p>
+<p class="P">
+  This is it - the `unzip` tool can still access all data
+  entries but the first EXE - the first EXE will be listed
+  in the central-directory of the ZIP archive but one can
+  not extract the data since the "PK" magic at offset null
+  has been overwritten with the EXE magic. The data of all
+  the other entries can still be extracted with a normal
+  `unzip` tool - or any tool from the zziplib be used for
+  the same task.
+</p>
+
+
+<h3> Step 2: Accessing The Data From The Program </h3>
+
+<p class="P">
+  There is an example in test/zzipself.c that show how to do
+  it. The OS will provide each program with its own name in
+  argv[0] of the main() routine. This program file (!!) is
+  also the zip archive that carries the compressed data
+  entries along. Therefore, we can just issue a zzip_opendir
+  on argv[0] to access the zip central-directory.
+</p>
+<p class="P">
+  Likewise one can open a file within it by just prepending
+  the string argv[0] to the filename stem, i.e. you could
+  do like 
+    <pre> ZZIP_FILE* f = zzip_fopen ("example.exe/start.gif", "rbi")</pre>
+</p><p class="P">
+  however you are advised to use the _ext_io cousin to be
+  platform independet - different Operating Systems use
+  different file extensions for executables, it's not always
+  an ".exe".
+</p>
+<p class="P">
+  Once the file is opened, the data can be zzip_fread or
+  passed through an SDL_rwops structure into the inner
+  parts of your program.
+</p>
+
+
+<h3> Step 3: Using Obfuscation Along </h3>
+
+<p class="P">
+  The next level uses  obfuscatation on the data part of the
+  application. That way there is no visible data to be seen
+  from outside, it looks like it had been compiled right into
+  the C source part. One can furthermore confuse a possible
+  attacker with staticlinking the zziplib into the executable
+  (this is possible in a limited set of conditions).
+</p>
+<p class="P">
+  The first pass is again in creating the zip - here we must
+  ensure that only the ZIP archive part is obfuscated but
+  the EXE part must be plain data so that the operationg 
+  system can read and relocate it into main memory. Using
+  xor-obfuscation this is easy - applying xor twice will
+  yield the original data. The steps look like this now:
+  <pre>
+    zzipxorcopy example.exe example.xor
+    zip -0 application.zip example.xor
+    zip -9 application.zip data/*
+    zzipsetstub application.zip example.xor
+    zzipxorcopy application.zip application.exe
+ </pre>
+</p>
+<p class="P">
+  In the second step the open-routine in your application
+  needs to be modified - there are quite some examples in
+  the zziplib that show you how to add an xor-read routine
+  and passing it in the "io"-part of an zzip_open_ext_io
+  routine (see zzipxorcat.c).
+  <pre>
+   static int xor_value = 0x55;
+
+   static zzip_ssize_t xor_read (int f, void* p, zzip_size_t l)
+   {
+       zzip_ssize_t r = read(f, p, l);
+       zzip_ssize_t x; char* q; for (x=0, q=p; x &lt; r; x++) q[x] ^= xor_value;
+       return r;
+   }
+
+   static struct zzip_plugin_io xor_handlers;
+   static zzip_strings_t xor_fileext[] = { ".exe", ".EXE", "", 0 };
+   
+   main(...)
+   {
+       zzip_init_io (&amp;xor_handlers, 0); xor_handlers.read = &amp;xor_read;
+  
+       ZZIP_FILE*  fp = zzip_open_ext_io (filename, 
+                             O_RDONLY|O_BINARY, ZZIP_CASELESS|ZZIP_ONLYZIP,
+                             xor_fileext, &amp;xor_handlers);
+      ....
+  </pre>
+</p>
+<p class="P">
+  You may want to pick your own xor-value instead of the default 0x55,
+  the zziplib-shipped tool `zzipxorcopy` does know an option to just
+  set the xor-value with which to obfuscate the data.
+</p>
+
+<hr><table border="0" width="100%"><tr><td>
+<a href="mailto:guidod@gmx.de?subject=zzip:">guidod@gmx.de</a>
+</td><td align="right">
+February 2003</td></tr></table>
+</td></tr></table></body></html>

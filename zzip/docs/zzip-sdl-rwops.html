@@ -1,0 +1,215 @@
+<html><head><title>zziplib - sdl rwops </title>
+ <meta name="formatter" content="mksite.pl" />
+ <meta name="src-dir" content="." />
+ <meta name="DC.date.issued" content="19. Aug 2001" />
+ <meta name="DC.title" content="SDL rwops" />
+ <meta name="DC.relation.isFormatOf" content="zzip-sdl-rwops.htm" />
+ <meta name="DC.date.modified" content="2014-12-25" />
+ <meta name="DC.date" content="19. Aug 2001" />
+ <meta name="DC.relation.section" content="zzip-index.html" />
+ <meta name="DC.title.selected" content="SDLrwops Example" />
+ <meta name="DC.publisher" content="mo" />
+ <style type="text/css"><!--
+  /* sdocbook.css */
+  
+  .date
+  {
+    display: inline;
+  }
+ --></style>
+
+  <style>
+   a:link          { text-decoration : none ; color : #000080 ; }
+   a:visited       { text-decoration : none ; color : #200060 ; }
+   .justify        { text-align : justify ; }
+   .navlist        { background-color : #F0F0F0 ; 
+                     width : 9em ; speak : none ; }
+   .navprint       { pause-after : 200ms ; speak : spell-out ; }
+   body            { background-color : white ; }
+   .P              { text-align : justify ; margin-right: 1em ;
+                                            margin-left: 1em ; }
+   .BLOCKQUOTE     { text-align : justify ; margin-right: 3em ;
+                                            margin-left: 3em ; }
+   .PRE            {                       margin-right: 2em ;
+                                            margin-left: 2em ; }
+   .DT             { font-weight : bold ; }
+   .DD             { text-align : justify ; margin-right: 1em ; }
+  </style>
+</head><body>
+<!--mksite:sectioninfo--> <!--mksite:nosimplevars-->
+<table width="100%"><tr valign="top"><td class="navlist">
+<center><sub>
+  <!--mksite:printerfriendly--> 
+  <a href="zzip-sdl-rwops.print.html" title="printer friendly version">
+  <img alt="printer / text mode version" width="8" height="8" border="0" /></a>
+  </sub> &nbsp;
+     <big><big><big><b>
+     <font color="#800080"><sup>Z</sup>ZIP<sub>lib</sub></font>
+     </b></big></big></big>
+<br><big><b> 0.13.62 </b></big>
+</center>
+<hr><a href="zzip-index.html">Library</a>
+<br>-<a href="zzip-zip.html"> ZIP Access</a>
+<br>-<a href="zzip-file.html"> Transparently</a>
+<br>-<b><a href="zzip-sdl-rwops.html"> SDLrwops <small>Example</small></a></b>
+<br>-<a href="zzip-extio.html"> ext/io <small>Customization</small></a>
+<br>&nbsp;<a href="zzip-xor.html"> xor/io <small>Obfuscation</small></a>
+<br>&nbsp;<a href="zzip-crypt.html"> zip/no <small>Encryption</small></a>
+<small><a href="zzip-cryptoid.html">(2)</a></small>
+<br>-<a href="zzip-api.html"> Library API</a>
+<br>&nbsp;<a href="zzip-basics.html"> basics</a></u>
+&nbsp;<a href="zzip-extras.html"> extras</a></u>
+<br>=<a href="zzip-parse.html">Parsing ZIPs</a>
+<br>-<a href="64on32.html"> 64on32 extras</a>
+<br>-<a href="future.html"> Next To Come</a> <br> &nbsp;
+<small><a href="fseeko.html"> fseeko </a></small>
+<small><a href="mmapped.html"> mmapped </a></small>
+<small><a href="memdisk.html"> memdisk </a></small>
+<br>-<a href="configs.html"> Config Helpers</a>
+<br>-<a href="sfx-make.html"> Making a zip/exe</a>
+<br>=<a href="history.html">Hints And Links</a>
+<br>-<a href="referentials.html"> Referentials</a>
+<br>-<a href="functions.html"> Functions List..</a>
+<br> &nbsp; -<a href="zziplib.html"> zziplib.*</a>
+<br> &nbsp; -<a href="zzipmmapped.html"> zzipmmapped.*</a>
+<br> &nbsp; -<a href="zzipfseeko.html"> zzipfseeko.*</a>
+<!--START-->
+<br> &nbsp; -<a href="man/index.html"><small> unix man pages</small></a>
+<!--ENDS-->
+
+<br>&nbsp
+<br>&nbsp;
+<br><small><a href="faq.html"> faq </a></small>
+<small>&nbsp;<a href="notes.html"> notes </a></small>
+<small>&nbsp;<a href="zip-php.html"> zip-php </a></small>
+<hr><a href="download.html"> Download Area </a>
+<br>&nbsp;<a href="developer.html"> Developer Area </a>
+<br>&nbsp;<a href="http://sourceforge.net/projects/zziplib"> Sourceforge Project</a>
+<br>&nbsp;<a href="http://zziplib.sourceforge.net"> zziplib.sf.net 
+                                  <small><i>Home</i></small></a>
+
+<br>&nbsp;<a href="changes.html"> ChangeLog</a>
+<br><small><a href="copying.html"> LGPL/MPL license</a></small>
+<br>&nbsp;
+<hr>
+<center><!--START-->
+     <a href="http://sourceforge.net/project/?group_id=6389">
+        <img src="http://sourceforge.net/sflogo.php?group_id=6389&type=2"
+            border="0" alt="sourceforge.net" width="125" height="37">
+     </a>
+<br><small><a href="site.html">-sitemap-</a></small>
+</center><!--ENDS-->
+
+<p align="right"><small>
+generated 2014-12-26
+</small>
+<br> <small>(C)</small> Guido Draheim
+<br><i> guidod<small>@</small>gmx.de</i>
+</p>
+<!--mksite:emailfooter:guidod@gmx.de?subject=zzip:-->
+
+<p align="right"><small><small>
+   formatted by <a href="http://zziplib.sf.net/mksite">mksite.sh</a>
+</p>
+
+<p><b>as xml:</b></p>
+<hr><a href="zzip-index.xml">Library</a>
+<br>-<a href="64on32.xml"> 64on32 extras</a>
+<br>-<a href="future.xml"> Next To Come</a> <br> &nbsp;
+</td><td> 
+
+ 
+<table width="100%"><tr valign="bottom"><td><h2> SDL rwops &</td><td align="right"><i> Example to make an SDL_rwops interface.</i></td></tr></table>
+
+<p><small> some <b>MSVC</b> help in 
+   <a href="README.MSVC6">README.MSVC6</a> and
+   <a href="README.SDL">README.SDL</a>
+</small></p>
+
+<!--border-->
+
+
+<h3> Source </h3>
+
+<p class="P">
+ The example sources of the <a href="zziplib.html">zziplib library</a>
+ are usually put under the <a href="COPYING.ZLIB">ZLIB license</a> so 
+ that you can reuse the code freely in your own projects. Here we talk
+ about the example that might be most useful for 
+ <a href="http://libsdl.org">SDL</a> based programs.
+ Just copy the two files 
+ <a href="SDL_rwops_zzip.h">SDL_rwops_zzip.h</a>
+ and
+ <a href="SDL_rwops_zzip.c">SDL_rwops_zzip.c</a>
+ to the directory with your other project sources, and make sure
+ to link it somehow to your programs. I did not make the effort to
+ create a seperate library out of it - it would just export one
+ single function <tt>SDL_RWFromZZIP</tt> that has the same call-synopsis
+ like <tt>SDL_RWFromFile</tt> (but it can not (yet) write a zip-file).
+</p>
+
+<p class="P">
+ The source file <a href="SDL_rwops_zzip.c">SDL_rwops_zzip.c</a> is
+ quite short - it just stores a ZZIP_FILE handle in the userdata
+ field of the <tt>SDL_rwops</tt> structure. The SDL'rwop calls will then
+ fetch that pointer and call the corresponding functions from the
+ <a href="zziplib.html">zziplib library</a>. Most of the glue code
+ is in the <tt>SDL_RWFromZZIP</tt> function that allocates an 
+ <tt>SDL_rwops</tt> structure and fills the handler-functions 
+ into the callback fields.
+</p>
+
+
+<h3> Usage </h3>
+
+<p class="P">
+ If you link this file to your project, remember that your executables
+ do now have additional dependencies - not only -lzzip to link with
+ the <a href="zziplib.html">zziplib library</a> - do not forget to
+ link with zlib library via -lz. Of course, there is a lib-config
+ script that you can use: `zzip-config --libs` will return these
+ linker-infos (unless you have a native-windows system - it is 
+ shell-script).
+</p>
+
+<p class="P">
+ As an example, replace that <tt>SDL_RWFromFile</tt> that accesses your
+ game-graphic files - these files are stored in shared/myapp
+ of course where they belong. When you've done that
+ then go to X/share/myapp and 
+<br><code>&nbsp;&nbsp;&nbsp;
+ `(cd graphics/ && zip -9r ../graphics.zip .)` </code><br>
+ and rename the graphics/ subfolder - and still all your files
+ are found: a filepath like X/shared/graphics/game/greetings.bmp 
+ will open X/shared/graphics.zip and return the zipped file 
+ game/greetings.bmp in the zip-archive (for reading that is).
+</p>
+
+
+<h3> Test </h3>
+
+<p class="P">
+ The <a href="zziplib.html">zziplib</a> configure script does not
+ look for <a href="http://libsdl.org">SDL</a>. If you know that
+ you have <a href="http://libsdl.org">SDL</a> installed 
+ then you can check this <tt>SDL_rwops</tt> example by using
+ <code><nobr>`make testsdl`</nobr></code>. This will compile the
+ two source files <a href="SDL_rwops_zzip.c">SDL_rwops_zzip.c</a>
+ and <a href="SDL_rwops_zzcat.c">SDL_rwops_zzcat.c</a> to be linked
+ together into an executable called <code>zzcatsdl</code>. The test
+ will continue with a <code><nobr>`zzcatsdl test/README`</nobr></code> 
+ - just like it is done for <code><nobr>`make test3`</nobr></code>.
+</p>
+<p class="P">
+ The corresponding section in the <a href="Makefile.am">Makefile.am</a>
+ is also an example how to use lib-config scripts to build files. Here
+ there is no build-processing that had been tweaked much by automake/autoconf.
+ Just use sdl-config and zzip-config to add the needed flags.
+</p>
+
+
+<hr><table border="0" width="100%"><tr><td>
+<a href="mailto:guidod@gmx.de?subject=zzip:">guidod@gmx.de</a>
+</td><td align="right">
+19. Aug 2001</td></tr></table>
+</td></tr></table></body></html>

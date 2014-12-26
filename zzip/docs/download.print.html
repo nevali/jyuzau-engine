@@ -1,0 +1,90 @@
+<html><head><title>zziplib - download </title>
+ <meta name="formatter" content="mksite.pl" />
+ <meta name="src-dir" content="." />
+ <meta name="DC.date.issued" content="2004-05-18" />
+ <meta name="DC.title" content="Download" />
+ <meta name="DC.relation.isFormatOf" content="download.html" />
+ <meta name="DC.date.modified" content="2014-12-25" />
+ <meta name="DC.date" content="2004-05-18" />
+ <meta name="DC.relation.section" content="download.html" />
+ <meta name="DC.title.selected" content="Download Area" />
+ <meta name="DC.publisher" content="mo" />
+ <style type="text/css"><!--
+  /* sdocbook.css */
+  
+  .date
+  {
+    display: inline;
+  }
+ --></style>
+   <style>
+     a:link    { text-decoration : none ; font-weight : bold ;  color : #000060 ; }
+     a:visited { text-decoration : none ; font-weight : bold ;  color : #000040 ; }
+     body      { background-color : white ; }
+   </style>
+</head><body>
+<br><a href="#." title="section"><img alt="|go text:" width="8" height="8" border="0" /></a> || - 
+<a href="zzip-index.print.html">Library</a> - 
+<a href="zzip-parse.print.html">Parsing ZIPs</a> - 
+<a href="history.print.html">Hints And Links</a> - 
+ [ <a href="download.print.html">Download Area</a> ]  - 
+<a href="zzip-index.print.xml"></a> - 
+
+<a name="."></a>
+ 
+<h2 class="H2"> Download </h2> what to get to get it
+
+
+<h4 class="H4">Sourceforge File Area</h4>
+
+<center>
+<a href="http://sourceforge.net/project/showfiles.php?group_id=6389">
+                sourceforge.net/project/showfiles.php?group_id=6389 </a>
+</center>
+
+<p class="P">
+  All source releases and some binary releases are listed at the
+  sourceforge download area under the link show above. The sourceforge
+  file area is replicated all over the world and should be accessible
+  with highest bandwith in all corners of the world.
+</p>
+
+
+<h4 class="H4"> Which Version To Download </h4>
+
+<p class="P">
+  Do not use 0.10.x anymore! It is listed as stable since it is the
+  only release of zziplib tested to work on a few dozen platforms.
+  However there were some problematic zip files out there that can
+  trigger segfaults. Later zzip file decoders have extra checks and
+  helper routines for that. It's just that the later zziplib have not
+  been given as many crossplatform build tets as the 0.10.x generation.
+</p>
+<p class="P">
+  Use a 0.12.x (proto-stable) or a 0.13.x (developer) variant of 
+  zziplib, especially if you intend to make heavy usage of the zip
+  decoders in specialized environments - I will not add any fixes to
+  the 0.10.x series anymore (it's deep frozen) but if you hit a 
+  problem with 0.13.x I can help you quickly with a patch and official
+  bugfix release. The later versions are regulary checked crossplatform
+  atleast for <b>Linux, Solaris, FreeBSD, Darwin/MacOSX, Win32/NT</b> 
+  including i386, amd64, sparc, sparc64, powerpc where available.
+</p>
+<p class="P">
+  Note that all generations 0.10.x through 0.13.x are strictly
+  <b>backward compatible</b>. There is a core API (file and dir
+  handling) being binary compatible, which is also true for most
+  of the helper routines (data getters). Only some rarely used
+  entries are made source level compatible, and so far no one had 
+  ever any problem with binary compatibility of the zziplib DLLs.
+</p>
+<p class="P">
+  The MSVC users are strongly advised to use a a later version as
+  well since I have tested the 0.12.x/0.13.x myself and making
+  some msc binary dll releases directly - prior versions were 
+  thirdparty contributions which were working smoothly since I have 
+  been preparing zziplib for win32 using the gcc/mingw compile suite.
+  Please check also the <a href="developer.print.html">developer pages</a>.
+</p>
+
+</body></html>

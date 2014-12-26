@@ -1,0 +1,202 @@
+<html><head><title>zziplib - zip obfuscation </title>
+ <meta name="formatter" content="mksite.pl" />
+ <meta name="src-dir" content="." />
+ <meta name="DC.date.issued" content="15. July 2002" />
+ <meta name="DC.title" content="ZIP Obfuscation" />
+ <meta name="DC.relation.isFormatOf" content="zzip-xor.htm" />
+ <meta name="DC.date.modified" content="2014-12-25" />
+ <meta name="DC.date" content="15. July 2002" />
+ <meta name="DC.relation.section" content="zzip-index.html" />
+ <meta name="DC.title.selected" content="xor/io Obfuscation" />
+ <meta name="DC.publisher" content="mo" />
+ <style type="text/css"><!--
+  /* sdocbook.css */
+  
+  .date
+  {
+    display: inline;
+  }
+ --></style>
+
+  <style>
+   a:link          { text-decoration : none ; color : #000080 ; }
+   a:visited       { text-decoration : none ; color : #200060 ; }
+   .justify        { text-align : justify ; }
+   .navlist        { background-color : #F0F0F0 ; 
+                     width : 9em ; speak : none ; }
+   .navprint       { pause-after : 200ms ; speak : spell-out ; }
+   body            { background-color : white ; }
+   .P              { text-align : justify ; margin-right: 1em ;
+                                            margin-left: 1em ; }
+   .BLOCKQUOTE     { text-align : justify ; margin-right: 3em ;
+                                            margin-left: 3em ; }
+   .PRE            {                       margin-right: 2em ;
+                                            margin-left: 2em ; }
+   .DT             { font-weight : bold ; }
+   .DD             { text-align : justify ; margin-right: 1em ; }
+  </style>
+</head><body>
+<!--mksite:sectioninfo--> <!--mksite:nosimplevars-->
+<table width="100%"><tr valign="top"><td class="navlist">
+<center><sub>
+  <!--mksite:printerfriendly--> 
+  <a href="zzip-xor.print.html" title="printer friendly version">
+  <img alt="printer / text mode version" width="8" height="8" border="0" /></a>
+  </sub> &nbsp;
+     <big><big><big><b>
+     <font color="#800080"><sup>Z</sup>ZIP<sub>lib</sub></font>
+     </b></big></big></big>
+<br><big><b> 0.13.62 </b></big>
+</center>
+<hr><a href="zzip-index.html">Library</a>
+<br>-<a href="zzip-zip.html"> ZIP Access</a>
+<br>-<a href="zzip-file.html"> Transparently</a>
+<br>-<a href="zzip-sdl-rwops.html"> SDLrwops <small>Example</small></a>
+<br>-<a href="zzip-extio.html"> ext/io <small>Customization</small></a>
+<br>&nbsp;<b><a href="zzip-xor.html"> xor/io <small>Obfuscation</small></a></b>
+<br>&nbsp;<a href="zzip-crypt.html"> zip/no <small>Encryption</small></a>
+<small><a href="zzip-cryptoid.html">(2)</a></small>
+<br>-<a href="zzip-api.html"> Library API</a>
+<br>&nbsp;<a href="zzip-basics.html"> basics</a></u>
+&nbsp;<a href="zzip-extras.html"> extras</a></u>
+<br>=<a href="zzip-parse.html">Parsing ZIPs</a>
+<br>-<a href="64on32.html"> 64on32 extras</a>
+<br>-<a href="future.html"> Next To Come</a> <br> &nbsp;
+<small><a href="fseeko.html"> fseeko </a></small>
+<small><a href="mmapped.html"> mmapped </a></small>
+<small><a href="memdisk.html"> memdisk </a></small>
+<br>-<a href="configs.html"> Config Helpers</a>
+<br>-<a href="sfx-make.html"> Making a zip/exe</a>
+<br>=<a href="history.html">Hints And Links</a>
+<br>-<a href="referentials.html"> Referentials</a>
+<br>-<a href="functions.html"> Functions List..</a>
+<br> &nbsp; -<a href="zziplib.html"> zziplib.*</a>
+<br> &nbsp; -<a href="zzipmmapped.html"> zzipmmapped.*</a>
+<br> &nbsp; -<a href="zzipfseeko.html"> zzipfseeko.*</a>
+<!--START-->
+<br> &nbsp; -<a href="man/index.html"><small> unix man pages</small></a>
+<!--ENDS-->
+
+<br>&nbsp
+<br>&nbsp;
+<br><small><a href="faq.html"> faq </a></small>
+<small>&nbsp;<a href="notes.html"> notes </a></small>
+<small>&nbsp;<a href="zip-php.html"> zip-php </a></small>
+<hr><a href="download.html"> Download Area </a>
+<br>&nbsp;<a href="developer.html"> Developer Area </a>
+<br>&nbsp;<a href="http://sourceforge.net/projects/zziplib"> Sourceforge Project</a>
+<br>&nbsp;<a href="http://zziplib.sourceforge.net"> zziplib.sf.net 
+                                  <small><i>Home</i></small></a>
+
+<br>&nbsp;<a href="changes.html"> ChangeLog</a>
+<br><small><a href="copying.html"> LGPL/MPL license</a></small>
+<br>&nbsp;
+<hr>
+<center><!--START-->
+     <a href="http://sourceforge.net/project/?group_id=6389">
+        <img src="http://sourceforge.net/sflogo.php?group_id=6389&type=2"
+            border="0" alt="sourceforge.net" width="125" height="37">
+     </a>
+<br><small><a href="site.html">-sitemap-</a></small>
+</center><!--ENDS-->
+
+<p align="right"><small>
+generated 2014-12-26
+</small>
+<br> <small>(C)</small> Guido Draheim
+<br><i> guidod<small>@</small>gmx.de</i>
+</p>
+<!--mksite:emailfooter:guidod@gmx.de?subject=zzip:-->
+
+<p align="right"><small><small>
+   formatted by <a href="http://zziplib.sf.net/mksite">mksite.sh</a>
+</p>
+
+<p><b>as xml:</b></p>
+<hr><a href="zzip-index.xml">Library</a>
+<br>-<a href="64on32.xml"> 64on32 extras</a>
+<br>-<a href="future.xml"> Next To Come</a> <br> &nbsp;
+</td><td> 
+
+ 
+<table width="100%"><tr valign="bottom"><td><h2> ZIP Obfuscation &</td><td align="right"><i>       Using obfuscations like XOR.</i></td></tr></table>
+
+<!--border-->
+
+
+<h3> The EXT/IO calls </h3>
+
+<p class="P">
+  You really should read the section about the
+  <a href="zzip-extio.html">EXT/IO feature</a> of the zziplib since the
+  obfuscation routines are built on top of it. In order to use obfuscation,
+  you will generally need to use all the three additional argument that
+  can be passsed to _open_ext_io functions. For the XOR-example, only one
+  IO-handler is modified being the read()-call that will simply xor each
+  data byte upon read with a specific value. It two advantages - doing an
+  xor twice does yield the same data, so as a developer you do not have
+  to wonder about the encryption/decryption pair, and it is a stateless
+  obfuscation that does not need to know about the current position
+  within the zip-datafile or zippedfile-datatream.
+</p><p class="P">
+  The examples provided just use a simple routine for xoring data that
+  is defined in all the three of the example programs: <pre>
+      static int xor_value = 0x55;
+      static zzip_ssize_t xor_read (int f, void* p, zzip_size_t l)
+      {
+          zzip_size_t r = read(f, p, l);
+	  zzip_size_t x;  char* q = p;
+          for (x=0; x &lt; r; x++) q[x] ^= xor_value;
+          return r;
+      }
+  </pre>
+</p><p class="P">
+  and place this routine into the io-handlers after initializing
+  the structure: <pre>
+    zzip_init_io (&amp;xor_handlers, 0); xor_handlers.read = &amp;xor_read;
+  </pre>
+</p>
+
+
+<h3> The examples </h3>
+
+<p class="P">
+  There are three example programs. The first one is
+  <a href="zzxorcopy.c">zzxorcopy.c</a> which actually is not a zziplib 
+  based program. It just opens a file via stdio, loops through all data bytes 
+  it can read thereby xor'ing it, and writes it out to the output file. A 
+  call like <code><nobr>"zzxorcopy file.zip file.dat"</nobr></code> will
+  create an obfuscated dat-file from a zip-file that has been possibly
+  create with the normal infozip tools or any other archive program to
+  generate a zip-file. The output dat-file is not recognized by normal
+  zip-enabled apps - the filemagic is obfuscated too. This output
+  dat-file however is subject to the other two example programs.
+</p><p class="P">
+  The <a href="zzxordir.c">zzxordir.c</a> program will open such an obfuscated
+  zip file and decode the central directory of that zip. Everything is
+  still there in just the way it can be shown with the normal unzip
+  programs and routines. And the <a href="zzxorcat.c">zzxorcat.c</a> program 
+  can extract data from this obfuscated zip - and print it un-obfuscated
+  to the screen. These example programs can help you jumpstart with
+  your own set of obfuscator routines, possibly more complex ones.
+</p><p class="P">
+  By the way, just compare those with their non-xor counterparts that
+  you can find in <a href="zzdir.c">zzdir.c</a> and 
+  <a href="zzxorcat.c">zzxorcat.c</a>. Notice that the difference is
+  in the setup part until the _open_ call after which one can just
+  use the normal zzip_ routines on that obfuscated file. This is
+  great for developing since you can start of with the magic-wrappers
+  working on real-files then slowly turning to pack-files that hold
+  most of the data and finally ending with a zip-only and obfuscated
+  dat-file for your project.
+</p>
+
+<p align="right"><small><small>
+<a href="copying.html">staticlinking?</a>
+</small></small></p>
+
+<hr><table border="0" width="100%"><tr><td>
+<a href="mailto:guidod@gmx.de?subject=zzip:">guidod@gmx.de</a>
+</td><td align="right">
+15. July 2002</td></tr></table>
+</td></tr></table></body></html>

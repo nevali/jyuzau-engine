@@ -1,0 +1,313 @@
+<html><head><title>zziplib - zzip-ext/io </title>
+ <meta name="formatter" content="mksite.pl" />
+ <meta name="src-dir" content="." />
+ <meta name="DC.date.issued" content="15. July 2002" />
+ <meta name="DC.title" content="ZZIP-EXT/IO" />
+ <meta name="DC.relation.isFormatOf" content="zzip-extio.htm" />
+ <meta name="DC.date.modified" content="2014-12-25" />
+ <meta name="DC.date" content="15. July 2002" />
+ <meta name="DC.relation.section" content="zzip-index.html" />
+ <meta name="DC.title.selected" content="ext/io Customization" />
+ <meta name="DC.publisher" content="mo" />
+ <style type="text/css"><!--
+  /* sdocbook.css */
+  
+  .date
+  {
+    display: inline;
+  }
+ --></style>
+
+  <style>
+   a:link          { text-decoration : none ; color : #000080 ; }
+   a:visited       { text-decoration : none ; color : #200060 ; }
+   .justify        { text-align : justify ; }
+   .navlist        { background-color : #F0F0F0 ; 
+                     width : 9em ; speak : none ; }
+   .navprint       { pause-after : 200ms ; speak : spell-out ; }
+   body            { background-color : white ; }
+   .P              { text-align : justify ; margin-right: 1em ;
+                                            margin-left: 1em ; }
+   .BLOCKQUOTE     { text-align : justify ; margin-right: 3em ;
+                                            margin-left: 3em ; }
+   .PRE            {                       margin-right: 2em ;
+                                            margin-left: 2em ; }
+   .DT             { font-weight : bold ; }
+   .DD             { text-align : justify ; margin-right: 1em ; }
+  </style>
+</head><body>
+<!--mksite:sectioninfo--> <!--mksite:nosimplevars-->
+<table width="100%"><tr valign="top"><td class="navlist">
+<center><sub>
+  <!--mksite:printerfriendly--> 
+  <a href="zzip-extio.print.html" title="printer friendly version">
+  <img alt="printer / text mode version" width="8" height="8" border="0" /></a>
+  </sub> &nbsp;
+     <big><big><big><b>
+     <font color="#800080"><sup>Z</sup>ZIP<sub>lib</sub></font>
+     </b></big></big></big>
+<br><big><b> 0.13.62 </b></big>
+</center>
+<hr><a href="zzip-index.html">Library</a>
+<br>-<a href="zzip-zip.html"> ZIP Access</a>
+<br>-<a href="zzip-file.html"> Transparently</a>
+<br>-<a href="zzip-sdl-rwops.html"> SDLrwops <small>Example</small></a>
+<br>-<b><a href="zzip-extio.html"> ext/io <small>Customization</small></a></b>
+<br>&nbsp;<a href="zzip-xor.html"> xor/io <small>Obfuscation</small></a>
+<br>&nbsp;<a href="zzip-crypt.html"> zip/no <small>Encryption</small></a>
+<small><a href="zzip-cryptoid.html">(2)</a></small>
+<br>-<a href="zzip-api.html"> Library API</a>
+<br>&nbsp;<a href="zzip-basics.html"> basics</a></u>
+&nbsp;<a href="zzip-extras.html"> extras</a></u>
+<br>=<a href="zzip-parse.html">Parsing ZIPs</a>
+<br>-<a href="64on32.html"> 64on32 extras</a>
+<br>-<a href="future.html"> Next To Come</a> <br> &nbsp;
+<small><a href="fseeko.html"> fseeko </a></small>
+<small><a href="mmapped.html"> mmapped </a></small>
+<small><a href="memdisk.html"> memdisk </a></small>
+<br>-<a href="configs.html"> Config Helpers</a>
+<br>-<a href="sfx-make.html"> Making a zip/exe</a>
+<br>=<a href="history.html">Hints And Links</a>
+<br>-<a href="referentials.html"> Referentials</a>
+<br>-<a href="functions.html"> Functions List..</a>
+<br> &nbsp; -<a href="zziplib.html"> zziplib.*</a>
+<br> &nbsp; -<a href="zzipmmapped.html"> zzipmmapped.*</a>
+<br> &nbsp; -<a href="zzipfseeko.html"> zzipfseeko.*</a>
+<!--START-->
+<br> &nbsp; -<a href="man/index.html"><small> unix man pages</small></a>
+<!--ENDS-->
+
+<br>&nbsp
+<br>&nbsp;
+<br><small><a href="faq.html"> faq </a></small>
+<small>&nbsp;<a href="notes.html"> notes </a></small>
+<small>&nbsp;<a href="zip-php.html"> zip-php </a></small>
+<hr><a href="download.html"> Download Area </a>
+<br>&nbsp;<a href="developer.html"> Developer Area </a>
+<br>&nbsp;<a href="http://sourceforge.net/projects/zziplib"> Sourceforge Project</a>
+<br>&nbsp;<a href="http://zziplib.sourceforge.net"> zziplib.sf.net 
+                                  <small><i>Home</i></small></a>
+
+<br>&nbsp;<a href="changes.html"> ChangeLog</a>
+<br><small><a href="copying.html"> LGPL/MPL license</a></small>
+<br>&nbsp;
+<hr>
+<center><!--START-->
+     <a href="http://sourceforge.net/project/?group_id=6389">
+        <img src="http://sourceforge.net/sflogo.php?group_id=6389&type=2"
+            border="0" alt="sourceforge.net" width="125" height="37">
+     </a>
+<br><small><a href="site.html">-sitemap-</a></small>
+</center><!--ENDS-->
+
+<p align="right"><small>
+generated 2014-12-26
+</small>
+<br> <small>(C)</small> Guido Draheim
+<br><i> guidod<small>@</small>gmx.de</i>
+</p>
+<!--mksite:emailfooter:guidod@gmx.de?subject=zzip:-->
+
+<p align="right"><small><small>
+   formatted by <a href="http://zziplib.sf.net/mksite">mksite.sh</a>
+</p>
+
+<p><b>as xml:</b></p>
+<hr><a href="zzip-index.xml">Library</a>
+<br>-<a href="64on32.xml"> 64on32 extras</a>
+<br>-<a href="future.xml"> Next To Come</a> <br> &nbsp;
+</td><td> 
+
+ 
+<table width="100%"><tr valign="bottom"><td><h2> ZZIP-EXT/IO &</td><td align="right"><i>	Customizing the file access</i></td></tr></table>
+
+<!--border-->
+
+
+<h3> The EXT/IO calls </h3>
+
+<p class="P">
+  There were quite some requests from game developers and graphics-apps
+  developers who wanted various extensions to be included into the
+  <a href="zziplib.html">zziplib library</a>, but most of them were
+  only of specific usage. After some discussions we came up with a
+  model to customize the <a href="zziplib.html">zziplib library</a>
+  calls in a number of ways - and adding two or three arguments to
+  the zzip_* calls. The standard <a href="zziplib.html">zziplib library</a>
+  will actually call these *_ext_io functions with these extra arguments
+  to be set to zero.
+</p><p class="P">
+  The EXT feature describes a way to customize the extensions used in
+  the magic wrapper to find a .ZIP file. It turned out that there are
+  quite a number of applications that did chose the zip file format as
+  their native document format and where just the file extension had
+  been changed. This includes file types like Quake3 ".PK3" files from
+  ID Software, the Java library files called ".JAR", and lately the 
+  OpenOffice-6 (resp. StarOffice-6) documents which carry xml-files along.
+  Just build a zero-termined string-list of file-extensions and submit it
+  to the _ext_io calls to let the <a href="zziplib.html">zziplib</a> find
+  parts of those zip-documents automagically.
+</p><p class="P">
+  In quite some of these cases, it is very benefical to make use of the
+  o_modes functionality that allows to submit extra bit-options into
+  the <a href="zziplib.html">zziplib</a> - this includes options like
+  <code>ZZIP_PREFERZIP</code> or even <code>ZZIP_ONLYZIP</code> which
+  modifies the default behaviour of looking for real files first instead
+  of some within a zipped directory tree. Other bit-options include
+  <code>ZZIP_CASELESS</code> to imitate win32-like filematching for a
+  zipped filetree.
+</p><p class="P">
+  Other wishes on <a href="zziplib.html">zziplib</a> circulated around
+  <a href="zzip-xor.html">obfuscation</a> or access to zip-files wrapped 
+  in other data areas including encrpyted resources from other applications. 
+  This has been adressed with the IO-handlers that you can explicitly 
+  submit to the *_ext_io functions - the default will be posix-IO 
+  open/read/write and seek/tell. An application using 
+  <a href="zziplib.html">zziplib</a> can divert these to its own set of
+  these calls - and it only needs to declare them on opening a zipped file.
+</p>
+
+
+<h3> The EXT stringlist </h3>
+
+<p class="P">
+  Declaring an EXT stringlist is very simple as it is simply a 
+  list of strings, the <a href="zziplib.html">zziplib</a> provides
+  you with a double-const <code>zzip_strings_t</code> type to help
+  you move a global declaration into the writeonly segment of your
+  app - it turned out that about all developers wanted just some
+  extensions on the default and they were fine with having them
+  global-const for their application, nothing like dynamically
+  modifying them. Well, you are still allowed to make it fully
+  dynamic... if you find a use case for that.
+</p><p class="P">
+  Extending the magic zip-extensions is just done by adding the 
+  additional extensions to be recognized - just remember to add
+  the uppercased variants too since those will be needed on
+  (unx-like) filesystems that are case-sensitive. In the internet
+  age, quite some downloaded will appear in uppercased format since
+  the other side declared it as that and that other end was happy
+  with it as being a (w32-like) case-insensitive server. Therefore,
+  it should look like <pre>
+     static zzip_strings_t my_ext[] = { ".zip", ".ZIP", ".jar", ".JAR", 0 };
+  </pre>
+</p><p class="P">
+  There is one frequently asked question in this area - how to open
+  a zipped file as "test.zip/README" instead of "test/README". Other
+  than some people might expect, the library will not find it - if
+  you want to have that one needs a fileext list that contains the
+  empty string - not the zero string, an empty string that is. It
+  looks like <pre>
+     static zzip_strings_t my_ext[] = { ".zip", ".ZIP", "", 0 };
+  </pre>
+</p><p class="P">
+  And last not least, people want to tell the libary to not try to
+  open a real file that lives side by side with the same path as the
+  file path that can be matched by the zziplib. Actually, the magic
+  wrappers were never meant to be used like - the developer should
+  have used zzip_dir_* functions to open a zip-file and the 
+  zzip_file_* functions to read entries from that zip-file. However,
+  the magic-wrappers look rather more familiar, and so you will find
+  now a bit-option ZZIP_ONLYZIP that can be passed down to the _ext_io
+  variants of the magic-wrapper calls, and a real-file will never get
+  tested for existance. Actually, I would rather recommend that for
+  application data the option ZZIP_PREFERZIP, so that one can enter
+  debugging mode by unpacking the zip-file as a real directory tree
+  in the place of the original zip.
+</p>
+
+
+<h3> The IO handlers </h3>
+
+<p class="P">
+  While you will find the zzip_plugin_io_t declared in the zziplib
+  headers, you are not advised to make much assumptions about their
+  structure. Still we gone the path of simplicity, so you can use
+  a global static for this struct too just like one can do for the
+  EXT-list. This again mimics the internals of zziplib. There is
+  even a helper function zzip_init_io that will copy the zziplib
+  internal handlers to your own handlers-set. Actually, this is
+  barely needed since the zziplib library will not check for nulls
+  in the plugin_io structure, all handlers must be filled, and the
+  zziplib routines call them unconditionally - that's simply 
+  because a conditional-call will be ten times slower than an
+  unconditional call which adds mostly just one or two cpu cycles
+  in the place so you won't ever notice zziplib to be anywhat
+  slower than before adding IO-handlers.
+</p><p class="P">
+  However, you better instantiate your handlers in your application
+  and call that zzip_init_io on that instance to have everything
+  filled, only then modify the entry you actually wish to have
+  modified. For <a href="zzip-xor.html">obfuscation</a> this
+  will mostly be just the <code>read()</code> routine. But one can
+  also use IO-handlers to wrap zip-files into another data part
+  for which one (also) wants to modify the open/close routines
+  as well.
+</p><p class="P">
+  Therefore, you can modify your normal stdio code to start using
+  zipped files by exchaning the fopen/fread/fclose calls by their
+  magic counterparts, i.e. <pre>
+    // FILE* file = fopen ("test/README", "rb");
+    ZZIP_FILE* file = zzip_fopen ("test/README", "rb");
+    // while (0 &lt; fread (buffer, 1, buflen, file))) 
+    while (0 &lt; zzip_fread (buffer, 1, buflen, file)))
+       { do something }
+    // fclose (file);
+    zzip_fclose (file);
+  </pre>
+</p><p class="P">
+   and you then need to prefix this code with some additional 
+   code to support your own EXT/IO set, so the code will finally
+   look like <pre>
+    /* use .DAT extension to find some files */
+    static zzip_strings_t ext[] = { ".dat", ".DAT", "", 0 }; 
+    /* add obfuscation routine - see zzxorcat.c examples */
+    static zzip_plugin_io_t io;
+    zzip_init_io (&amp; io, 0);
+    io.read = xor_read; 
+    /* and the rest of the code, just as above, but with ext/io */
+    ZZIP_FILE* file = zzip_open_ext_io ("test/README", O_RDONLY|O_BINARY,
+                                        ZZIP_ONLYZIP|ZZIP_CASELESS, ext, io);
+    while (0 &lt; zzip_fread (buffer, 1, buflen, file)))
+        { do something }
+    zzip_fclose (file);
+  </pre>   
+</p>
+
+
+<h3> Finally </h3>
+
+<p class="P">
+   What's more to it? Well, if you have some ideas then please mail me
+   about it - don't worry, I'll probably reject it to be part of the
+   standard zziplib dll, but perhaps it is worth to be added as a
+   configure option and can help others later, and even more perhaps
+   it can be somehow generalized just as the ext/io features have been
+   generalized now. In most respects, this ext/io did not add much
+   code to the <a href="zziplib.html">zziplib</a> - the posix-calls
+   in the implemenation, like <code>"read(file)"</code> were simply
+   exchanged with <code>"zip-&gt;io-&gt;read(file)"</code>, and the 
+   old <code>"zzip_open(name,mode)"</code> call is split up - the old
+   entry still persists but directly calls 
+   <code>"zzip_open_ext_io(name,mode,0,0,0)"</code> which has the
+   old implementation code with just one addition: when the ZIP_FILE
+   handle is created, it uses the transferred io-handlers (or the
+   default ones if io==0), and initialized the io-member of that
+   structure for usage within the <code>zzip_read</code> calls.
+</p><p class="P">
+   This adds just a few bytes to the libs and just consumes additional 
+   cpu cycles that can be rightfully called to be negligable (unlike
+   most commerical vendors will tell you when they indeed want to
+   tell you that for soooo many new features you have to pay a price).
+   It makes for greater variability without adding fatness to the
+   core in the default case, this is truly efficient I'd say. Well,
+   call this a German desease :-)=) ... and again, if you have another
+   idea, write today... or next week.
+</p>
+
+
+<hr><table border="0" width="100%"><tr><td>
+<a href="mailto:guidod@gmx.de?subject=zzip:">guidod@gmx.de</a>
+</td><td align="right">
+15. July 2002</td></tr></table>
+</td></tr></table></body></html>

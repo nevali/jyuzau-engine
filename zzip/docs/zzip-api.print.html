@@ -1,0 +1,72 @@
+<html><head><title>zziplib - zzip programmers interface </title>
+ <meta name="formatter" content="mksite.pl" />
+ <meta name="src-dir" content="." />
+ <meta name="DC.date.issued" content="20. July 2002" />
+ <meta name="DC.title" content="ZZIP Programmers Interface" />
+ <meta name="DC.relation.isFormatOf" content="zzip-api.html" />
+ <meta name="DC.date.modified" content="2014-12-25" />
+ <meta name="DC.date" content="20. July 2002" />
+ <meta name="DC.relation.section" content="zzip-index.html" />
+ <meta name="DC.title.selected" content="Library API" />
+ <meta name="DC.publisher" content="mo" />
+ <style type="text/css"><!--
+  /* sdocbook.css */
+  
+  .date
+  {
+    display: inline;
+  }
+ --></style>
+   <style>
+     a:link    { text-decoration : none ; font-weight : bold ;  color : #000060 ; }
+     a:visited { text-decoration : none ; font-weight : bold ;  color : #000040 ; }
+     body      { background-color : white ; }
+   </style>
+</head><body>
+<br><a href="#." title="section"><img alt="|go text:" width="8" height="8" border="0" /></a> || - 
+ [ <a href="zzip-index.print.html">Library</a> ]  - 
+<a href="zzip-parse.print.html">Parsing ZIPs</a> - 
+<a href="history.print.html">Hints And Links</a> - 
+<a href="download.print.html">Download Area</a> - 
+<a href="zzip-index.print.xml"></a> - 
+
+<br><a href="zzip-api.html" title="topics"><img alt="||topics:" width="8" height="8" border="0" /></a> || - 
+<a href="zzip-zip.print.html">ZIP Access</a> - 
+<a href="zzip-file.print.html">Transparently</a> - 
+<a href="zzip-sdl-rwops.print.html">SDLrwops <small>Example</small></a> - 
+<a href="zzip-extio.print.html">ext/io <small>Customization</small></a> - 
+ [ <a href="zzip-api.print.html">Library API</a> ]  - 
+<a href="zzip-extras.print.html">extras</a> - 
+
+<a name="."></a>
+ 
+<h2> ZZIP Programmers Interface </h2>   The complete API description.
+
+<!--border-->
+
+<p class="P">
+  The zzip library was orginally developped by Tomi Ollila as a
+  set of zip decoder routines. Guido Draheim did pick it up and
+  wrapped them under a call synopsis matching their posix
+  api calls. Therefore <code>zzip_open()</code> has the same 
+  synopsis as <code>open(2)</code> but it can open zipped files.
+  Later the distinction was made between magic wrappers and apis
+  for direct access to zip archives and the files contained
+  in the archive. 
+</p>
+<p class="P">
+  These (three) functional apis have little helper functions 
+  alongside including those to get the posix filehandle out of a 
+  zzip handle and to get some attributes about the data handle
+  represented by a zzip handle. Plus checking for error codes
+  that may have been generated from internal checks.
+</p>
+
+<dl>
+<dt> <a href="zzip-basics.print.html">Basics</a> </dt>
+<dd> Magic Wrappers, Zip Archive Dir access, Zipped File access </dd>
+<dt> <a href="zzip-extras.print.html">Extras</a> </dt>
+<dd> ext/io init, StdC calls, Error defs, ReOpen, FileStat </dd>
+</dl>
+
+</body></html>
