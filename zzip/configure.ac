@@ -7,7 +7,7 @@ AC_CONFIG_MACRO_DIR([m4])
 # =======================================================================
 AC_CANONICAL_SYSTEM
 dnl AM_ENABLE_MULTILIB([Makefile],[$host])
-AX_ENABLE_BUILDDIR_UNAME
+dnl AX_ENABLE_BUILDDIR_UNAME
 AC_SET_DEFAULT_PATHS_SYSTEM
 # -----------------------------------------------------------------------
 AC_ARG_ENABLE([thread-safe],
@@ -352,9 +352,9 @@ AC_OUTPUT([Makefile
            zzip/Makefile zzipwrap/Makefile SDL/Makefile
            docs/Makefile test/Makefile bins/Makefile])
 dnl -------------------------------------------------------------
-PATCH_LIBTOOL_ON_DARWIN_ZSH_OVERQUOTING
-PATCH_LIBTOOL_SYS_LIB_SEARCH_PATH_SPEC
-PATCH_LIBTOOL_TO_ADD_HOST_CC
+dnl PATCH_LIBTOOL_ON_DARWIN_ZSH_OVERQUOTING
+dnl PATCH_LIBTOOL_SYS_LIB_SEARCH_PATH_SPEC
+dnl PATCH_LIBTOOL_TO_ADD_HOST_CC
 # ---------------------------------------------------------------
 echo '-----' $PACKAGE $VERSION $prefix
 $SHELL libtool --features || true
