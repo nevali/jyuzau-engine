@@ -50,6 +50,5 @@ fi
 AC_CONFIG_FILES([Makefile
                  includes/Makefile
                  src/Makefile
-                 demos/Makefile
                  OIS.pc])
 AC_OUTPUT
