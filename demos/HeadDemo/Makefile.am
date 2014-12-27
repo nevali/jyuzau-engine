@@ -20,7 +20,8 @@ noinst_PROGRAMS = HeadDemo
 
 HeadDemo_SOURCES = app.mm delegate.hh delegate.mm core.cc core.hh
 
-EXTRA_DIST = Info.plist.in resources.cfg.in ogrehead.mesh
+EXTRA_DIST = Info.plist.in resources.cfg.in ogrehead.mesh Ogre.material \
+	GreenSkin.jpg tusk.jpg spheremap.png
 
 noinst_DATA = resources.cfg plugins.cfg Info.plist
 
