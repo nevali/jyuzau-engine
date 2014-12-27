@@ -17,10 +17,9 @@
 # include "config.h"
 #endif
 
-#include "core.hh"
-#include "delegate.hh"
+#include "jyuzau.hh"
 
-class HeadDemo: public JyuzauCore
+class HeadDemo: public Jyuzau::Core
 {
 protected:
 	virtual void createScene(void);
@@ -43,19 +42,34 @@ void HeadDemo::createScene(void)
     light->setPosition(20.0f, 80.0f, 50.0f);
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+	
+INT WINAPI
+	WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR strCmdLine, INT nShowCmd)
+{
+	HeadDemo app;
+	
+	return Jyuzau::WinMain(hInst, hPrevInst, strCmdLine, nShowCmd, &app);
+}
+
+#else
+
 int
 main(int argc, char **argv)
 {
-	id delegate;
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	JyuzauCore *app = new HeadDemo();
-	
-	delegate = [[JyuzauDelegate alloc] init:app];
-	[[NSApplication sharedApplication] setDelegate:delegate];
-	int retVal = NSApplicationMain(argc, (const char **) argv);
+	HeadDemo app;
 
-	[pool release];
-	
-	delete app;
-	return retVal;
+	return Jyuzau::main(argc, argv, &app);
 }
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+//---------------------------------------------------------------------------

@@ -14,11 +14,11 @@
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ @OGRE_CPPFLAGS@ @OIS_CPPFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @OGRE_LDFLAGS@ @OIS_LDFLAGS@
-LIBS = @LIBS@ @OGRE_LIBS@ @OIS_LIBS@ -framework Cocoa -framework Foundation
 
 noinst_PROGRAMS = HeadDemo
 
-HeadDemo_SOURCES = app.mm delegate.hh delegate.mm core.cc core.hh
+HeadDemo_SOURCES = app.cc
+HeadDemo_LDADD = ${top_builddir}/jyuzau/libjyuzau.la
 
 EXTRA_DIST = Info.plist.in resources.cfg.in ogrehead.mesh Ogre.material \
 	GreenSkin.jpg tusk.jpg spheremap.png
@@ -28,12 +28,6 @@ noinst_DATA = resources.cfg plugins.cfg Info.plist
 CLEANFILES = plugins.cfg Resources Frameworks
 
 DISTCLEANFILES = resources.cfg Info.plist
-
-.mm.o:
-	$(OBJCXXCOMPILE) -c -o $@ $<
-
-.mm.lo:
-	$(LTOBJCXXCOMPILE) -c -o $@ $<
 
 plugins.cfg: ${top_builddir}/ogre-build/sdk/bin/plugins.cfg
 	rm -f $@ && cp $< $@
