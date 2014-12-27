@@ -1,19 +1,15 @@
 INCLUDES = $(STLPORT_CFLAGS) -I$(top_srcdir)/includes $(CFLAGS) -I/usr/X11R6/include
 
+AM_CXXFLAGS = @AM_CXXFLAGS@ -x objective-c++
 
+.mm.lo:
+	$(LTCXXCOMPILE) -c -o $@ $<
 
 lib_LTLIBRARIES=libOIS.la
-libOIS_la_SOURCES = OISInputManager.cpp \
-	OISObject.cpp \
-	OISEffect.cpp \
-	OISJoyStick.cpp \
-	OISKeyboard.cpp \
-	OISForceFeedback.cpp \
-	OISException.cpp
 
 if OIS_BACKEND_MAC
 
-libOIS_la_SOURCES += \
+OIS_BACKEND = \
 	mac/CocoaInputManager.mm \
 	mac/CocoaJoyStick.mm \
 	mac/CocoaKeyboard.mm \
@@ -29,7 +25,7 @@ endif
 
 if OIS_BACKEND_LINUX
 
-libOIS_la_SOURCES += \
+OIS_BACKEND = \
 	linux/EventHelpers.cpp \
 	linux/LinuxInputManager.cpp \
 	linux/LinuxJoyStickEvents.cpp \
@@ -40,6 +36,16 @@ libOIS_la_SOURCES += \
 libOIS_la_LIBADD = $(STLPORT_LIBS) -L/usr/X11R6/lib -lX11
 
 endif
+
+
+libOIS_la_SOURCES = OISInputManager.cpp \
+	OISObject.cpp \
+	OISEffect.cpp \
+	OISJoyStick.cpp \
+	OISKeyboard.cpp \
+	OISForceFeedback.cpp \
+	OISException.cpp \
+	$(OIS_BACKEND)
 
 libOIS_la_LDFLAGS = -release @PACKAGE_VERSION@
 #libOIS_la_LDFLAGS = -version-info $(shell echo "@PACKAGE_VERSION@" | tr '.' ':')

@@ -13,7 +13,7 @@ dnl Check for programs
 BT_PROG_XCODE
 AC_PROG_CC([clang gcc c99 cc])
 AC_PROG_CXX([clang++ g++ c++])
-AC_PROG_OBJC
+AC_PROG_OBJCXX
 LT_INIT
 
 AC_SUBST([AM_CPPFLAGS])
