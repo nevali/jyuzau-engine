@@ -23,6 +23,7 @@ BT_PROG_XCODE
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_OBJC
+AC_PROG_OBJCXX
 LT_INIT
 
 AC_SUBST([AM_CPPFLAGS])
@@ -31,6 +32,14 @@ AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_LDFLAGS])
 
 OGRE_CMAKE_FLAGS=''
+
+dnl Handle Objective-C++ compilation
+
+OBJCXXCOMPILE='$(OBJCXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_OBJCXXFLAGS) $(OBJCXXFLAGS)'
+LTOBJCXXCOMPILE='$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(OBJCXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_OBJCXXFLAGS) $(OBJCXXFLAGS)'
+
+AC_SUBST([OBJCXXCOMPILE])
+AC_SUBST([LTOBJCXXCOMPILE])
 
 dnl -------------------------------------------------------------------
 dnl Configure FreeImage
@@ -113,7 +122,9 @@ prefix="$save_prefix"
 AC_CONFIG_FILES([
 Makefile
 demos/Makefile
-demos/Resources/resources.cfg
+demos/HeadDemo/Makefile
+demos/HeadDemo/Info.plist
+demos/HeadDemo/resources.cfg
 ])
 
 AC_OUTPUT

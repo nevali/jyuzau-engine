@@ -1,0 +1,9 @@
+[Essential]
+Zip=@abs_top_builddir@/ogre-build/sdk/Media/packs/SdkTrays.zip
+Zip=@abs_top_builddir@/ogre-build/sdk/Media/packs/profiler.zip
+
+[Demo]
+FileSystem=../Resources
+
+[General]
+FileSystem=@abs_top_builddir@/ogre-build/sdk/Media
