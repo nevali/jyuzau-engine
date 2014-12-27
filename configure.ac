@@ -31,6 +31,11 @@ AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_LDFLAGS])
 
+AM_CPPFLAGS='-I${top_builddir} -I${top_srcdir} -I${top_builddir}/sdk/include'
+AM_LDFLAGS='-L${top_builddir}/sdk/lib'
+
+AC_CONFIG_HEADER([config.h])
+
 OGRE_CMAKE_FLAGS=''
 
 dnl Handle Objective-C++ compilation
@@ -99,6 +104,7 @@ test -d ${ogre_builddir} && rm -f ${ogre_builddir}/configure-stamp || exit $?
 OGRE_CPPFLAGS='-I${top_builddir}/ogre-build/sdk/include -I${top_builddir}/ogre-build/sdk/include/OGRE -I${top_builddir}/ogre-build/sdk/include/OGRE/OSX -I${top_builddir}/ogre-build/sdk/include/OGRE/Overlay -F${top_builddir}/ogre-build/sdk/lib/RelWithDebInfo'
 OGRE_LDFLAGS='-F${top_builddir}/ogre-build/sdk/lib/RelWithDebInfo'
 OGRE_LIBS='-framework Ogre -framework OgreOverlay'
+
 AC_SUBST([OGRE_CPPFLAGS])
 AC_SUBST([OGRE_LDFLAGS])
 AC_SUBST([OGRE_LIBS])
@@ -121,6 +127,7 @@ prefix="$save_prefix"
 
 AC_CONFIG_FILES([
 Makefile
+jyuzau/Makefile
 demos/Makefile
 demos/HeadDemo/Makefile
 demos/HeadDemo/Info.plist

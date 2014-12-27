@@ -14,9 +14,11 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-DIST_SUBDIRS = ois ogre demos
+DIST_SUBDIRS = freeimage zzip ois ogre jyuzau demos
 
-SUBDIRS = @subdirs@ . demos
+SUBDIRS = @subdirs@ . jyuzau demos
+
+noinst_HEADERS = jyuzau.hh
 
 # OGRE is built with CMake, and doesn't understand the notion of to-be-installed
 # dependent packages. Instead, we install all of our bundled packages to
