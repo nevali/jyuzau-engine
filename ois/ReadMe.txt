@@ -1,3 +1,9 @@
+This version of OIS has been modified.
+
+* https://bitbucket.org/cabalistic/ogredeps/src/ - as part of the OGRE project
+
+* https://github.com/nevali/jyuzau-engine
+
 ======================================================================================
 ================ LICENSE =============================================================
 ======================================================================================
