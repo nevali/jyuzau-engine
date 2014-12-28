@@ -36,21 +36,7 @@ HeadDemo::createScene(void)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("failed to create scene");
 		return;
-	}
-	
-	// Set the scene's ambient light
-    mSceneMgr->setAmbientLight(Ogre::ColourValue(0.5f, 0.5f, 0.5f));
- 
-/* 	headActor = Jyuzau::Actor::create("Ogre", headScene);
-	if(!headActor)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("failed to create actor");
-		return;
-	} */
- 
-	// Create a Light and set its position
-	Ogre::Light* light = mSceneMgr->createLight("MainLight");
-	light->setPosition(20.0f, 80.0f, 50.0f);
+	} 
 }
 
 void
