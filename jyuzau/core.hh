@@ -63,12 +63,16 @@
 #  include "OgreStaticPluginLoader.h"
 #endif
 
+# include "scene.hh"
+
 namespace Jyuzau
 {
 
 	class Core : public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener, OgreBites::SdkTrayListener
 	{
 	public:
+		Core *getInstance(void);
+		
 		Core(void);
 		virtual ~Core(void);
 
@@ -99,6 +103,8 @@ namespace Jyuzau
 		virtual void windowResized(Ogre::RenderWindow* rw);
 		// Unattach OIS before window shutdown (very important under Linux)
 		virtual void windowClosed(Ogre::RenderWindow* rw);
+
+		Scene *activeScene;
 
 		Ogre::Root*                 mRoot;
 		Ogre::Camera*               mCamera;

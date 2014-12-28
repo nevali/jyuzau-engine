@@ -18,9 +18,12 @@ LIBS = @LIBS@ @OGRE_LIBS@ @OIS_LIBS@ -framework Cocoa -framework Foundation
 
 lib_LTLIBRARIES = libjyuzau.la
 
-libjyuzau_la_SOURCES = delegate.hh core.hh \
-	app.cc core.cc \
-	nsapp.mm delegate.mm
+libjyuzau_la_SOURCES = core.hh \
+	app.cc \
+	core.hh core.cc loadable.hh loadable.cc  \
+	scene.hh scene.cc prop.hh prop.cc actor.hh actor.cc \
+	nsapp.mm \
+	delegate.hh delegate.mm
 
 libjyuzau_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 

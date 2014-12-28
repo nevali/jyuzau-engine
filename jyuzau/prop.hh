@@ -1,0 +1,70 @@
+/* Copyright 2014 Mo McRoberts.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+#ifndef JYUZAU_PROP_HH_
+# define JYUZAU_PROP_HH_               1
+
+# include "loadable.hh"
+
+namespace Jyuzau
+{
+	class LoadableMesh: public LoadableObject
+	{
+		friend class Prop;
+	public:
+		LoadableMesh(Ogre::String name, AttrList &attrs);
+		virtual bool complete(void);
+	protected:
+		Ogre::String m_source;
+	};
+
+	class LoadableMaterial: public LoadableObject
+	{
+		friend class Prop;
+	public:
+		LoadableMaterial(Ogre::String name, AttrList &attrs);
+		virtual bool complete(void);
+	protected:
+		Ogre::String m_source;
+	};
+
+	class LoadableProp: public LoadableObject
+	{
+		friend class Prop;
+	public:
+		LoadableProp(Ogre::String name, AttrList &attrs);
+		virtual bool add(LoadableObject *child);
+		virtual bool complete(void);
+	protected:
+		LoadableMesh *m_mesh;
+		LoadableMaterial *m_material;
+	};
+	
+	class Prop: public Loadable
+	{
+	public:
+		Prop(Ogre::String name, Ogre::String kind = "prop");
+		virtual ~Prop();
+		
+		virtual void loaded(void);
+		
+		bool attach(void);
+		bool detach(void);
+	protected:
+		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
+	};
+};
+
+#endif /*!JYUZAU_PROP_HH_*/
