@@ -21,10 +21,13 @@
 namespace Jyuzau
 {
 	
+	/* An actor is a kind of prop which can have autonomous behaviours
+	 * and cameras attached to it.
+	 */
 	class Actor: public Prop
 	{
 	public:
-		static Actor *create(Ogre::String name);
+		static Actor *create(Ogre::String name, Scene *scene = NULL);
 		
 		Actor(Ogre::String name);
 		virtual ~Actor();

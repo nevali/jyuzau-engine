@@ -24,27 +24,7 @@ namespace Jyuzau
 	typedef std::vector<Attr> AttrList;
 	typedef AttrList::iterator AttrListIterator;
 	
-	class LoadableObject
-	{
-		friend class Loadable;
-		
-	public:
-		LoadableObject(Ogre::String name, AttrList &attrs);
-		virtual ~LoadableObject();
-	
-		virtual Ogre::String name(void);
-		virtual LoadableObject *parent(void);
-	protected:
-		LoadableObject *m_parent, *m_first, *m_last, *m_prev, *m_next;
-		Ogre::String m_name;
-		bool m_loaded;
-		AttrList m_attrs;
-		
-		virtual bool add(LoadableObject *child);
-		virtual void loaded(void);
-		virtual bool complete(void);
-		virtual bool addResources(Ogre::String group);
-	};
+	class LoadableObject;
 	
 	class Loadable
 	{
@@ -60,11 +40,17 @@ namespace Jyuzau
 		static void sax_startElement(void *ctx, const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces, int nb_attributes, int nb_defaulted, const xmlChar **attributes);
 		static void sax_endElement(void *ctx, const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI);
 
+		/* This is public only because one cannot make all descendants of
+		 * a class a friend
+		 */
+		virtual void add(Loadable *child);
 	protected:
 		Ogre::String m_name, m_kind, m_path, m_container, m_group;
 		int m_skip;
 		bool m_loaded, m_load_status;
 		LoadableObject *m_root, *m_cur;
+		Loadable *m_owner;
+		std::vector<Loadable *> m_objects;
 		
 		virtual bool loadDocument(Ogre::String path);
 		
@@ -75,9 +61,30 @@ namespace Jyuzau
 		
 		virtual void startElement(const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces, int nb_attributes, int nb_defaulted, const xmlChar **attributes);
 		virtual void endElement(const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI);
-		
 	};
 	
+	class LoadableObject
+	{
+		friend class Loadable;
+		
+	public:
+		LoadableObject(Loadable *owner, Ogre::String name, AttrList &attrs);
+		virtual ~LoadableObject();
+	
+		virtual Ogre::String name(void);
+		virtual LoadableObject *parent(void);
+	protected:
+		Loadable *m_owner;
+		LoadableObject *m_parent, *m_first, *m_last, *m_prev, *m_next;
+		Ogre::String m_name;
+		bool m_loaded;
+		AttrList m_attrs;
+		
+		virtual bool add(LoadableObject *child);
+		virtual void loaded(void);
+		virtual bool complete(void);
+		virtual bool addResources(Ogre::String group);
+	};
 };
 
 #endif /*!JYUZAU_LOADABLE_HH_*/

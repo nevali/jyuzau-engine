@@ -22,7 +22,7 @@
 using namespace Jyuzau;
 
 Prop *
-Prop::create(Ogre::String name)
+Prop::create(Ogre::String name, Scene *scene, Ogre::Vector3 pos)
 {
 	Prop *p;
 	
@@ -31,6 +31,14 @@ Prop::create(Ogre::String name)
 	{
 		delete p;
 		return NULL;
+	}
+	if(scene)
+	{
+		if(!p->attach(scene, name, pos))
+		{
+			delete p;
+			return NULL;
+		}
 	}
 	return p;
 }
@@ -62,7 +70,7 @@ Prop::factory(Ogre::String name, AttrList &attrs)
 	{
 		if(!name.compare(m_kind))
 		{
-			return new LoadableProp(name, attrs);
+			return new LoadableProp(this, name, attrs);
 		}
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected root element <" + name + ">");
 		return NULL;
@@ -74,11 +82,11 @@ Prop::factory(Ogre::String name, AttrList &attrs)
 	}
 	if(!name.compare("mesh"))
 	{
-		return new LoadableMesh(name, attrs);
+		return new LoadableMesh(this, name, attrs);
 	}
 	if(!name.compare("material"))
 	{
-		return new LoadableMaterial(name, attrs);
+		return new LoadableMaterial(this, name, attrs);
 	}
 	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected element <" + name + ">");
 	return NULL;
@@ -111,17 +119,27 @@ Prop::entity(Ogre::SceneManager *scene)
 }
 
 bool
-Prop::attach(Ogre::SceneManager *scene)
+Prop::attach(Scene *scene, Ogre::String name, Ogre::Vector3 pos)
 {
-	return attach(scene->getRootSceneNode());
+	return attach(scene->rootNode(), name, pos);
 }
 
 bool
-Prop::attach(Ogre::SceneNode *node)
+Prop::attach(Ogre::SceneManager *scene, Ogre::String name, Ogre::Vector3 pos)
+{
+	return attach(scene->getRootSceneNode(), name, pos);
+}
+
+bool
+Prop::attach(Ogre::SceneNode *node, Ogre::String name, Ogre::Vector3 pos)
 {
 	Ogre::Entity *ent;
 	Ogre::SceneManager *manager = node->getCreator();
 	
+	if(!name.length())
+	{
+		name = m_group;
+	}
 	if(m_node)
 	{
 		return m_node;
@@ -131,7 +149,7 @@ Prop::attach(Ogre::SceneNode *node)
 	{
 		return false;
 	}
-	m_node = node->createChildSceneNode(m_group);
+	m_node = node->createChildSceneNode(name, pos);
 	if(!m_node)
 	{
 		return false;
@@ -141,8 +159,8 @@ Prop::attach(Ogre::SceneNode *node)
 }
 
 
-LoadableProp::LoadableProp(Ogre::String name, AttrList &attrs):
-	LoadableObject(name, attrs),
+LoadableProp::LoadableProp(Loadable *owner, Ogre::String name, AttrList &attrs):
+	LoadableObject(owner, name, attrs),
 	m_mesh(NULL),
 	m_material(NULL)
 {
@@ -178,19 +196,11 @@ LoadableProp::complete()
 	return LoadableObject::complete();
 }
 
-bool
-LoadableProp::addResources(Ogre::String group)
-{
-	m_mesh->addResources(group);
-	m_material->addResources(group);
-	return true;
-}
 
 
 
-
-LoadableMesh::LoadableMesh(Ogre::String name, AttrList &attrs):
-	LoadableObject(name, attrs),
+LoadableMesh::LoadableMesh(Loadable *owner, Ogre::String name, AttrList &attrs):
+	LoadableObject(owner, name, attrs),
 	m_source("")
 {
 	AttrListIterator it;
@@ -221,8 +231,8 @@ LoadableMesh::addResources(Ogre::String group)
 
 
 
-LoadableMaterial::LoadableMaterial(Ogre::String name, AttrList &attrs):
-	LoadableObject(name, attrs),
+LoadableMaterial::LoadableMaterial(Loadable *owner, Ogre::String name, AttrList &attrs):
+	LoadableObject(owner, name, attrs),
 	m_source("")
 {
 	AttrListIterator it;

@@ -22,7 +22,7 @@
 using namespace Jyuzau;
 
 Actor *
-Actor::create(Ogre::String name)
+Actor::create(Ogre::String name, Scene *scene)
 {
 	Actor *p;
 	
@@ -31,6 +31,14 @@ Actor::create(Ogre::String name)
 	{
 		delete p;
 		return NULL;
+	}
+	if(scene)
+	{
+		if(!p->attach(scene))
+		{
+			delete p;
+			return NULL;
+		}
 	}
 	return p;
 }

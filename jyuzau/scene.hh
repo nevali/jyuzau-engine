@@ -20,15 +20,62 @@
 
 namespace Jyuzau
 {
+	class Prop;
+	class LoadableSceneProp;
+	
+	typedef std::pair<LoadableSceneProp *, Prop *> SceneProp;
 	
 	class Scene: public Loadable
 	{
 	public:
+		static Scene *create(Ogre::String name, Ogre::SceneManager *sceneManager = NULL);
+		
 		Scene(Ogre::String name);
 		virtual ~Scene();
 		
-		bool attach(void);
+		bool attach(Ogre::SceneManager *sceneManager);
 		bool detach(void);
+		
+		Ogre::SceneNode *rootNode(void);
+		
+		/* Add a Prop to the scene and take ownership of it */
+		virtual void addProp(LoadableSceneProp *sceneProp, Prop *prop);
+	protected:
+		Ogre::SceneManager *m_manager;
+		std::vector<SceneProp> m_props;
+		
+		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
+	};
+	
+	class LoadableScene: public LoadableObject
+	{
+		friend class Scene;
+	public:
+		LoadableScene(Loadable *owner, Ogre::String name, AttrList &attrs);
+	protected:
+	};
+	
+	class LoadableSceneProp: public LoadableObject
+	{
+		friend class Scene;
+	public:
+		LoadableSceneProp(Loadable *owner, Ogre::String name, AttrList &attrs);
+		
+		virtual Ogre::String id(void);
+		virtual bool complete(void);
+		virtual Ogre::Vector3 pos();
+	protected:
+		Ogre::String m_id, m_class;
+		Ogre::Vector3 m_pos;
+	};
+	
+	class LoadableSceneActor: public LoadableSceneProp
+	{
+		friend class Scene;
+	public:
+		LoadableSceneActor(Loadable *owner, Ogre::String name, AttrList &attrs);
+	protected:
+		virtual bool addResources(Ogre::String group);
 	};
 };
 

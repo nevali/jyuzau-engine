@@ -25,14 +25,16 @@
 
 using namespace Jyuzau;
 
-Loadable::Loadable(Ogre::String name, Ogre::String kind, bool subdir)
+Loadable::Loadable(Ogre::String name, Ogre::String kind, bool subdir):
+	m_name(name),
+	m_kind(kind),
+	m_root(NULL),
+	m_cur(NULL),
+	m_objects(),
+	m_owner(NULL)
 {
 	Ogre::String base;
 	
-	m_name = name;
-	m_kind = kind;
-	m_root = NULL;
-	m_cur = NULL;
 	m_loaded = m_load_status = false;
 	
 	if (!Ogre::StringUtil::startsWith(name, "/", false))
@@ -58,6 +60,12 @@ Loadable::Loadable(Ogre::String name, Ogre::String kind, bool subdir)
 
 Loadable::~Loadable()
 {
+	std::vector<Loadable *>::iterator it;
+	
+	for(it = m_objects.begin(); it != m_objects.end(); it++)
+	{
+		delete *it;
+	}
 	if(m_root)
 	{
 		delete m_root;
@@ -121,7 +129,7 @@ Loadable::factory(Ogre::String name, AttrList &attrs)
 	/* Default loadable object factory; simply returns a new instance
 	 * of LoadableObject
 	 */
-	return new LoadableObject(name, attrs);
+	return new LoadableObject(this, name, attrs);
 }
 
 LoadableObject *
@@ -141,6 +149,7 @@ Loadable::loadDocument(Ogre::String path)
 	memset(&sax, 0, sizeof(sax));
 	sax.initialized = XML_SAX2_MAGIC;
 	sax.startElementNs = sax_startElement;
+	sax.endElementNs = sax_endElement;
 	ctx = xmlCreatePushParserCtxt(&(sax), (void *) this, "", 0, NULL);
 	if(!ctx)
 	{
@@ -157,6 +166,16 @@ Loadable::loadDocument(Ogre::String path)
 	return true;
 }
 
+/* Add a child object to this one; the child becomes owned by this object, and
+ * will be destroyed by this object's destructor.
+ */
+void
+Loadable::add(Loadable *child)
+{
+	child->m_owner = this;
+	m_objects.push_back(child);
+}
+
 void
 Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces, int nb_attributes, int nb_defaulted, const xmlChar **attributes)
 {
@@ -167,15 +186,19 @@ Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xm
 	size_t i, c;
 	AttrList attrs;
 	
+	Ogre::LogManager::getSingletonPtr()->logMessage("<" + name + ">");
 	if(m_skip)
 	{
+		/* We're already skipping the parent of this element, so ensure we
+		 * skip this element (and its children) too.
+		 */
+		m_skip++;
 		return;
 	}
-	
 	for(i = c = 0; c < nb_attributes; c++)
 	{
 		Ogre::String ans(attributes[i + 2] ? (const char *) attributes[i + 2] : "");
-		Ogre::String aname((const char *) attributes[0]);
+		Ogre::String aname((const char *) attributes[i]);
 		Ogre::String attr(ans + aname);
 		Ogre::String value((const char *) attributes[i + 3], (size_t) (attributes[i+4] - attributes[i+3]));
 		attrs.push_back(std::make_pair(attr, value));
@@ -186,6 +209,7 @@ Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xm
 	if(!obj)
 	{
 		m_skip++;
+		Ogre::LogManager::getSingletonPtr()->logMessage("+++ m_skip is now " + std::to_string(m_skip));
 		return;
 	}
 	if(m_cur)
@@ -195,6 +219,7 @@ Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xm
 			delete obj;
 			m_skip++;
 		}
+		m_cur = obj;
 	}
 	else
 	{
@@ -205,9 +230,13 @@ Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xm
 void
 Loadable::endElement(const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI)
 {
+	Ogre::String name((const char *) localname);
+	
+	Ogre::LogManager::getSingletonPtr()->logMessage("</" + name + ">");
 	if(m_skip)
 	{
 		m_skip--;
+		Ogre::LogManager::getSingletonPtr()->logMessage("--- m_skip is now " + std::to_string(m_skip));
 	}
 	else if(m_cur)
 	{
@@ -216,6 +245,9 @@ Loadable::endElement(const xmlChar *localname, const xmlChar *prefix, const xmlC
 	}
 }
 
+/* SAX callbacks, which simply invoke the equivalent methods on the Loadable
+ * instance (which is passed as the ctx pointer).
+ */
 void
 Loadable::sax_startElement(void *ctx, const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces, int nb_attributes, int nb_defaulted, const xmlChar **attributes)
 {
@@ -230,8 +262,14 @@ Loadable::sax_endElement(void *ctx, const xmlChar *localname, const xmlChar *pre
 
 
 
-
-LoadableObject::LoadableObject(Ogre::String name, AttrList &attrs):
+/* LoadableObject is the base class used to encapsulate XML elements as
+ * they're loaded from asset descriptions.
+ *
+ * Specialisations of LoadableObject deal with different kinds of element
+ * in different contexts.
+ */
+LoadableObject::LoadableObject(Loadable *owner, Ogre::String name, AttrList &attrs):
+	m_owner(owner),
 	m_name(name),
 	m_attrs(attrs)
 {
@@ -314,6 +352,13 @@ LoadableObject::loaded()
 bool
 LoadableObject::addResources(Ogre::String group)
 {
+	LoadableObject *p;
+	
+	/* By default, invoke addResources() on each of the children */
+	for(p = m_first; p; p = p->m_next)
+	{
+		p->addResources(group);
+	}
 	return true;
 }
 

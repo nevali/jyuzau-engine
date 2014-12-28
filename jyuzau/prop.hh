@@ -20,12 +20,40 @@
 
 namespace Jyuzau
 {
+	class Scene;
+	
+	/* A Prop is an object which can be attached to scenes. They have meshes
+	 * and textures, and descendants (e.g., Actor) can include particular
+	 * behaviours.
+	 */	
+	class Prop: public Loadable
+	{
+	public:
+		static Prop *create(Ogre::String name, Scene *scene = NULL, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
+	
+		Prop(Ogre::String name, Ogre::String kind = "prop");
+		virtual ~Prop();
+	
+		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager);
+	
+		virtual bool attach(Scene *scene, Ogre::String name = "", Ogre::Vector3 pos = Ogre::Vector3::ZERO);
+		virtual bool attach(Ogre::SceneManager *scene, Ogre::String name, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
+		virtual bool attach(Ogre::SceneNode *node, Ogre::String name, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
+	protected:
+		bool m_attached;
+		Ogre::Entity *m_entity;
+		Ogre::SceneNode *m_node;
+	
+		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
+		virtual void loaded(void);
+	};
+	
 	class LoadableMesh: public LoadableObject
 	{
 		friend class Prop;
 		friend class LoadableProp;
 	public:
-		LoadableMesh(Ogre::String name, AttrList &attrs);
+		LoadableMesh(Loadable *owner, Ogre::String name, AttrList &attrs);
 		virtual bool complete(void);
 	protected:
 		Ogre::String m_source;
@@ -38,7 +66,7 @@ namespace Jyuzau
 		friend class Prop;
 		friend class LoadableProp;
 	public:
-		LoadableMaterial(Ogre::String name, AttrList &attrs);
+		LoadableMaterial(Loadable *owner, Ogre::String name, AttrList &attrs);
 		virtual bool complete(void);
 	protected:
 		Ogre::String m_source;
@@ -50,34 +78,12 @@ namespace Jyuzau
 	{
 		friend class Prop;
 	public:
-		LoadableProp(Ogre::String name, AttrList &attrs);
+		LoadableProp(Loadable *owner, Ogre::String name, AttrList &attrs);
 		virtual bool add(LoadableObject *child);
 		virtual bool complete(void);
 	protected:
 		LoadableMesh *m_mesh;
 		LoadableMaterial *m_material;
-
-		virtual bool addResources(Ogre::String group);
-	};
-	
-	class Prop: public Loadable
-	{
-	public:
-		static Prop *create(Ogre::String name);
-		
-		Prop(Ogre::String name, Ogre::String kind = "prop");
-		virtual ~Prop();
-		
-		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager);
-		virtual bool attach(Ogre::SceneManager *scene);
-		virtual bool attach(Ogre::SceneNode *node);
-	protected:
-		bool m_attached;
-		Ogre::Entity *m_entity;
-		Ogre::SceneNode *m_node;
-		
-		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
-		virtual void loaded(void);
 	};
 };
 
