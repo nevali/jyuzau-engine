@@ -17,7 +17,7 @@ AM_LDFLAGS = @AM_LDFLAGS@ @OGRE_LDFLAGS@ @OIS_LDFLAGS@
 
 noinst_PROGRAMS = HeadDemo
 
-HeadDemo_SOURCES = app.cc
+HeadDemo_SOURCES = app.cc ../demoapp.cc
 HeadDemo_LDADD = ${top_builddir}/jyuzau/libjyuzau.la
 
 EXTRA_DIST = Info.plist.in resources.cfg.in ogrehead.mesh Ogre.material \

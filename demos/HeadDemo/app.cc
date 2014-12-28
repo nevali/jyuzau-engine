@@ -17,29 +17,49 @@
 # include "config.h"
 #endif
 
-#include "jyuzau.hh"
+#include "../demoapp.hh"
 
-class HeadDemo: public Jyuzau::Core
+class HeadDemo: public DemoApp
 {
 protected:
+	Jyuzau::Scene *headScene;
+	
 	virtual void createScene(void);
+	virtual void destroyScene(void);
 };
 
-void HeadDemo::createScene(void)
+void
+HeadDemo::createScene(void)
 {
+	headScene = Jyuzau::Scene::create("head", mSceneMgr);
+	if(!headScene)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("failed to create scene");
+		return;
+	}
+	
 	// Set the scene's ambient light
     mSceneMgr->setAmbientLight(Ogre::ColourValue(0.5f, 0.5f, 0.5f));
  
-    // Create an Entity
-    Ogre::Entity* ogreHead = mSceneMgr->createEntity("Head", "ogrehead.mesh");
+/* 	headActor = Jyuzau::Actor::create("Ogre", headScene);
+	if(!headActor)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("failed to create actor");
+		return;
+	} */
  
-    // Create a SceneNode and attach the Entity to it
-    Ogre::SceneNode* headNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("HeadNode");
-    headNode->attachObject(ogreHead);
- 
-    // Create a Light and set its position
-    Ogre::Light* light = mSceneMgr->createLight("MainLight");
-    light->setPosition(20.0f, 80.0f, 50.0f);
+	// Create a Light and set its position
+	Ogre::Light* light = mSceneMgr->createLight("MainLight");
+	light->setPosition(20.0f, 80.0f, 50.0f);
+}
+
+void
+HeadDemo::destroyScene(void)
+{
+	if(headScene)
+	{
+		delete headScene;
+	}
 }
 
 #ifdef __cplusplus
