@@ -18,7 +18,9 @@
 #endif
 
 #include <Cocoa/Cocoa.h>
-#include "jyuzau.hh"
+
+#include "jyuzau/main.hh"
+#include "jyuzau/delegate.hh"
 
 /* Implement main() for Cocoa applications */
 int

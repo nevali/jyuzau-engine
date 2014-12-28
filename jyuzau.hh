@@ -23,17 +23,12 @@
 # include "jyuzau/prop.hh"
 # include "jyuzau/actor.hh"
 # include "jyuzau/scene.hh"
+# include "jyuzau/light.hh"
 
 # ifdef __OBJC__
 #  include "jyuzau/delegate.hh"
 # endif
 
-namespace Jyuzau {
-	int main(int argc, char **argv, Jyuzau::Core *app);
-	
-# if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-	INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, INT nShowCmd, Jyuzau::Core *app);
-# endif
-};
+# include "jyuzau/main.hh"
 
 #endif /*!JYUZAU_HH_*/

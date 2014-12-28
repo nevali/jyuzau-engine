@@ -13,25 +13,21 @@
  *  limitations under the License.
  */
 
-#ifndef JYUZAU_ACTOR_HH_
-# define JYUZAU_ACTOR_HH_              1
+#ifndef JYUZAU_MAIN_HH_
+# define JYUZAU_MAIN_HH_               1
 
-# include "jyuzau/prop.hh"
+# include <OgrePlatform.h>
 
-namespace Jyuzau
-{
+namespace Jyuzau {
 	
-	/* An actor is a kind of prop which can have autonomous behaviours
-	 * and cameras attached to it.
-	 */
-	class Actor: public Prop
-	{
-	public:
-		static Actor *create(Ogre::String name, Scene *scene = NULL);
-		
-		Actor(Ogre::String name);
-		virtual ~Actor();
-	};
+	class Core;
+	
+	int main(int argc, char **argv, Jyuzau::Core *app);
+	
+# if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+	INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, INT nShowCmd, Jyuzau::Core *app);
+# endif
+	
 };
 
-#endif /*!JYUZAU_ACTOR_HH_*/
+#endif /*!JYUZAU_MAIN_HH_*/

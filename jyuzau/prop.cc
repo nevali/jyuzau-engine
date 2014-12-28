@@ -17,7 +17,14 @@
 # include "config.h"
 #endif
 
-#include "jyuzau.hh"
+#include <OgreSceneNode.h>
+#include <OgreEntity.h>
+#include <OgreSceneManager.h>
+#include <OgreLogManager.h>
+#include <OgreResourceGroupManager.h>
+
+#include "jyuzau/prop.hh"
+#include "jyuzau/scene.hh"
 
 using namespace Jyuzau;
 

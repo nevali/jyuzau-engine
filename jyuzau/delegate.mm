@@ -21,7 +21,7 @@
 # include "config.h"
 #endif
 
-#include "delegate.hh"
+#include "jyuzau/delegate.hh"
 
 @implementation JyuzauDelegate
 

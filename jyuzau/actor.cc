@@ -17,7 +17,7 @@
 # include "config.h"
 #endif
 
-#include "jyuzau.hh"
+#include "jyuzau/actor.hh"
 
 using namespace Jyuzau;
 

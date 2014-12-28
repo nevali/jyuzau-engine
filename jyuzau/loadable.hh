@@ -16,6 +16,12 @@
 #ifndef JYUZAU_LOADABLE_HH_
 # define JYUZAU_LOADABLE_HH_           1
 
+# include <utility>	
+
+# include <OgreString.h>
+# include <OgreColourValue.h>
+# include <OgreVector3.h>
+
 # include <libxml/parser.h>
 
 namespace Jyuzau
@@ -86,6 +92,7 @@ namespace Jyuzau
 	
 		virtual Ogre::String name(void);
 		virtual LoadableObject *parent(void);
+		virtual bool complete(void);
 	protected:
 		Loadable *m_owner;
 		LoadableObject *m_parent, *m_first, *m_last, *m_prev, *m_next;
@@ -95,8 +102,10 @@ namespace Jyuzau
 		
 		virtual bool add(LoadableObject *child);
 		virtual void loaded(void);
-		virtual bool complete(void);
 		virtual bool addResources(Ogre::String group);
+		
+		virtual Ogre::ColourValue parseColourValue(AttrList &attrs);
+		virtual Ogre::Vector3 parseXYZ(AttrList &attrs);
 	};
 };
 

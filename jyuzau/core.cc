@@ -17,7 +17,7 @@
 # include "config.h"
 #endif
 
-#include "core.hh"
+#include "jyuzau/core.hh"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <macUtils.h>

@@ -16,7 +16,9 @@
 #ifndef JYUZAU_PROP_HH_
 # define JYUZAU_PROP_HH_               1
 
-# include "loadable.hh"
+# include <OgreVector3.h>
+
+# include "jyuzau/loadable.hh"
 
 namespace Jyuzau
 {

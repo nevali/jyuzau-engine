@@ -17,7 +17,10 @@
 # include "config.h"
 #endif
 
-#include "jyuzau.hh"
+#include <OgreLogManager.h>
+#include <OgreColourValue.h>
+
+#include "jyuzau/loadable.hh"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <macUtils.h>
@@ -96,7 +99,7 @@ Loadable::load(void)
 	}
 	if(!m_root)
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: No suitable root found in " + m_path);
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: no suitable root found in " + m_path);
 		return false;
 	}
 	if(!m_root->complete())
@@ -124,7 +127,7 @@ Loadable::loaded(void)
 bool
 Loadable::addResources(Ogre::String group)
 {
-	if(!m_root->addResources(group))
+	if(m_root && !m_root->addResources(group))
 	{
 		return false;
 	}
@@ -364,4 +367,60 @@ LoadableObject::addResources(Ogre::String group)
 	}
 	return true;
 }
+
+Ogre::ColourValue
+LoadableObject::parseColourValue(AttrList &attrs)
+{
+	double red = 0, green = 0, blue = 0, alpha = 1;
+	AttrListIterator it;
+	
+	for(it = m_attrs.begin(); it != m_attrs.end(); it++)
+	{
+		Attr p = *it;
+		
+		if(!p.first.compare("r"))
+		{
+			red = atof(p.second.c_str());
+		}
+		else if(!p.first.compare("g"))
+		{
+			green = atof(p.second.c_str());
+		}
+		else if(!p.first.compare("b"))
+		{
+			blue = atof(p.second.c_str());
+		}
+		else if(!p.first.compare("a"))
+		{
+			alpha = atof(p.second.c_str());
+		}
+	}
+	return Ogre::ColourValue(red, green, blue, alpha);
+}
+
+Ogre::Vector3
+LoadableObject::parseXYZ(AttrList &attrs)
+{
+	double x = 0, y = 0, z = 0;
+	AttrListIterator it;
+	
+	for(it = m_attrs.begin(); it != m_attrs.end(); it++)
+	{
+		Attr p = *it;
+		if(!p.first.compare("x"))
+		{
+			x = atof(p.second.c_str());
+		}
+		else if(!p.first.compare("y"))
+		{
+			y = atof(p.second.c_str());
+		}
+		else if(!p.first.compare("z"))
+		{
+			z = atof(p.second.c_str());
+		}
+	}
+	return Ogre::Vector3(x, y, z);
+}
+
 
