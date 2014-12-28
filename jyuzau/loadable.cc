@@ -53,6 +53,7 @@ Loadable::Loadable(Ogre::String name, Ogre::String kind, bool subdir)
 		m_container = base;
 		m_path = m_container + "/" + name + ".xml";
 	}
+	m_group = Ogre::String(m_kind + "::" + m_name);
 }
 
 Loadable::~Loadable()
@@ -95,7 +96,23 @@ Loadable::load(void)
 void
 Loadable::loaded(void)
 {
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Loaded " + m_name + "[" + m_kind + "] from " + m_path);
+	if(!addResources(m_group))
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to add resources from " + m_group);
+		m_load_status = false;
+		return;
+	}
+	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Loaded " + m_kind + "::" + m_name + " from " + m_path);
+}
+
+bool
+Loadable::addResources(Ogre::String group)
+{
+	if(!m_root->addResources(group))
+	{
+		return false;
+	}
+	return true;
 }
 
 LoadableObject *
@@ -293,3 +310,10 @@ LoadableObject::loaded()
 		}
 	}
 }
+
+bool
+LoadableObject::addResources(Ogre::String group)
+{
+	return true;
+}
+

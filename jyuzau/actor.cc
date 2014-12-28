@@ -21,6 +21,20 @@
 
 using namespace Jyuzau;
 
+Actor *
+Actor::create(Ogre::String name)
+{
+	Actor *p;
+	
+	p = new Actor(name);
+	if(!p->load())
+	{
+		delete p;
+		return NULL;
+	}
+	return p;
+}
+
 Actor::Actor(Ogre::String name):
 	Prop::Prop(name, "actor")
 {

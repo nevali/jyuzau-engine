@@ -43,6 +43,7 @@ namespace Jyuzau
 		virtual bool add(LoadableObject *child);
 		virtual void loaded(void);
 		virtual bool complete(void);
+		virtual bool addResources(Ogre::String group);
 	};
 	
 	class Loadable
@@ -60,7 +61,7 @@ namespace Jyuzau
 		static void sax_endElement(void *ctx, const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI);
 
 	protected:
-		Ogre::String m_name, m_kind, m_path, m_container;
+		Ogre::String m_name, m_kind, m_path, m_container, m_group;
 		int m_skip;
 		bool m_loaded, m_load_status;
 		LoadableObject *m_root, *m_cur;
@@ -68,6 +69,7 @@ namespace Jyuzau
 		virtual bool loadDocument(Ogre::String path);
 		
 		virtual void loaded(void);
+		virtual bool addResources(Ogre::String group);
 		
 		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
 		

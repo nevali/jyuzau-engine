@@ -21,13 +21,38 @@
 
 using namespace Jyuzau;
 
+Prop *
+Prop::create(Ogre::String name)
+{
+	Prop *p;
+	
+	p = new Prop(name);
+	if(!p->load())
+	{
+		delete p;
+		return NULL;
+	}
+	return p;
+}
+
 Prop::Prop(Ogre::String name, Ogre::String kind):
-	Loadable::Loadable(name, kind, true)
+	Loadable::Loadable(name, kind, true),
+	m_entity(NULL),
+	m_node(NULL)
 {
 }
 
 Prop::~Prop()
 {
+	if(m_node)
+	{
+		m_node->detachObject(m_entity);
+		delete m_node;
+	}
+	if(m_entity)
+	{
+		delete m_entity;
+	}
 }
 
 LoadableObject *
@@ -62,23 +87,58 @@ Prop::factory(Ogre::String name, AttrList &attrs)
 void
 Prop::loaded(void)
 {
+	Ogre::ResourceGroupManager *gm;
+	
+	gm = Ogre::ResourceGroupManager::getSingletonPtr();
+	gm->addResourceLocation(m_container, "FileSystem", m_group);
 	Loadable::loaded();
+	gm->initialiseResourceGroup(m_group);
 }
 
+Ogre::Entity *
+Prop::entity(Ogre::SceneManager *scene)
+{
+	if(m_entity)
+	{
+		return m_entity;
+	}
+	if(!m_loaded || !m_load_status)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a prop which has not been properly loaded");
+	}
+	m_entity = scene->createEntity(m_name, dynamic_cast<LoadableProp *>(m_root)->m_mesh->m_source, m_group);
+	return m_entity;
+}
 
 bool
-Prop::attach(void)
+Prop::attach(Ogre::SceneManager *scene)
 {
-	return true;
+	return attach(scene->getRootSceneNode());
 }
 
 bool
-Prop::detach(void)
+Prop::attach(Ogre::SceneNode *node)
 {
+	Ogre::Entity *ent;
+	Ogre::SceneManager *manager = node->getCreator();
+	
+	if(m_node)
+	{
+		return m_node;
+	}
+	ent = entity(manager);
+	if(!ent)
+	{
+		return false;
+	}
+	m_node = node->createChildSceneNode(m_group);
+	if(!m_node)
+	{
+		return false;
+	}
+	m_node->attachObject(ent);
 	return true;
 }
-
-
 
 
 LoadableProp::LoadableProp(Ogre::String name, AttrList &attrs):
@@ -118,6 +178,14 @@ LoadableProp::complete()
 	return LoadableObject::complete();
 }
 
+bool
+LoadableProp::addResources(Ogre::String group)
+{
+	m_mesh->addResources(group);
+	m_material->addResources(group);
+	return true;
+}
+
 
 
 
@@ -144,6 +212,12 @@ LoadableMesh::complete(void)
 	return m_source.length();
 }
 
+bool
+LoadableMesh::addResources(Ogre::String group)
+{
+	Ogre::ResourceGroupManager::getSingleton().declareResource(m_source, "Mesh", group);
+	return true;
+}
 
 
 
@@ -168,4 +242,11 @@ bool
 LoadableMaterial::complete(void)
 {
 	return m_source.length();
+}
+
+bool
+LoadableMaterial::addResources(Ogre::String group)
+{
+	Ogre::ResourceGroupManager::getSingleton().declareResource(m_source, "Material", group);
+	return true;
 }

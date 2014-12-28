@@ -23,21 +23,27 @@ namespace Jyuzau
 	class LoadableMesh: public LoadableObject
 	{
 		friend class Prop;
+		friend class LoadableProp;
 	public:
 		LoadableMesh(Ogre::String name, AttrList &attrs);
 		virtual bool complete(void);
 	protected:
 		Ogre::String m_source;
+
+		virtual bool addResources(Ogre::String group);
 	};
 
 	class LoadableMaterial: public LoadableObject
 	{
 		friend class Prop;
+		friend class LoadableProp;
 	public:
 		LoadableMaterial(Ogre::String name, AttrList &attrs);
 		virtual bool complete(void);
 	protected:
 		Ogre::String m_source;
+
+		virtual bool addResources(Ogre::String group);
 	};
 
 	class LoadableProp: public LoadableObject
@@ -50,20 +56,28 @@ namespace Jyuzau
 	protected:
 		LoadableMesh *m_mesh;
 		LoadableMaterial *m_material;
+
+		virtual bool addResources(Ogre::String group);
 	};
 	
 	class Prop: public Loadable
 	{
 	public:
+		static Prop *create(Ogre::String name);
+		
 		Prop(Ogre::String name, Ogre::String kind = "prop");
 		virtual ~Prop();
 		
-		virtual void loaded(void);
-		
-		bool attach(void);
-		bool detach(void);
+		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager);
+		virtual bool attach(Ogre::SceneManager *scene);
+		virtual bool attach(Ogre::SceneNode *node);
 	protected:
+		bool m_attached;
+		Ogre::Entity *m_entity;
+		Ogre::SceneNode *m_node;
+		
 		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
+		virtual void loaded(void);
 	};
 };
 

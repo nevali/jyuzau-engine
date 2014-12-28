@@ -19,6 +19,10 @@
 # include <OGRE/OgrePlatform.h>
 
 # include "jyuzau/core.hh"
+# include "jyuzau/loadable.hh"
+# include "jyuzau/prop.hh"
+# include "jyuzau/actor.hh"
+# include "jyuzau/scene.hh"
 
 # ifdef __OBJC__
 #  include "jyuzau/delegate.hh"

@@ -24,6 +24,8 @@ namespace Jyuzau
 	class Actor: public Prop
 	{
 	public:
+		static Actor *create(Ogre::String name);
+		
 		Actor(Ogre::String name);
 		virtual ~Actor();
 	};
