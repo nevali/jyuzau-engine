@@ -101,8 +101,6 @@ Scene::rootNode(void)
 LoadableObject *
 Scene::factory(Ogre::String name, AttrList &attrs)
 {
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Scene::factory(" + name + ")");
-	
 	if(!m_root)
 	{
 		if(!name.compare(m_kind))
@@ -160,7 +158,6 @@ LoadableSceneProp::LoadableSceneProp(Loadable *owner, Ogre::String name, AttrLis
 	m_class(""),
 	m_pos()
 {
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: loading a prop");
 	AttrListIterator it;
 	double x = 0, y = 0, z = 0;
 	
@@ -168,7 +165,6 @@ LoadableSceneProp::LoadableSceneProp(Loadable *owner, Ogre::String name, AttrLis
 	{
 		Attr p = *it;
 		
-		Ogre::LogManager::getSingletonPtr()->logMessage("prop attr: [" + p.first + "]");
 		if(!p.first.compare("id"))
 		{
 			m_id = p.second;
@@ -235,7 +231,6 @@ LoadableSceneProp::pos(void)
 LoadableSceneActor::LoadableSceneActor(Loadable *owner, Ogre::String name, AttrList &attrs):
 	LoadableSceneProp(owner, name, attrs)
 {
-	Ogre::LogManager::getSingletonPtr()->logMessage("++ Jyuzau: loading an actor");
 }
 
 bool
@@ -243,12 +238,10 @@ LoadableSceneActor::addResources(Ogre::String group)
 {
 	Prop *prop;
 	
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: adding scene actor resources");
 	prop = Actor::create(m_class);
 	if(!prop)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene actor instance");
-		
 		return false;
 	}
 	(dynamic_cast<Scene *> (m_owner))->addProp(this, prop);

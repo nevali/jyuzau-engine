@@ -21,6 +21,7 @@
 
 using namespace Jyuzau;
 
+/* Load a prop, optionally attaching it to a scene */
 Prop *
 Prop::create(Ogre::String name, Scene *scene, Ogre::Vector3 pos)
 {
@@ -63,6 +64,75 @@ Prop::~Prop()
 	}
 }
 
+/* Attach the prop to a scene, creating the entity if necessary. Note that
+ * the name supplied must be unique in the scene (and if the entity is being
+ * created, a unique entity name, too). The position defaults to [0, 0, 0]
+ * if unspecified, and the name defaults to the group name (class::name).
+ */
+bool
+Prop::attach(Scene *scene, Ogre::String name, Ogre::Vector3 pos)
+{
+	return attach(scene->rootNode(), name, pos);
+}
+
+bool
+Prop::attach(Ogre::SceneManager *scene, Ogre::String name, Ogre::Vector3 pos)
+{
+	return attach(scene->getRootSceneNode(), name, pos);
+}
+
+bool
+Prop::attach(Ogre::SceneNode *node, Ogre::String name, Ogre::Vector3 pos)
+{
+	Ogre::Entity *ent;
+	Ogre::SceneManager *manager = node->getCreator();
+	
+	if(!name.length())
+	{
+		name = m_group;
+	}
+	if(m_node)
+	{
+		return m_node;
+	}
+	ent = entity(manager, name);
+	if(!ent)
+	{
+		return false;
+	}
+	m_node = node->createChildSceneNode(name, pos);
+	if(!m_node)
+	{
+		return false;
+	}
+	m_node->attachObject(ent);
+	return true;
+}
+
+/* Obtain an Ogre::Entity for this prop. If unspecified, the name will default
+ * to the group name (class::name) of the prop. When invoked by attach(),
+ * the node name supplied will be re-used as the entity name here unless the
+ * the entity has already been created.
+ */
+Ogre::Entity *
+Prop::entity(Ogre::SceneManager *scene, Ogre::String name)
+{
+	if(m_entity)
+	{
+		return m_entity;
+	}
+	if(!name.length())
+	{
+		name = m_group;
+	}
+	if(!m_loaded || !m_load_status)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a prop which has not been properly loaded");
+	}
+	m_entity = scene->createEntity(name, dynamic_cast<LoadableProp *>(m_root)->m_mesh->m_source, m_group);
+	return m_entity;
+}
+
 LoadableObject *
 Prop::factory(Ogre::String name, AttrList &attrs)
 {
@@ -103,61 +173,10 @@ Prop::loaded(void)
 	gm->initialiseResourceGroup(m_group);
 }
 
-Ogre::Entity *
-Prop::entity(Ogre::SceneManager *scene)
-{
-	if(m_entity)
-	{
-		return m_entity;
-	}
-	if(!m_loaded || !m_load_status)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a prop which has not been properly loaded");
-	}
-	m_entity = scene->createEntity(m_name, dynamic_cast<LoadableProp *>(m_root)->m_mesh->m_source, m_group);
-	return m_entity;
-}
 
-bool
-Prop::attach(Scene *scene, Ogre::String name, Ogre::Vector3 pos)
-{
-	return attach(scene->rootNode(), name, pos);
-}
 
-bool
-Prop::attach(Ogre::SceneManager *scene, Ogre::String name, Ogre::Vector3 pos)
-{
-	return attach(scene->getRootSceneNode(), name, pos);
-}
 
-bool
-Prop::attach(Ogre::SceneNode *node, Ogre::String name, Ogre::Vector3 pos)
-{
-	Ogre::Entity *ent;
-	Ogre::SceneManager *manager = node->getCreator();
-	
-	if(!name.length())
-	{
-		name = m_group;
-	}
-	if(m_node)
-	{
-		return m_node;
-	}
-	ent = entity(manager);
-	if(!ent)
-	{
-		return false;
-	}
-	m_node = node->createChildSceneNode(name, pos);
-	if(!m_node)
-	{
-		return false;
-	}
-	m_node->attachObject(ent);
-	return true;
-}
-
+/* A LoadableProp object encapsulates the <prop> root XML element */
 
 LoadableProp::LoadableProp(Loadable *owner, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, name, attrs),
@@ -199,6 +218,10 @@ LoadableProp::complete()
 
 
 
+/* A LoadableMesh object encapsulates a <mesh> within a <prop>.
+ * <mesh src="foo.mesh" />
+ */
+
 LoadableMesh::LoadableMesh(Loadable *owner, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, name, attrs),
 	m_source("")
@@ -230,6 +253,11 @@ LoadableMesh::addResources(Ogre::String group)
 }
 
 
+
+
+/* A LoadableMaterial object encapsulates a <material> within a <prop>.
+ * <material src="foo.material" />
+ */
 
 LoadableMaterial::LoadableMaterial(Loadable *owner, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, name, attrs),

@@ -25,6 +25,14 @@
 
 using namespace Jyuzau;
 
+/* The Loadable class represents different kinds of assets which can be
+ * loaded from disk: scenes, props, actors, etc.
+ *
+ * It manages XML parsing, creation of the appropriate LoadableObject
+ * descendant instances, and provides the hooks for interfacing with
+ * OGRE's resource manager.
+ */
+
 Loadable::Loadable(Ogre::String name, Ogre::String kind, bool subdir):
 	m_name(name),
 	m_kind(kind),
@@ -186,7 +194,6 @@ Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xm
 	size_t i, c;
 	AttrList attrs;
 	
-	Ogre::LogManager::getSingletonPtr()->logMessage("<" + name + ">");
 	if(m_skip)
 	{
 		/* We're already skipping the parent of this element, so ensure we
@@ -209,7 +216,6 @@ Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xm
 	if(!obj)
 	{
 		m_skip++;
-		Ogre::LogManager::getSingletonPtr()->logMessage("+++ m_skip is now " + std::to_string(m_skip));
 		return;
 	}
 	if(m_cur)
@@ -230,13 +236,9 @@ Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xm
 void
 Loadable::endElement(const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI)
 {
-	Ogre::String name((const char *) localname);
-	
-	Ogre::LogManager::getSingletonPtr()->logMessage("</" + name + ">");
 	if(m_skip)
 	{
 		m_skip--;
-		Ogre::LogManager::getSingletonPtr()->logMessage("--- m_skip is now " + std::to_string(m_skip));
 	}
 	else if(m_cur)
 	{
@@ -268,6 +270,7 @@ Loadable::sax_endElement(void *ctx, const xmlChar *localname, const xmlChar *pre
  * Specialisations of LoadableObject deal with different kinds of element
  * in different contexts.
  */
+
 LoadableObject::LoadableObject(Loadable *owner, Ogre::String name, AttrList &attrs):
 	m_owner(owner),
 	m_name(name),

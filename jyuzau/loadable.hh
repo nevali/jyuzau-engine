@@ -26,6 +26,13 @@ namespace Jyuzau
 	
 	class LoadableObject;
 	
+	/* The Loadable class represents different kinds of assets which can be
+	 * loaded from disk: scenes, props, actors, etc.
+	 *
+	 * It manages XML parsing, creation of the appropriate LoadableObject
+	 * descendant instances, and provides the hooks for interfacing with
+	 * OGRE's resource manager.
+	 */
 	class Loadable
 	{
 	public:
@@ -63,6 +70,12 @@ namespace Jyuzau
 		virtual void endElement(const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI);
 	};
 	
+	/* LoadableObject is the base class used to encapsulate XML elements as
+	 * they're loaded from asset descriptions.
+	 *
+	 * Specialisations of LoadableObject deal with different kinds of element
+	 * in different contexts.
+	 */
 	class LoadableObject
 	{
 		friend class Loadable;

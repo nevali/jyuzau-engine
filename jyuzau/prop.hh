@@ -34,7 +34,7 @@ namespace Jyuzau
 		Prop(Ogre::String name, Ogre::String kind = "prop");
 		virtual ~Prop();
 	
-		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager);
+		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager, Ogre::String name = "");
 	
 		virtual bool attach(Scene *scene, Ogre::String name = "", Ogre::Vector3 pos = Ogre::Vector3::ZERO);
 		virtual bool attach(Ogre::SceneManager *scene, Ogre::String name, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
