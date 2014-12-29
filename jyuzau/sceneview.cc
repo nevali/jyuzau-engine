@@ -53,28 +53,15 @@ SceneViewState::~SceneViewState()
 }
 
 void
-SceneViewState::activated(void)
+SceneViewState::load()
 {
-	Ogre::Camera *camera;
-	
-	m_scene = Scene::create(m_name, Core::getInstance()->sceneManager());
-	camera = Core::getInstance()->camera();
-	m_cameraMan = new OgreBites::SdkCameraMan(camera);
-}
-
-void
-SceneViewState::deactivated(void)
-{
-	if(m_cameraMan)
+	if(m_loaded)
 	{
-		delete m_cameraMan;
-		m_cameraMan = NULL;
+		return;
 	}
-	if(m_scene)
-	{
-		delete m_scene;
-		m_scene = NULL;
-	}
+	State::load();
+	m_scene = Scene::create(m_name, m_sceneManager);
+	m_cameraMan = new OgreBites::SdkCameraMan(m_camera);
 }
 
 bool

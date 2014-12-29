@@ -39,8 +39,8 @@ namespace Jyuzau
 		Scene *m_scene;
 		OgreBites::SdkCameraMan* m_cameraMan;
 		
-		virtual void activated(void);
-		virtual void deactivated(void);
+		virtual void load(void);
+
 		virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 		virtual bool keyPressed(const OIS::KeyEvent &arg);
 		virtual bool keyReleased(const OIS::KeyEvent &arg);

@@ -17,6 +17,7 @@
 # define JYUZAU_STATE_HH_              1
 
 # include <OGRE/OgreFrameListener.h>
+# include <OGRE/OgreSceneManager.h>
 
 # include <OIS/OISEvents.h>
 # include <OIS/OISKeyboard.h>
@@ -37,9 +38,19 @@ namespace Jyuzau
 	public:
 		State();
 		virtual ~State();
+		
+		virtual void preload(void);
+		
+		virtual Ogre::SceneManager *sceneManager(void);
+		virtual Ogre::Camera *camera(void);
 	protected:
 		State *m_prev, *m_next;
+		bool m_loaded;
+		Ogre::SceneManager *m_sceneManager;
+		Ogre::Camera *m_camera;
+		Ogre::Viewport *m_viewport;
 		
+		virtual void load(void);
 		virtual void activated(void);
 		virtual void deactivated(void);
 		virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);

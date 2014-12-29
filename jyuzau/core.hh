@@ -30,13 +30,13 @@
 # include <OIS/OISKeyboard.h>
 # include <OIS/OISMouse.h>
 
-# include "scene.hh"
-
 namespace Jyuzau
 {
 	class State;
+	class Scene;
+	class Player;
 
-	class Core : public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener
+	class Core: public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener
 	{
 		friend class State;
 	public:
@@ -53,26 +53,50 @@ namespace Jyuzau
 		virtual bool cleanup();
 		virtual bool render(Ogre::Real interval);
 		
+		/* Properties */
+		virtual Ogre::Root *root(void);
+		virtual Ogre::RenderWindow *window(void);
+		virtual Ogre::OverlaySystem *overlays(void);
+		virtual State *state(void);
+		
 		virtual Ogre::Camera *camera(void);
 		virtual Ogre::SceneManager *sceneManager(void);
 		
+		/* State management */
 		virtual void pushState(State *state);
 		virtual void popState(void);
 		virtual void setState(State *state);
 		virtual void removeState(State *state);
 		
+		/* Trigger application termination */
 		virtual void shutdown();
 	protected:
-		virtual void createInitialState(void);
-		virtual void chooseSceneManager(void);
-		virtual void createCamera(void);
-		virtual void createFrameListener(void);
-		virtual void createViewports(void);
-		virtual void setupResources(void);
+		Scene *m_activeScene;
+		State *m_firstState, *m_lastState;
+		Ogre::Root *m_root;
+		Ogre::RenderWindow *m_window;
+		Ogre::OverlaySystem *m_overlaySystem;
+		Ogre::String m_resourcePath;
+		Ogre::String m_pluginsCfg;
+		bool m_cursorWasVisible;
+		bool m_shutdown;
+		OIS::InputManager *m_inputManager;
+		OIS::Mouse *m_mouse;
+		OIS::Keyboard *m_keyboard;
+# ifdef OGRE_STATIC_LIB
+		Ogre::StaticPluginLoader m_staticPluginLoader;
+# endif
+		
+		virtual void activateState(State *state);
+		virtual void deactivateState(State *state);
+		
+		virtual void createResourceGroups(void);
 		virtual void createResourceListener(void);
-		virtual void loadResources(void);
-		virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
+		virtual void createInitialState(void);
+		virtual void createFrameListener(void);
 
+		/* Event listeners */
+		virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 		virtual bool keyPressed(const OIS::KeyEvent &arg);
 		virtual bool keyReleased(const OIS::KeyEvent &arg);
 		virtual bool mouseMoved(const OIS::MouseEvent &arg);
@@ -81,32 +105,6 @@ namespace Jyuzau
 		virtual void windowResized(Ogre::RenderWindow* rw);
 		virtual void windowClosed(Ogre::RenderWindow* rw);
 
-		Scene *activeScene;
-
-		Ogre::Root*                 mRoot;
-		Ogre::Camera*               mCamera;
-		Ogre::SceneManager*         mSceneMgr;
-		Ogre::RenderWindow*         mWindow;
-		Ogre::String                mPluginsCfg;
-
-		Ogre::OverlaySystem*        mOverlaySystem;
-
-		bool                        mCursorWasVisible;	// Was cursor visible before dialog appeared?
-		bool                        mShutDown;
-
-		//OIS Input devices
-		OIS::InputManager*          mInputManager;
-		OIS::Mouse*                 mMouse;
-		OIS::Keyboard*              mKeyboard;
-
-		// Added for Mac compatibility
-		Ogre::String                 m_ResourcePath;
-
-		#ifdef OGRE_STATIC_LIB
-		Ogre::StaticPluginLoader m_StaticPluginLoader;
-		#endif
-		
-		State *m_firstState, *m_lastState;
 	};
 
 };

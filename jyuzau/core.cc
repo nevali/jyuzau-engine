@@ -52,40 +52,6 @@ using namespace Jyuzau;
 
 static Core *singleton = NULL;
 
-Core::Core(void)
-	: mRoot(0),
-	mCamera(0),
-	mSceneMgr(0),
-	mWindow(0),
-	mPluginsCfg(Ogre::StringUtil::BLANK),
-	mCursorWasVisible(false),
-	mShutDown(true),
-	mInputManager(0),
-	mMouse(0),
-	mKeyboard(0),
-	mOverlaySystem(0),
-	activeScene(NULL),
-	m_firstState(NULL),
-	m_lastState(NULL)
-{
-	singleton = this;
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-	m_ResourcePath = Ogre::macBundlePath() + "/Contents/Resources/";
-#else
-	m_ResourcePath = "";
-#endif
-}
-
-Core::~Core(void)
-{
-	singleton = NULL;
-
-	if (mOverlaySystem) delete mOverlaySystem;
-	Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, this);
-	windowClosed(mWindow);
-	delete mRoot;
-}
-
 /* Obtain the singleton instance of Jyuzau::Core, if one exists */
 Core *
 Core::getInstance(void)
@@ -93,71 +59,36 @@ Core::getInstance(void)
 	return singleton;
 }
 
-/* Initialise the engine, create the initial scene */
-bool
-Core::init(void)
+Core::Core(void)
+	: m_root(NULL),
+	m_window(NULL),
+	m_pluginsCfg(Ogre::StringUtil::BLANK),
+	m_cursorWasVisible(false),
+	m_shutdown(true),
+	m_inputManager(NULL),
+	m_mouse(NULL),
+	m_keyboard(NULL),
+	m_overlaySystem(NULL),
+	m_activeScene(NULL),
+	m_firstState(NULL),
+	m_lastState(NULL)
 {
-#ifdef _DEBUG
-#ifndef OGRE_STATIC_LIB
-	mPluginsCfg = m_ResourcePath + "plugins_d.cfg";
+	singleton = this;
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+	m_resourcePath = Ogre::macBundlePath() + "/Contents/Resources/";
 #else
-	mPluginsCfg = "plugins_d.cfg";
+	m_resourcePath = "";
 #endif
-#else
-#ifndef OGRE_STATIC_LIB
-	mPluginsCfg = m_ResourcePath + "plugins.cfg";
-#else
-	mPluginsCfg = "plugins.cfg";
-#endif
-#endif
-	
-	mRoot = new Ogre::Root(mPluginsCfg);
-
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: " + Ogre::String(PACKAGE_STRING));
-
-	setupResources();
-
-	if(!mRoot->showConfigDialog())
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: aborted at configuration dialog");
-		return false;
-	}
-	
-	mWindow = mRoot->initialise(true, "Jyuzau");
-	
-	chooseSceneManager();
-	createCamera();
-	createViewports();
-	createResourceListener();
-	loadResources();
-
-	/* Create the initial state */
-	createInitialState();
-	if(!m_firstState)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Core has no initial state; aborting");
-		return false;
-	}
-	createFrameListener();
-	mShutDown = false;
-	return true;
-};
-
-void
-Core::shutdown()
-{
-	mShutDown = true;
 }
 
-bool
-Core::cleanup()
+Core::~Core(void)
 {
-	if(m_firstState)
-	{
-		m_firstState->m_next = NULL;
-		popState();
-	}
-	return true;
+	singleton = NULL;
+
+	if (m_overlaySystem) delete m_overlaySystem;
+	Ogre::WindowEventUtilities::removeWindowEventListener(m_window, this);
+	windowClosed(m_window);
+	delete m_root;
 }
 
 /* Enter the rendering run-loop on non-Apple platforms */
@@ -171,35 +102,135 @@ Core::go()
 	{
 		return false;
 	}
-	mRoot->startRendering();
+	m_root->startRendering();
 	return cleanup();
 #endif
 }
 
-/* Render a single frame */
-bool
-Core::render(Ogre::Real interval)
+Ogre::Root *
+Core::root(void)
 {
-	mRoot->renderOneFrame(interval);
-	if(mShutDown)
-	{
-		return false;
-	}
-	return true;
+	return m_root;
+}
+
+Ogre::RenderWindow *
+Core::window(void)
+{
+	return m_window;
+}
+
+Ogre::OverlaySystem *
+Core::overlays(void)
+{
+	return m_overlaySystem;
+}
+
+State *
+Core::state(void)
+{
+	return m_firstState;
 }
 
 /* Return a pointer to the active camera */
 Ogre::Camera *
 Core::camera(void)
 {
-	return mCamera;
+	if(m_firstState)
+	{
+		return m_firstState->camera();
+	}
+	return NULL;
 }
 
 /* Return a pointer to the scene manager */
 Ogre::SceneManager *
 Core::sceneManager(void)
 {
-	return mSceneMgr;
+	if(m_firstState)
+	{
+		return m_firstState->sceneManager();
+	}
+	return NULL;
+}
+
+/* Trigger application termination */
+void
+Core::shutdown()
+{
+	m_shutdown = true;
+}
+
+
+/* Initialise the engine, create the initial scene */
+bool
+Core::init(void)
+{
+#ifdef _DEBUG
+#ifndef OGRE_STATIC_LIB
+	m_pluginsCfg = m_resourcePath + "plugins_d.cfg";
+#else
+	m_pluginsCfg = "plugins_d.cfg";
+#endif
+#else
+#ifndef OGRE_STATIC_LIB
+	m_pluginsCfg = m_resourcePath + "plugins.cfg";
+#else
+	m_pluginsCfg = "plugins.cfg";
+#endif
+#endif
+	
+	m_root = new Ogre::Root(m_pluginsCfg);
+
+	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: " + Ogre::String(PACKAGE_STRING));
+
+	createResourceGroups();
+
+	if(!m_root->showConfigDialog())
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: aborted at configuration dialog");
+		return false;
+	}
+	
+	m_window = m_root->initialise(true, "Jyuzau");
+	m_overlaySystem = new Ogre::OverlaySystem();
+
+	createResourceListener();
+
+	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+
+	/* Create the initial State objects */
+	createInitialState();
+	if(!m_firstState)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Core has no initial state; aborting");
+		return false;
+	}
+	createFrameListener();
+	m_shutdown = false;
+	return true;
+};
+
+bool
+Core::cleanup()
+{
+	if(m_firstState)
+	{
+		m_firstState->m_next = NULL;
+		popState();
+	}
+	return true;
+}
+
+/* Render a single frame */
+bool
+Core::render(Ogre::Real interval)
+{
+	m_root->renderOneFrame(interval);
+	if(m_shutdown)
+	{
+		return false;
+	}
+	return true;
 }
 
 /* Push a new state onto the stack */
@@ -216,9 +247,9 @@ Core::pushState(State *state)
 	if(state->m_next)
 	{
 		state->m_next->m_prev = state;
-		state->m_next->deactivated();
+		deactivateState(state->m_next);
 	}
-	state->activated();
+	activateState(state);
 }
 
 /* Pop the current state off the stack; if it was the last, trigger shutdown */
@@ -229,7 +260,7 @@ Core::popState()
 	{
 		return;
 	}
-	m_firstState->deactivated();
+	deactivateState(m_firstState);
 	if(m_firstState->m_next)
 	{
 		m_firstState = m_firstState->m_next;
@@ -251,7 +282,7 @@ Core::setState(State *state)
 	state->m_prev = NULL;
 	if(m_firstState)
 	{
-		m_firstState->deactivated();
+		deactivateState(m_firstState);
 		state->m_next = m_firstState->m_next;
 		m_firstState->m_next = NULL;
 	}
@@ -261,7 +292,7 @@ Core::setState(State *state)
 		m_lastState = state;
 	}
 	m_firstState = state;
-	state->activated();
+	activateState(m_firstState);
 }
 
 /* Remove a state from the stack, if it's present; invoked by State::~State(),
@@ -277,7 +308,7 @@ Core::removeState(State *state)
 	if(state == m_firstState)
 	{
 		m_firstState = state->m_next;
-		m_firstState->activated();
+		activateState(m_firstState);
 	}
 	if(!m_firstState)
 	{
@@ -286,28 +317,36 @@ Core::removeState(State *state)
 }
 
 void
-Core::chooseSceneManager(void)
+Core::activateState(State *state)
 {
-	// Get the SceneManager, in this case a generic one
-	mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
-
-	// Initialize the OverlaySystem (changed for Ogre 1.9)
-	mOverlaySystem = new Ogre::OverlaySystem();
-	mSceneMgr->addRenderQueueListener(mOverlaySystem);
+	state->activated();
+	state->sceneManager()->addRenderQueueListener(m_overlaySystem);
 }
 
+void
+Core::deactivateState(State *state)
+{
+	state->sceneManager()->removeRenderQueueListener(m_overlaySystem);
+	state->deactivated();
+}
+
+/* Initialisation methods */
 
 void
-Core::createCamera(void)
+Core::createResourceGroups(void)
 {
-	// Create the camera
-	mCamera = mSceneMgr->createCamera("PlayerCam");
+	/* Can be overidden to initialise any resource groups */
+}
 
-	// Position it at 500 in Z direction
-	mCamera->setPosition(Ogre::Vector3(0,0,80));
-	// Look back along -Z
-	mCamera->lookAt(Ogre::Vector3(0,0,-300));
-	mCamera->setNearClipDistance(5);
+void
+Core::createResourceListener(void)
+{
+}
+
+void
+Core::createInitialState()
+{
+	/* To be overridden by subclasses in order to push a new state */
 }
 
 void
@@ -317,72 +356,42 @@ Core::createFrameListener(void)
 	size_t windowHnd = 0;
 	std::ostringstream windowHndStr;
 
-	mWindow->getCustomAttribute("WINDOW", &windowHnd);
+	m_window->getCustomAttribute("WINDOW", &windowHnd);
 	windowHndStr << windowHnd;
 
 	pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
 
-	mInputManager = OIS::InputManager::createInputSystem(pl);
+	m_inputManager = OIS::InputManager::createInputSystem(pl);
 
-	mKeyboard = static_cast<OIS::Keyboard*>(mInputManager->createInputObject(OIS::OISKeyboard, true));
-	mMouse = static_cast<OIS::Mouse*>(mInputManager->createInputObject(OIS::OISMouse, true));
+	m_keyboard = static_cast<OIS::Keyboard*>(m_inputManager->createInputObject(OIS::OISKeyboard, true));
+	m_mouse = static_cast<OIS::Mouse*>(m_inputManager->createInputObject(OIS::OISMouse, true));
 
-	mMouse->setEventCallback(this);
-	mKeyboard->setEventCallback(this);
+	m_mouse->setEventCallback(this);
+	m_keyboard->setEventCallback(this);
 
-	// Set initial mouse clipping size
-	windowResized(mWindow);
+	windowResized(m_window);
 
-	// Register as a Window listener
-	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, this);
+	Ogre::WindowEventUtilities::addWindowEventListener(m_window, this);
 
-	mRoot->addFrameListener(this);
+	m_root->addFrameListener(this);
 }
 
-void
-Core::createViewports(void)
-{
-	// Create one viewport, entire window
-	Ogre::Viewport* vp = mWindow->addViewport(mCamera);
-	vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
-
-	// Alter the camera aspect ratio to match the viewport
-	mCamera->setAspectRatio(Ogre::Real(vp->getActualWidth()) / Ogre::Real(vp->getActualHeight()));
-}
-
-void
-Core::setupResources(void)
-{
-}
-
-void
-Core::createResourceListener(void)
-{
-}
-
-void
-Core::loadResources(void)
-{
-	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-}
+/* Event listeners */
 
 bool
 Core::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	if(mWindow->isClosed())
+	if(m_window->isClosed())
 	{
-		mShutDown = true;
+		m_shutdown = true;
 		return false;
 	}
-
-	if(mShutDown)
+	if(m_shutdown)
 	{
 		return false;
 	}
-	
-	// Need to capture/update each device
-	mKeyboard->capture();
-	mMouse->capture();
+	m_keyboard->capture();
+	m_mouse->capture();
 
 	if(!m_firstState)
 	{
@@ -446,9 +455,10 @@ Core::windowResized(Ogre::RenderWindow* rw)
 {
 	unsigned int width, height, depth;
 	int left, top;
+	
 	rw->getMetrics(width, height, depth, left, top);
 
-	const OIS::MouseState &ms = mMouse->getMouseState();
+	const OIS::MouseState &ms = m_mouse->getMouseState();
 	ms.width = width;
 	ms.height = height;
 }
@@ -456,21 +466,15 @@ Core::windowResized(Ogre::RenderWindow* rw)
 void
 Core::windowClosed(Ogre::RenderWindow* rw)
 {
-	if(rw == mWindow)
+	if(rw == m_window)
 	{
-		if(mInputManager)
+		if(m_inputManager)
 		{
-			mInputManager->destroyInputObject(mMouse);
-			mInputManager->destroyInputObject(mKeyboard);
+			m_inputManager->destroyInputObject(m_mouse);
+			m_inputManager->destroyInputObject(m_keyboard);
 
-			OIS::InputManager::destroyInputSystem(mInputManager);
-			mInputManager = NULL;
+			OIS::InputManager::destroyInputSystem(m_inputManager);
+			m_inputManager = NULL;
 		}
 	}
-}
-
-void
-Core::createInitialState()
-{
-	/* To be overridden by subclasses */
 }

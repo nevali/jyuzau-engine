@@ -25,23 +25,90 @@
 using namespace Jyuzau;
 
 State::State():
-	m_prev(NULL), m_next(NULL)
+	m_prev(NULL), m_next(NULL), m_loaded(false),
+	m_sceneManager(NULL),
+	m_camera(NULL),
+	m_viewport(NULL)
 {
 }
 
 State::~State()
 {
 	Core::getInstance()->removeState(this);
+	if(m_viewport)
+	{
+		delete m_viewport;
+	}
+	if(m_camera)
+	{
+		delete m_camera;
+	}
+	if(m_sceneManager)
+	{
+		delete m_sceneManager;
+	}
+}
+
+Ogre::SceneManager *
+State::sceneManager(void)
+{
+	return m_sceneManager;
+}
+
+Ogre::Camera *
+State::camera(void)
+{
+	return m_camera;
+}
+
+
+void
+State::preload(void)
+{
+	if(!m_loaded)
+	{
+		load();
+	}
+}
+
+void
+State::load(void)
+{
+	m_sceneManager = Ogre::Root::getSingletonPtr()->createSceneManager(Ogre::ST_GENERIC);
+	m_camera = m_sceneManager->createCamera("PlayerCam");
+
+	// Position it at 500 in Z direction
+	m_camera->setPosition(Ogre::Vector3(0,0,80));
+	// Look back along -Z
+	m_camera->lookAt(Ogre::Vector3(0,0,-300));
+	m_camera->setNearClipDistance(5);
+
+	m_loaded = true;
 }
 
 void
 State::activated(void)
 {
+	Ogre::RenderWindow *window;
+	
+	if(!m_loaded)
+	{
+		load();
+	}
+	window = Core::getInstance()->window();
+	m_viewport = window->addViewport(m_camera);
+	m_viewport->setBackgroundColour(Ogre::ColourValue(0,0,0));
+	m_camera->setAspectRatio(Ogre::Real(m_viewport->getActualWidth()) / Ogre::Real(m_viewport->getActualHeight()));
 }
 
 void
 State::deactivated(void)
 {
+	if(m_viewport)
+	{
+		delete m_viewport;
+		m_viewport = NULL;
+	}
 }
 
 bool
