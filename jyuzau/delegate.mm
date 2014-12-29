@@ -70,14 +70,22 @@
 	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	mLastFrameTime = 1;
 	mTimer = nil;
+	bool r;
 	
 	try
 	{
-		mApp->init();
+		r = mApp->init();
 	}
 	catch(Ogre::Exception& e)
 	{
-		std::cerr << "An exception has occurred: " << e.getFullDescription().c_str() << std::endl;
+		NSLog(@"Jyuzau: Core initialisation threw exception: %s", e.getFullDescription().c_str());
+		r = false;
+	}
+	if(!r)
+	{
+		NSLog(@"Jyuzau: Core initialisation failed, terminating application");
+		[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
+		return;
 	}
 	mTimer = [NSTimer scheduledTimerWithTimeInterval:(NSTimeInterval)(1.0f / 60.0f) * mLastFrameTime
 		target:self
@@ -91,6 +99,7 @@
 {
 	if(!mApp->render((Ogre::Real) [mTimer timeInterval]))
 	{
+		NSLog(@"Jyuzau: Core has shut down, terminating application");
 		[mTimer invalidate];
 		mTimer = nil;
 		[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];

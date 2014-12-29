@@ -32,7 +32,6 @@
 #  include <OIS/OISMouse.h>
 
 #  include <OGRE/SdkTrays.h>
-#  include <OGRE/SdkCameraMan.h>
 #else
 #  include <OISEvents.h>
 #  include <OISInputManager.h>
@@ -40,7 +39,6 @@
 #  include <OISMouse.h>
 
 #  include <SdkTrays.h>
-#  include <SdkCameraMan.h>
 #endif
 
 #ifdef OGRE_STATIC_LIB
@@ -67,26 +65,39 @@
 
 namespace Jyuzau
 {
+	class State;
 
 	class Core : public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener, OgreBites::SdkTrayListener
 	{
+		friend class State;
 	public:
-		Core *getInstance(void);
+		static Core *getInstance(void);
 		
 		Core(void);
 		virtual ~Core(void);
 
+		/* Single-method run-loop */
+		virtual bool go();
+
+		/* Alternative interface to the run-loop */
 		virtual bool init();
 		virtual bool cleanup();
-		virtual bool go();
 		virtual bool render(Ogre::Real interval);
+		
+		virtual Ogre::Camera *camera(void);
+		virtual Ogre::SceneManager *sceneManager(void);
+		
+		virtual void pushState(State *state);
+		virtual void popState(void);
+		virtual void setState(State *state);
+		virtual void removeState(State *state);
+		
+		virtual void shutdown();
 	protected:
-		virtual bool configure(void);
+		virtual void createInitialState(void);
 		virtual void chooseSceneManager(void);
 		virtual void createCamera(void);
 		virtual void createFrameListener(void);
-		virtual void createScene(void);
-		virtual void destroyScene(void);
 		virtual void createViewports(void);
 		virtual void setupResources(void);
 		virtual void createResourceListener(void);
@@ -98,10 +109,7 @@ namespace Jyuzau
 		virtual bool mouseMoved(const OIS::MouseEvent &arg);
 		virtual bool mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
 		virtual bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
-
-		// Adjust mouse clipping area
 		virtual void windowResized(Ogre::RenderWindow* rw);
-		// Unattach OIS before window shutdown (very important under Linux)
 		virtual void windowClosed(Ogre::RenderWindow* rw);
 
 		Scene *activeScene;
@@ -118,7 +126,6 @@ namespace Jyuzau
 		// OgreBites
 		OgreBites::InputContext     mInputContext;
 		OgreBites::SdkTrayManager*	mTrayMgr;
-		OgreBites::SdkCameraMan*    mCameraMan;     	// Basic camera controller
 		OgreBites::ParamsPanel*     mDetailsPanel;   	// Sample details panel
 		bool                        mCursorWasVisible;	// Was cursor visible before dialog appeared?
 		bool                        mShutDown;
@@ -134,6 +141,8 @@ namespace Jyuzau
 		#ifdef OGRE_STATIC_LIB
 		Ogre::StaticPluginLoader m_StaticPluginLoader;
 		#endif
+		
+		State *m_firstState, *m_lastState;
 	};
 
 };

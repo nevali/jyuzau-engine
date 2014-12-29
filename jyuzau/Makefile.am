@@ -20,11 +20,12 @@ lib_LTLIBRARIES = libjyuzau.la
 
 libjyuzau_la_SOURCES = core.hh \
 	app.cc \
-	core.hh core.cc loadable.hh loadable.cc  \
+	core.hh core.cc loadable.hh loadable.cc state.hh state.cc \
 	scene.hh scene.cc prop.hh prop.cc actor.hh actor.cc \
-	light.hh light.cc \
+	player.hh player.cc light.hh light.cc \
 	nsapp.mm \
-	delegate.hh delegate.mm
+	delegate.hh delegate.mm \
+	sceneview.hh sceneview.mm
 
 libjyuzau_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 

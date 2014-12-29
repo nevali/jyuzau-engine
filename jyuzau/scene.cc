@@ -184,7 +184,6 @@ Scene::addAmbientLight(LoadableSceneAmbientLight *light)
 LoadableScene::LoadableScene(Loadable *owner, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, name, attrs)
 {
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: loading a scene");
 }
 
 

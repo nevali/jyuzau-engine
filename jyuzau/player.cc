@@ -13,22 +13,41 @@
  *  limitations under the License.
  */
 
-#ifndef JYUZAU_HH_
-# define JYUZAU_HH_                    1
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-# include <OGRE/OgrePlatform.h>
+#include "jyuzau/player.hh"
 
-# include "jyuzau/core.hh"
-# include "jyuzau/loadable.hh"
-# include "jyuzau/prop.hh"
-# include "jyuzau/actor.hh"
-# include "jyuzau/player.hh"
-# include "jyuzau/scene.hh"
-# include "jyuzau/light.hh"
-# ifdef __OBJC__
-#  include "jyuzau/delegate.hh"
-# endif
-# include "jyuzau/main.hh"
-# include "jyuzau/state.hh"
+using namespace Jyuzau;
 
-#endif /*!JYUZAU_HH_*/
+Player *
+Player::create(Ogre::String name, Scene *scene)
+{
+	Player *p;
+	
+	p = new Player(name);
+	if(!p->load())
+	{
+		delete p;
+		return NULL;
+	}
+	if(scene)
+	{
+		if(!p->attach(scene))
+		{
+			delete p;
+			return NULL;
+		}
+	}
+	return p;
+}
+
+Player::Player(Ogre::String name):
+	Actor::Actor(name)
+{
+}
+
+Player::~Player()
+{
+}

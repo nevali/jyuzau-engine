@@ -18,6 +18,7 @@
 #endif
 
 #include "jyuzau/core.hh"
+#include "jyuzau/state.hh"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <macUtils.h>
@@ -35,15 +36,16 @@ Core::Core(void)
 	mResourcesCfg(Ogre::StringUtil::BLANK),
 	mPluginsCfg(Ogre::StringUtil::BLANK),
 	mTrayMgr(0),
-	mCameraMan(0),
 	mDetailsPanel(0),
 	mCursorWasVisible(false),
-	mShutDown(false),
+	mShutDown(true),
 	mInputManager(0),
 	mMouse(0),
 	mKeyboard(0),
 	mOverlaySystem(0),
-	activeScene(NULL)
+	activeScene(NULL),
+	m_firstState(NULL),
+	m_lastState(NULL)
 {
 	singleton = this;
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
@@ -57,7 +59,6 @@ Core::~Core(void)
 {
 	singleton = NULL;
 	if (mTrayMgr) delete mTrayMgr;
-	if (mCameraMan) delete mCameraMan;
 	if (mOverlaySystem) delete mOverlaySystem;
 
 	// Remove ourself as a Window listener
@@ -97,32 +98,50 @@ Core::init(void)
 	
 	mRoot = new Ogre::Root(mPluginsCfg);
 
+	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: " + Ogre::String(PACKAGE_STRING));
+
 	setupResources();
 
-	bool carryOn = configure();
-	if (!carryOn) return false;
-
+	if(!mRoot->showConfigDialog())
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: aborted at configuration dialog");
+		return false;
+	}
+	
+	mWindow = mRoot->initialise(true, "Jyuzau");
+	
 	chooseSceneManager();
 	createCamera();
 	createViewports();
-
-	// Create any resource listeners (for loading screens)
 	createResourceListener();
-	// Load resources
 	loadResources();
 
-	// Create the scene
-	createScene();
-
+	/* Create the initial state */
+	createInitialState();
+	if(!m_firstState)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Core has no initial state; aborting");
+		return false;
+	}
 	createFrameListener();
-
+	mShutDown = false;
 	return true;
 };
+
+void
+Core::shutdown()
+{
+	mShutDown = true;
+}
 
 bool
 Core::cleanup()
 {
-	destroyScene();
+	if(m_firstState)
+	{
+		m_firstState->m_next = NULL;
+		popState();
+	}
 	return true;
 }
 
@@ -142,8 +161,9 @@ Core::go()
 #endif
 }
 
-/* Render a single scene */
-bool Core::render(Ogre::Real interval)
+/* Render a single frame */
+bool
+Core::render(Ogre::Real interval)
 {
 	mRoot->renderOneFrame(interval);
 	if(mShutDown)
@@ -153,25 +173,100 @@ bool Core::render(Ogre::Real interval)
 	return true;
 }
 
-
-/* Protected methods */
-
-bool Core::configure(void)
+/* Return a pointer to the active camera */
+Ogre::Camera *
+Core::camera(void)
 {
-	// Show the configuration dialog and initialise the system.
-	// You can skip this and use root.restoreConfig() to load configuration
-	// settings if you were sure there are valid ones saved in ogre.cfg.
-	if(mRoot->showConfigDialog())
-	{
-		// If returned true, user clicked OK so initialise.
-		// Here we choose to let the system create a default rendering window by passing 'true'.
-		mWindow = mRoot->initialise(true, "TutorialApplication Render Window");
+	return mCamera;
+}
 
-		return true;
+/* Return a pointer to the scene manager */
+Ogre::SceneManager *
+Core::sceneManager(void)
+{
+	return mSceneMgr;
+}
+
+/* Push a new state onto the stack */
+void
+Core::pushState(State *state)
+{
+	state->m_prev = NULL;
+	state->m_next = m_firstState;
+	if(!m_lastState)
+	{
+		m_lastState = state;
+	}
+	m_firstState = state;
+	if(state->m_next)
+	{
+		state->m_next->m_prev = state;
+		state->m_next->deactivated();
+	}
+	state->activated();
+}
+
+/* Pop the current state off the stack; if it was the last, trigger shutdown */
+void
+Core::popState()
+{
+	if(!m_firstState)
+	{
+		return;
+	}
+	m_firstState->deactivated();
+	if(m_firstState->m_next)
+	{
+		m_firstState = m_firstState->m_next;
+		m_firstState->m_prev = NULL;
+		m_firstState->activated();
 	}
 	else
 	{
-		return false;
+		m_firstState = NULL;
+		m_lastState = NULL;
+		shutdown();
+	}	
+}
+
+/* Replace the current state stack tail, preserving the remainder */
+void
+Core::setState(State *state)
+{
+	state->m_prev = NULL;
+	if(m_firstState)
+	{
+		m_firstState->deactivated();
+		state->m_next = m_firstState->m_next;
+		m_firstState->m_next = NULL;
+	}
+	else
+	{
+		state->m_next = NULL;
+		m_lastState = state;
+	}
+	m_firstState = state;
+	state->activated();
+}
+
+/* Remove a state from the stack, if it's present; invoked by State::~State(),
+ * so will not invoke ->deactivated() if state == m_firstState.
+ */
+void
+Core::removeState(State *state)
+{
+	if(state == m_lastState)
+	{
+		m_lastState = state->m_prev;
+	}
+	if(state == m_firstState)
+	{
+		m_firstState = state->m_next;
+		m_firstState->activated();
+	}
+	if(!m_firstState)
+	{
+		shutdown();
 	}
 }
 
@@ -198,8 +293,6 @@ Core::createCamera(void)
 	// Look back along -Z
 	mCamera->lookAt(Ogre::Vector3(0,0,-300));
 	mCamera->setNearClipDistance(5);
-
-	mCameraMan = new OgreBites::SdkCameraMan(mCamera);   // Create a default camera controller
 }
 
 void
@@ -256,13 +349,6 @@ Core::createFrameListener(void)
 	mDetailsPanel->hide();
 
 	mRoot->addFrameListener(this);
-}
-void Core::createScene(void)
-{
-}
-
-void Core::destroyScene(void)
-{
 }
 
 void
@@ -344,7 +430,6 @@ Core::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
 	if (!mTrayMgr->isDialogVisible())
 	{
-		mCameraMan->frameRenderingQueued(evt);   // If dialog isn't up, then update the camera
 		if (mDetailsPanel->isVisible())		  // If details panel is visible, then update its contents
 		{
 			mDetailsPanel->setParamValue(0, Ogre::StringConverter::toString(mCamera->getDerivedPosition().x));
@@ -356,41 +441,65 @@ Core::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			mDetailsPanel->setParamValue(7, Ogre::StringConverter::toString(mCamera->getDerivedOrientation().z));
 		}
 	}
-
-	return true;
-}
-//---------------------------------------------------------------------------
-bool Core::keyPressed( const OIS::KeyEvent &arg )
-{
-	if (arg.key == OIS::KC_ESCAPE)
+	if(!m_firstState)
 	{
-		mShutDown = true;
+		return false;
 	}
-	return true;
+	return m_firstState->frameRenderingQueued(evt);
 }
-//---------------------------------------------------------------------------
-bool Core::keyReleased(const OIS::KeyEvent &arg)
+
+bool
+Core::keyPressed(const OIS::KeyEvent &arg)
 {
-	return true;
+	if(!m_firstState)
+	{
+		return false;
+	}
+	return m_firstState->keyPressed(arg);
 }
-//---------------------------------------------------------------------------
-bool Core::mouseMoved(const OIS::MouseEvent &arg)
+
+bool
+Core::keyReleased(const OIS::KeyEvent &arg)
 {
-	return true;
+	if(!m_firstState)
+	{
+		return false;
+	}
+	return m_firstState->keyReleased(arg);
 }
-//---------------------------------------------------------------------------
-bool Core::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
+
+bool
+Core::mouseMoved(const OIS::MouseEvent &arg)
 {
-	return true;
+	if(!m_firstState)
+	{
+		return false;
+	}
+	return m_firstState->mouseMoved(arg);
 }
-//---------------------------------------------------------------------------
-bool Core::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
+
+bool
+Core::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
-	return true;
+	if(!m_firstState)
+	{
+		return false;
+	}
+	return m_firstState->mousePressed(arg, id);
 }
-//---------------------------------------------------------------------------
-// Adjust mouse clipping area
-void Core::windowResized(Ogre::RenderWindow* rw)
+
+bool
+Core::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
+{
+	if(!m_firstState)
+	{
+		return false;
+	}
+	return m_firstState->mouseReleased(arg, id);
+}
+
+void
+Core::windowResized(Ogre::RenderWindow* rw)
 {
 	unsigned int width, height, depth;
 	int left, top;
@@ -400,11 +509,10 @@ void Core::windowResized(Ogre::RenderWindow* rw)
 	ms.width = width;
 	ms.height = height;
 }
-//---------------------------------------------------------------------------
-// Unattach OIS before window shutdown (very important under Linux)
-void Core::windowClosed(Ogre::RenderWindow* rw)
+
+void
+Core::windowClosed(Ogre::RenderWindow* rw)
 {
-	// Only close for window that created OIS (the main window in these demos)
 	if(rw == mWindow)
 	{
 		if(mInputManager)
@@ -413,8 +521,13 @@ void Core::windowClosed(Ogre::RenderWindow* rw)
 			mInputManager->destroyInputObject(mKeyboard);
 
 			OIS::InputManager::destroyInputSystem(mInputManager);
-			mInputManager = 0;
+			mInputManager = NULL;
 		}
 	}
 }
-//---------------------------------------------------------------------------
+
+void
+Core::createInitialState()
+{
+	/* To be overridden by subclasses */
+}

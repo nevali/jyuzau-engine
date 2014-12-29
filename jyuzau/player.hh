@@ -13,22 +13,29 @@
  *  limitations under the License.
  */
 
-#ifndef JYUZAU_HH_
-# define JYUZAU_HH_                    1
+#ifndef JYUZAU_PLAYER_HH_
+# define JYUZAU_PLAYER_HH_             1
 
-# include <OGRE/OgrePlatform.h>
-
-# include "jyuzau/core.hh"
-# include "jyuzau/loadable.hh"
-# include "jyuzau/prop.hh"
 # include "jyuzau/actor.hh"
-# include "jyuzau/player.hh"
-# include "jyuzau/scene.hh"
-# include "jyuzau/light.hh"
-# ifdef __OBJC__
-#  include "jyuzau/delegate.hh"
-# endif
-# include "jyuzau/main.hh"
-# include "jyuzau/state.hh"
 
-#endif /*!JYUZAU_HH_*/
+namespace Jyuzau
+{
+
+	/* A Player is a specialisation of Actor which has the ability to be
+	 * controlled by the user.
+	 *
+	 * Note that players share an asset namespace with actors (i.e., player
+	 * assets are loaded from assets/actors/foo, rather than a specific
+	 * assets/players/foo).
+	 */
+	class Player: public Actor
+	{
+	public:
+		static Player *create(Ogre::String name, Scene *scene = NULL);
+		
+		Player(Ogre::String name);
+		virtual ~Player();
+	};
+};
+
+#endif /*!JYUZAU_PLAYER_HH_*/
