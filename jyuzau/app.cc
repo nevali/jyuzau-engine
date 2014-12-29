@@ -17,7 +17,7 @@
 # include "config.h"
 #endif
 
-#include "jyuzau.hh"
+#include "jyuzau/main.hh"
 
 /* Implement main() for non-Cocoa Unix platforms */
 #if OGRE_PLATFORM != OGRE_PLATFORM_APPLE && OGRE_PLATFORM != OGRE_PLATFORM_WIN32
