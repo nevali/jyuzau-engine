@@ -20,19 +20,22 @@ noinst_PROGRAMS = SceneView
 SceneView_SOURCES = app.cc ../demoapp.cc
 SceneView_LDADD = ${top_builddir}/jyuzau/libjyuzau.la
 
-EXTRA_DIST = Info.plist.in resources.cfg.in
+EXTRA_DIST = Info.plist.in
 
-noinst_DATA = resources.cfg plugins.cfg Info.plist \
+noinst_DATA = plugins.cfg Info.plist \
 	assets/actors/Ogre/ogrehead.mesh assets/actors/Ogre/Ogre.material \
 	assets/actors/Ogre/GreenSkin.jpg assets/actors/Ogre/tusk.jpg \
-	assets/actors/Ogre/spheremap.png
+	assets/actors/Ogre/spheremap.png SdkTrays.zip
 
 CLEANFILES = plugins.cfg Resources Frameworks \
 	assets/actors/Ogre/ogrehead.mesh assets/actors/Ogre/Ogre.material \
 	assets/actors/Ogre/GreenSkin.jpg assets/actors/Ogre/tusk.jpg \
-	assets/actors/Ogre/spheremap.png
+	assets/actors/Ogre/spheremap.png SdkTrays.zip
 
-DISTCLEANFILES = resources.cfg Info.plist
+DISTCLEANFILES = Info.plist
+
+SdkTrays.zip: ${top_builddir}/ogre-build/sdk/Media/packs/SdkTrays.zip
+	rm -f $@ && cp $< $@
 
 assets/actors/Ogre/ogrehead.mesh: ${top_builddir}/ogre-build/sdk/Media/models/ogrehead.mesh
 	rm -f $@ && cp $< $@

@@ -30,6 +30,8 @@ protected:
 	OgreBites::SdkTrayManager *m_trayMgr;
 	OgreBites::ParamsPanel *m_detailsPanel;
 	
+	virtual void setupResources(void);
+	
 	virtual void createFrameListener(void);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 	

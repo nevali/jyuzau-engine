@@ -35,6 +35,13 @@ DemoApp::~DemoApp()
 }
 
 void
+DemoApp::setupResources(void)
+{
+	Core::setupResources();
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(m_ResourcePath + "SdkTrays.zip", "Zip", "SdkTrays");
+}
+
+void
 DemoApp::createFrameListener(void)
 {
 	Core::createFrameListener();

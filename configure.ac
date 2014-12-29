@@ -137,7 +137,6 @@ jyuzau/Makefile
 demos/Makefile
 demos/SceneView/Makefile
 demos/SceneView/Info.plist
-demos/SceneView/resources.cfg
 ])
 
 AC_OUTPUT
