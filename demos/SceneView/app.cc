@@ -18,34 +18,21 @@
 #endif
 
 #include "../demoapp.hh"
+#include "jyuzau/sceneview.hh"
 
-class HeadDemo: public DemoApp
+class SceneViewApp: public DemoApp
 {
 protected:
-	Jyuzau::Scene *headScene;
+	Jyuzau::State *viewState;
 	
-	virtual void createScene(void);
-	virtual void destroyScene(void);
+	virtual void createInitialState(void);
 };
 
 void
-HeadDemo::createScene(void)
+SceneViewApp::createInitialState(void)
 {
-	headScene = Jyuzau::Scene::create("head", mSceneMgr);
-	if(!headScene)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("failed to create scene");
-		return;
-	} 
-}
-
-void
-HeadDemo::destroyScene(void)
-{
-	if(headScene)
-	{
-		delete headScene;
-	}
+	viewState = new Jyuzau::SceneViewState("demo");
+	pushState(viewState);
 }
 
 #ifdef __cplusplus
@@ -57,7 +44,7 @@ extern "C" {
 INT WINAPI
 	WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR strCmdLine, INT nShowCmd)
 {
-	HeadDemo app;
+	SceneViewApp app;
 	
 	return Jyuzau::WinMain(hInst, hPrevInst, strCmdLine, nShowCmd, &app);
 }
@@ -67,7 +54,7 @@ INT WINAPI
 int
 main(int argc, char **argv)
 {
-	HeadDemo app;
+	SceneViewApp app;
 
 	return Jyuzau::main(argc, argv, &app);
 }

@@ -15,20 +15,40 @@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @OGRE_CPPFLAGS@ @OIS_CPPFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @OGRE_LDFLAGS@ @OIS_LDFLAGS@
 
-noinst_PROGRAMS = HeadDemo
+noinst_PROGRAMS = SceneView
 
-HeadDemo_SOURCES = app.cc ../demoapp.cc
-HeadDemo_LDADD = ${top_builddir}/jyuzau/libjyuzau.la
+SceneView_SOURCES = app.cc ../demoapp.cc
+SceneView_LDADD = ${top_builddir}/jyuzau/libjyuzau.la
 
-EXTRA_DIST = Info.plist.in resources.cfg.in ogrehead.mesh Ogre.material \
-	GreenSkin.jpg tusk.jpg spheremap.png
+EXTRA_DIST = Info.plist.in resources.cfg.in
 
-noinst_DATA = resources.cfg plugins.cfg Info.plist
+noinst_DATA = resources.cfg plugins.cfg Info.plist \
+	assets/actors/Ogre/ogrehead.mesh assets/actors/Ogre/Ogre.material \
+	assets/actors/Ogre/GreenSkin.jpg assets/actors/Ogre/tusk.jpg \
+	assets/actors/Ogre/spheremap.png
 
-CLEANFILES = plugins.cfg Resources Frameworks
+CLEANFILES = plugins.cfg Resources Frameworks \
+	assets/actors/Ogre/ogrehead.mesh assets/actors/Ogre/Ogre.material \
+	assets/actors/Ogre/GreenSkin.jpg assets/actors/Ogre/tusk.jpg \
+	assets/actors/Ogre/spheremap.png
 
 DISTCLEANFILES = resources.cfg Info.plist
 
+assets/actors/Ogre/ogrehead.mesh: ${top_builddir}/ogre-build/sdk/Media/models/ogrehead.mesh
+	rm -f $@ && cp $< $@
+
+assets/actors/Ogre/Ogre.material: ${top_builddir}/ogre-build/sdk/Media/materials/scripts/Ogre.material
+	rm -f $@ && cp $< $@
+
+assets/actors/Ogre/tusk.jpg: ${top_builddir}/ogre-build/sdk/Media/materials/textures/tusk.jpg
+	rm -f $@ && cp $< $@
+
+assets/actors/Ogre/GreenSkin.jpg: ${top_builddir}/ogre-build/sdk/Media/materials/textures/GreenSkin.jpg
+	rm -f $@ && cp $< $@
+
+assets/actors/Ogre/spheremap.png: ${top_builddir}/ogre-build/sdk/Media/materials/textures/spheremap.png
+	rm -f $@ && cp $< $@
+	
 plugins.cfg: ${top_builddir}/ogre-build/sdk/bin/plugins.cfg
 	rm -f $@ && cp $< $@
 

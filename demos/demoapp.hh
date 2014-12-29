@@ -18,11 +18,22 @@
 
 # include "jyuzau.hh"
 
-class DemoApp: public Jyuzau::Core
+# include <OGRE/SdkTrays.h>
+
+class DemoApp: public Jyuzau::Core, public OgreBites::SdkTrayListener
 {
+public:
+	DemoApp();
+	virtual ~DemoApp();
 protected:
+	OgreBites::InputContext m_inputContext;
+	OgreBites::SdkTrayManager *m_trayMgr;
+	OgreBites::ParamsPanel *m_detailsPanel;
+	
+	virtual void createFrameListener(void);
+	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
+	
 	virtual bool keyPressed(const OIS::KeyEvent &arg);
-	virtual bool keyReleased(const OIS::KeyEvent &arg);
 	virtual bool mouseMoved(const OIS::MouseEvent &arg);
 	virtual bool mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
 	virtual bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);

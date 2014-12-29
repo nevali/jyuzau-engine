@@ -135,9 +135,9 @@ AC_CONFIG_FILES([
 Makefile
 jyuzau/Makefile
 demos/Makefile
-demos/HeadDemo/Makefile
-demos/HeadDemo/Info.plist
-demos/HeadDemo/resources.cfg
+demos/SceneView/Makefile
+demos/SceneView/Info.plist
+demos/SceneView/resources.cfg
 ])
 
 AC_OUTPUT
