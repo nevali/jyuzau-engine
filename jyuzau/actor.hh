@@ -18,8 +18,26 @@
 
 # include "jyuzau/prop.hh"
 
+namespace Ogre
+{
+	class Camera;
+}
+
 namespace Jyuzau
 {
+	
+	enum CameraType {
+		CT_FIRSTPERSON,
+		CT_FOLLOWING,
+		/* The following must always be last */
+		CT_COUNT
+	};
+	
+	enum MoveSpeed {
+		MS_CREEP,
+		MS_WALK,
+		MS_RUN
+	};
 	
 	/* An actor is a kind of prop which can have autonomous behaviours
 	 * and cameras attached to it.
@@ -31,6 +49,28 @@ namespace Jyuzau
 		
 		Actor(Ogre::String name);
 		virtual ~Actor();
+		
+		virtual Ogre::Camera *camera(CameraType type);
+
+		virtual void forward(MoveSpeed speed = MS_WALK);
+		virtual void backward(MoveSpeed speed = MS_WALK);
+		virtual void turnLeft(MoveSpeed speed = MS_WALK);
+		virtual void turnRight(MoveSpeed speed = MS_WALK);
+		virtual void strafeLeft(MoveSpeed speed = MS_WALK);
+		virtual void strafeRight(MoveSpeed speed = MS_WALK);
+		virtual void primaryFire(void);
+		virtual void secondaryFire(void);
+		virtual void special(void);
+		virtual void crouch(void);
+		virtual void jump(void);
+		virtual void zoom(void);
+		virtual void switchWeapon(int index);
+		virtual void prevWeapon(void);
+		virtual void nextWeapon(void);
+	protected:
+		Ogre::Camera *m_cameras[CT_COUNT];
+		
+		virtual Ogre::Camera *createCamera(CameraType type);
 	};
 };
 

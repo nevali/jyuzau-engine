@@ -17,6 +17,8 @@
 # include "config.h"
 #endif
 
+#include <OGRE/OgreCamera.h>
+
 #include "jyuzau/actor.hh"
 
 using namespace Jyuzau;
@@ -46,8 +48,114 @@ Actor::create(Ogre::String name, Scene *scene)
 Actor::Actor(Ogre::String name):
 	Prop::Prop(name, "actor")
 {
+	memset(m_cameras, 0, sizeof(m_cameras));
 }
 
 Actor::~Actor()
+{
+	size_t c;
+	
+	for(c = 0; c < CT_COUNT; c++)
+	{
+		if(m_cameras[c])
+		{
+			delete m_cameras[c];
+		}
+	}
+}
+
+Ogre::Camera *
+Actor::camera(CameraType type)
+{
+	if(type >= CT_COUNT)
+	{
+		return NULL;
+	}
+	if(!m_cameras[type])
+	{
+		m_cameras[type] = createCamera(type);
+	}
+	return m_cameras[type];
+}
+
+Ogre::Camera *
+Actor::createCamera(CameraType type)
+{
+	return NULL;
+}
+
+void
+Actor::forward(MoveSpeed speed)
+{
+}
+
+void
+Actor::backward(MoveSpeed speed)
+{
+}
+
+void
+Actor::turnLeft(MoveSpeed speed)
+{
+}
+
+void
+Actor::turnRight(MoveSpeed speed)
+{
+}
+
+void
+Actor::strafeLeft(MoveSpeed speed)
+{
+}
+
+void
+Actor::strafeRight(MoveSpeed speed)
+{
+}
+
+void
+Actor::primaryFire(void)
+{
+}
+
+void
+Actor::secondaryFire(void)
+{
+	
+}
+
+void
+Actor::special(void)
+{
+}
+
+void
+Actor::crouch(void)
+{
+}
+
+void
+Actor::jump(void)
+{
+}
+
+void
+Actor::zoom(void)
+{
+}
+
+void
+Actor::switchWeapon(int index)
+{
+}
+
+void
+Actor::prevWeapon(void)
+{
+}
+
+void
+Actor::nextWeapon(void)
 {
 }

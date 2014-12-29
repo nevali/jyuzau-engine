@@ -52,8 +52,9 @@ namespace Jyuzau
 		std::vector<Ogre::Viewport *> m_viewports;
 		
 		virtual void load(void);
-		virtual void createSceneManager(void);
 		virtual void createScenes(void);
+		virtual void createSceneManager(void);
+		virtual void attachScenes(void);
 		virtual void createPlayers(void);
 		
 		virtual void activated(Ogre::RenderWindow *window);

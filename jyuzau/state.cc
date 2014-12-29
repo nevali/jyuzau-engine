@@ -85,10 +85,17 @@ State::preload(void)
 void
 State::load(void)
 {
-	createSceneManager();
 	createScenes();
+	createSceneManager();
+	attachScenes();
 	createPlayers();
 	m_loaded = true;
+}
+
+void
+State::createScenes()
+{
+	/* This method should be overridden to perform scene-loading */
 }
 
 void
@@ -101,9 +108,11 @@ State::createSceneManager()
 }
 
 void
-State::createScenes()
+State::attachScenes()
 {
-	/* This method should be overridden to perform scene-loading */
+	/* This method should be overridden to attach the loaded scenes to
+	 * the scene manager
+	 */
 }
 
 void

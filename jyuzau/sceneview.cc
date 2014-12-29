@@ -55,11 +55,17 @@ SceneViewState::~SceneViewState()
 void
 SceneViewState::createScenes()
 {
-	m_scene = Scene::create(m_name, m_sceneManager);
+	m_scene = Scene::create(m_name);
 }
 
 void
-SceneViewState::createPlayers()
+SceneViewState::attachScenes(void)
+{
+	m_scene->attach(m_sceneManager);
+}
+
+void
+SceneViewState::createPlayers(void)
 {
 	Ogre::Camera *cam;
 	
