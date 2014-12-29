@@ -16,7 +16,7 @@
 #ifndef JYUZAU_STATE_HH_
 # define JYUZAU_STATE_HH_              1
 
-# include <OgreFrameListener.h>
+# include <OGRE/OgreFrameListener.h>
 
 # include <OIS/OISEvents.h>
 # include <OIS/OISKeyboard.h>

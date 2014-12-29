@@ -16,7 +16,7 @@
 #ifndef JYUZAU_PROP_HH_
 # define JYUZAU_PROP_HH_               1
 
-# include <OgreVector3.h>
+# include <OGRE/OgreVector3.h>
 
 # include "jyuzau/loadable.hh"
 

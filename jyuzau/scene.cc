@@ -17,7 +17,7 @@
 # include "config.h"
 #endif
 
-#include <OgreLogManager.h>
+#include <OGRE/OgreLogManager.h>
 
 #include "jyuzau/scene.hh"
 #include "jyuzau/prop.hh"

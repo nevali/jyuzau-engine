@@ -16,50 +16,19 @@
 #ifndef JYUZAU_CORE_HH_
 # define JYUZAU_CORE_HH_               1
 
-#include <OgreCamera.h>
-#include <OgreEntity.h>
-#include <OgreLogManager.h>
-#include <OgreRoot.h>
-#include <OgreViewport.h>
-#include <OgreSceneManager.h>
-#include <OgreRenderWindow.h>
-#include <OgreConfigFile.h>
+# include <OGRE/OgreCamera.h>
+# include <OGRE/OgreEntity.h>
+# include <OGRE/OgreRoot.h>
+# include <OGRE/OgreSceneManager.h>
+# include <OGRE/OgreRenderWindow.h>
+# include <OGRE/OgreWindowEventUtilities.h>
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#  include <OIS/OISEvents.h>
-#  include <OIS/OISInputManager.h>
-#  include <OIS/OISKeyboard.h>
-#  include <OIS/OISMouse.h>
+# include <OGRE/Overlay/OgreOverlaySystem.h>
 
-#  include <OGRE/SdkTrays.h>
-#else
-#  include <OISEvents.h>
-#  include <OISInputManager.h>
-#  include <OISKeyboard.h>
-#  include <OISMouse.h>
-
-#  include <SdkTrays.h>
-#endif
-
-#ifdef OGRE_STATIC_LIB
-#  define OGRE_STATIC_GL
-#  if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-#    define OGRE_STATIC_Direct3D9
-#    if OGRE_USE_D3D10
-#      define OGRE_STATIC_Direct3D10
-#    endif
-#  endif
-#  define OGRE_STATIC_BSPSceneManager
-#  define OGRE_STATIC_ParticleFX
-#  define OGRE_STATIC_CgProgramManager
-#  ifdef OGRE_USE_PCZ
-#    define OGRE_STATIC_PCZSceneManager
-#    define OGRE_STATIC_OctreeZone
-#  else
-#    define OGRE_STATIC_OctreeSceneManager
-#  endif
-#  include "OgreStaticPluginLoader.h"
-#endif
+# include <OIS/OISEvents.h>
+# include <OIS/OISInputManager.h>
+# include <OIS/OISKeyboard.h>
+# include <OIS/OISMouse.h>
 
 # include "scene.hh"
 
@@ -67,7 +36,7 @@ namespace Jyuzau
 {
 	class State;
 
-	class Core : public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener, OgreBites::SdkTrayListener
+	class Core : public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener
 	{
 		friend class State;
 	public:
@@ -123,10 +92,6 @@ namespace Jyuzau
 
 		Ogre::OverlaySystem*        mOverlaySystem;
 
-		// OgreBites
-		OgreBites::InputContext     mInputContext;
-		OgreBites::SdkTrayManager*	mTrayMgr;
-		OgreBites::ParamsPanel*     mDetailsPanel;   	// Sample details panel
 		bool                        mCursorWasVisible;	// Was cursor visible before dialog appeared?
 		bool                        mShutDown;
 

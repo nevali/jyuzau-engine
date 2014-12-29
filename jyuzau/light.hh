@@ -16,10 +16,10 @@
 #ifndef JYUZAU_LIGHT_HH_
 # define JYUZAU_LIGHT_HH_              1
 
-# include <OgreVector3.h>
-# include <OgreColourValue.h>
-# include <OgreSceneManager.h>
-# include <OgreString.h>
+# include <OGRE/OgreVector3.h>
+# include <OGRE/OgreColourValue.h>
+# include <OGRE/OgreSceneManager.h>
+# include <OGRE/OgreString.h>
 
 # include "jyuzau/loadable.hh"
 

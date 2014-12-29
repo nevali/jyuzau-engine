@@ -17,8 +17,8 @@
 # include "config.h"
 #endif
 
-#include <OgreLogManager.h>
-#include <OgreColourValue.h>
+#include <OGRE/OgreLogManager.h>
+#include <OGRE/OgreColourValue.h>
 
 #include "jyuzau/loadable.hh"
 

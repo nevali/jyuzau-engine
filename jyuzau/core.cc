@@ -20,8 +20,32 @@
 #include "jyuzau/core.hh"
 #include "jyuzau/state.hh"
 
+#include <OGRE/OgreLogManager.h>
+#include <OGRE/OgreConfigFile.h>
+#include <OGRE/OgreViewport.h>
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <macUtils.h>
+# include <OGRE/OSX/macUtils.h>
+#endif
+
+#ifdef OGRE_STATIC_LIB
+#  define OGRE_STATIC_GL
+#  if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+#    define OGRE_STATIC_Direct3D9
+#    if OGRE_USE_D3D10
+#      define OGRE_STATIC_Direct3D10
+#    endif
+#  endif
+#  define OGRE_STATIC_BSPSceneManager
+#  define OGRE_STATIC_ParticleFX
+#  define OGRE_STATIC_CgProgramManager
+#  ifdef OGRE_USE_PCZ
+#    define OGRE_STATIC_PCZSceneManager
+#    define OGRE_STATIC_OctreeZone
+#  else
+#    define OGRE_STATIC_OctreeSceneManager
+#  endif
+#  include <OGRE/OgreStaticPluginLoader.h>
 #endif
 
 using namespace Jyuzau;
@@ -35,8 +59,6 @@ Core::Core(void)
 	mWindow(0),
 	mResourcesCfg(Ogre::StringUtil::BLANK),
 	mPluginsCfg(Ogre::StringUtil::BLANK),
-	mTrayMgr(0),
-	mDetailsPanel(0),
 	mCursorWasVisible(false),
 	mShutDown(true),
 	mInputManager(0),
@@ -58,10 +80,8 @@ Core::Core(void)
 Core::~Core(void)
 {
 	singleton = NULL;
-	if (mTrayMgr) delete mTrayMgr;
-	if (mOverlaySystem) delete mOverlaySystem;
 
-	// Remove ourself as a Window listener
+	if (mOverlaySystem) delete mOverlaySystem;
 	Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, this);
 	windowClosed(mWindow);
 	delete mRoot;
@@ -298,7 +318,6 @@ Core::createCamera(void)
 void
 Core::createFrameListener(void)
 {
-	Ogre::LogManager::getSingletonPtr()->logMessage("*** Initializing OIS ***");
 	OIS::ParamList pl;
 	size_t windowHnd = 0;
 	std::ostringstream windowHndStr;
@@ -321,32 +340,6 @@ Core::createFrameListener(void)
 
 	// Register as a Window listener
 	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, this);
-
-	mInputContext.mKeyboard = mKeyboard;
-	mInputContext.mMouse = mMouse;
-	mTrayMgr = new OgreBites::SdkTrayManager("InterfaceName", mWindow, mInputContext, this);
-	mTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
-	mTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
-	mTrayMgr->hideCursor();
-
-	// Create a params panel for displaying sample details
-	Ogre::StringVector items;
-	items.push_back("cam.pX");
-	items.push_back("cam.pY");
-	items.push_back("cam.pZ");
-	items.push_back("");
-	items.push_back("cam.oW");
-	items.push_back("cam.oX");
-	items.push_back("cam.oY");
-	items.push_back("cam.oZ");
-	items.push_back("");
-	items.push_back("Filtering");
-	items.push_back("Poly Mode");
-
-	mDetailsPanel = mTrayMgr->createParamsPanel(OgreBites::TL_NONE, "DetailsPanel", 200, items);
-	mDetailsPanel->setParamValue(9, "Bilinear");
-	mDetailsPanel->setParamValue(10, "Solid");
-	mDetailsPanel->hide();
 
 	mRoot->addFrameListener(this);
 }
@@ -426,21 +419,6 @@ Core::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	mKeyboard->capture();
 	mMouse->capture();
 
-	mTrayMgr->frameRenderingQueued(evt);
-
-	if (!mTrayMgr->isDialogVisible())
-	{
-		if (mDetailsPanel->isVisible())		  // If details panel is visible, then update its contents
-		{
-			mDetailsPanel->setParamValue(0, Ogre::StringConverter::toString(mCamera->getDerivedPosition().x));
-			mDetailsPanel->setParamValue(1, Ogre::StringConverter::toString(mCamera->getDerivedPosition().y));
-			mDetailsPanel->setParamValue(2, Ogre::StringConverter::toString(mCamera->getDerivedPosition().z));
-			mDetailsPanel->setParamValue(4, Ogre::StringConverter::toString(mCamera->getDerivedOrientation().w));
-			mDetailsPanel->setParamValue(5, Ogre::StringConverter::toString(mCamera->getDerivedOrientation().x));
-			mDetailsPanel->setParamValue(6, Ogre::StringConverter::toString(mCamera->getDerivedOrientation().y));
-			mDetailsPanel->setParamValue(7, Ogre::StringConverter::toString(mCamera->getDerivedOrientation().z));
-		}
-	}
 	if(!m_firstState)
 	{
 		return false;

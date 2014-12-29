@@ -16,7 +16,7 @@
 #ifndef JYUZAU_MAIN_HH_
 # define JYUZAU_MAIN_HH_               1
 
-# include <OgrePlatform.h>
+# include <OGRE/OgrePlatform.h>
 
 namespace Jyuzau {
 	

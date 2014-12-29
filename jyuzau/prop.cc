@@ -17,11 +17,11 @@
 # include "config.h"
 #endif
 
-#include <OgreSceneNode.h>
-#include <OgreEntity.h>
-#include <OgreSceneManager.h>
-#include <OgreLogManager.h>
-#include <OgreResourceGroupManager.h>
+#include <OGRE/OgreSceneNode.h>
+#include <OGRE/OgreEntity.h>
+#include <OGRE/OgreSceneManager.h>
+#include <OGRE/OgreLogManager.h>
+#include <OGRE/OgreResourceGroupManager.h>
 
 #include "jyuzau/prop.hh"
 #include "jyuzau/scene.hh"

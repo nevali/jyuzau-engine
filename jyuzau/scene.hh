@@ -17,10 +17,11 @@
 # define JYUZAU_SCENE_HH_              1
 
 # include <utility>
-# include <OgreString.h>
-# include <OgreSceneManager.h>
-# include <OgreVector3.h>
-# include <OgreColourValue.h>
+
+# include <OGRE/OgreString.h>
+# include <OGRE/OgreSceneManager.h>
+# include <OGRE/OgreVector3.h>
+# include <OGRE/OgreColourValue.h>
 
 # include "jyuzau/loadable.hh"
 

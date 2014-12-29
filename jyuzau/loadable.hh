@@ -18,9 +18,9 @@
 
 # include <utility>	
 
-# include <OgreString.h>
-# include <OgreColourValue.h>
-# include <OgreVector3.h>
+# include <OGRE/OgreString.h>
+# include <OGRE/OgreColourValue.h>
+# include <OGRE/OgreVector3.h>
 
 # include <libxml/parser.h>
 
