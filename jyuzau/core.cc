@@ -194,8 +194,6 @@ Core::init(void)
 	m_window = m_root->initialise(true, "Jyuzau");
 	m_overlaySystem = new Ogre::OverlaySystem();
 
-	createResourceListener();
-
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
 	/* Create the initial State objects */
@@ -265,12 +263,13 @@ Core::popState()
 	{
 		m_firstState = m_firstState->m_next;
 		m_firstState->m_prev = NULL;
-		m_firstState->activated();
+		activateState(m_firstState);
 	}
 	else
 	{
 		m_firstState = NULL;
 		m_lastState = NULL;
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: no states remain in stack; shutting down");
 		shutdown();
 	}	
 }
@@ -319,7 +318,7 @@ Core::removeState(State *state)
 void
 Core::activateState(State *state)
 {
-	state->activated();
+	state->activated(m_window);
 	state->sceneManager()->addRenderQueueListener(m_overlaySystem);
 }
 
@@ -327,7 +326,7 @@ void
 Core::deactivateState(State *state)
 {
 	state->sceneManager()->removeRenderQueueListener(m_overlaySystem);
-	state->deactivated();
+	state->deactivated(m_window);
 }
 
 /* Initialisation methods */
@@ -336,11 +335,6 @@ void
 Core::createResourceGroups(void)
 {
 	/* Can be overidden to initialise any resource groups */
-}
-
-void
-Core::createResourceListener(void)
-{
 }
 
 void

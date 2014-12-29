@@ -32,7 +32,7 @@ namespace Jyuzau
 	 * States can be stacked (i.e., pushed and popped), as well as
 	 * replaced when needed, via Jyuzau::Core methods.
 	 */
-	class State
+	class State: public Ogre::FrameListener
 	{
 		friend class Core;
 	public:
@@ -42,17 +42,26 @@ namespace Jyuzau
 		virtual void preload(void);
 		
 		virtual Ogre::SceneManager *sceneManager(void);
-		virtual Ogre::Camera *camera(void);
+		virtual Ogre::Camera *camera(int index = 0);
+		virtual int cameraCount(void);
 	protected:
 		State *m_prev, *m_next;
 		bool m_loaded;
 		Ogre::SceneManager *m_sceneManager;
-		Ogre::Camera *m_camera;
-		Ogre::Viewport *m_viewport;
+		std::vector<Ogre::Camera *> m_cameras;
+		std::vector<Ogre::Viewport *> m_viewports;
 		
 		virtual void load(void);
-		virtual void activated(void);
-		virtual void deactivated(void);
+		virtual void createSceneManager(void);
+		virtual void createScenes(void);
+		virtual void createPlayers(void);
+		
+		virtual void activated(Ogre::RenderWindow *window);
+		virtual void deactivated(Ogre::RenderWindow *window);
+		
+		virtual void addViewports(Ogre::RenderWindow *window);
+		virtual void removeViewports(Ogre::RenderWindow *window);
+		
 		virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 		virtual bool keyPressed(const OIS::KeyEvent &arg);
 		virtual bool keyReleased(const OIS::KeyEvent &arg);

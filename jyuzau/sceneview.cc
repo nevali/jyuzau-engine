@@ -53,15 +53,24 @@ SceneViewState::~SceneViewState()
 }
 
 void
-SceneViewState::load()
+SceneViewState::createScenes()
 {
-	if(m_loaded)
-	{
-		return;
-	}
-	State::load();
 	m_scene = Scene::create(m_name, m_sceneManager);
-	m_cameraMan = new OgreBites::SdkCameraMan(m_camera);
+}
+
+void
+SceneViewState::createPlayers()
+{
+	Ogre::Camera *cam;
+	
+	/* Create a simple camera which can be controlled by the camera manager */
+	cam = m_sceneManager->createCamera("PlayerCam");
+	cam->setPosition(Ogre::Vector3(0,0,80));
+	cam->lookAt(Ogre::Vector3(0,0,-300));
+	cam->setNearClipDistance(5);
+	m_cameras.push_back(cam);
+	
+	m_cameraMan = new OgreBites::SdkCameraMan(cam);
 }
 
 bool

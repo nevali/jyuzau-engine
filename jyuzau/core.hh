@@ -91,7 +91,6 @@ namespace Jyuzau
 		virtual void deactivateState(State *state);
 		
 		virtual void createResourceGroups(void);
-		virtual void createResourceListener(void);
 		virtual void createInitialState(void);
 		virtual void createFrameListener(void);
 

@@ -27,21 +27,27 @@ using namespace Jyuzau;
 State::State():
 	m_prev(NULL), m_next(NULL), m_loaded(false),
 	m_sceneManager(NULL),
-	m_camera(NULL),
-	m_viewport(NULL)
+	m_cameras(),
+	m_viewports()
 {
 }
 
 State::~State()
 {
+	std::vector<Ogre::Viewport *>::iterator vit;
+	std::vector<Ogre::Camera *>::iterator cit;
+	
 	Core::getInstance()->removeState(this);
-	if(m_viewport)
+
+	/* Delete any viewports that we've created */
+	for(vit = m_viewports.begin(); vit != m_viewports.end(); vit++)
 	{
-		delete m_viewport;
+		delete (*vit);
 	}
-	if(m_camera)
+	/* Delete any cameras that we've created */
+	for(cit = m_cameras.begin(); cit != m_cameras.end(); cit++)
 	{
-		delete m_camera;
+		delete (*vit);
 	}
 	if(m_sceneManager)
 	{
@@ -56,11 +62,16 @@ State::sceneManager(void)
 }
 
 Ogre::Camera *
-State::camera(void)
+State::camera(int index)
 {
-	return m_camera;
+	return m_cameras[index];
 }
 
+int
+State::cameraCount(void)
+{
+	return m_cameras.size();
+}
 
 void
 State::preload(void)
@@ -74,41 +85,80 @@ State::preload(void)
 void
 State::load(void)
 {
-	m_sceneManager = Ogre::Root::getSingletonPtr()->createSceneManager(Ogre::ST_GENERIC);
-	m_camera = m_sceneManager->createCamera("PlayerCam");
-
-	// Position it at 500 in Z direction
-	m_camera->setPosition(Ogre::Vector3(0,0,80));
-	// Look back along -Z
-	m_camera->lookAt(Ogre::Vector3(0,0,-300));
-	m_camera->setNearClipDistance(5);
-
+	createSceneManager();
+	createScenes();
+	createPlayers();
 	m_loaded = true;
 }
 
 void
-State::activated(void)
+State::createSceneManager()
 {
-	Ogre::RenderWindow *window;
+	/* Create a generic scene manager by default; descendants can override
+	 * this to create specific scene managers as required.
+	 */
+	m_sceneManager = Ogre::Root::getSingletonPtr()->createSceneManager(Ogre::ST_GENERIC);
+}
+
+void
+State::createScenes()
+{
+	/* This method should be overridden to perform scene-loading */
+}
+
+void
+State::createPlayers()
+{
+	/* This method should be overidden to create players and cameras */
+}
+
+void
+State::addViewports(Ogre::RenderWindow *window)
+{
+	Ogre::Viewport *viewport;
 	
+	/* By default, if there is at least one camera, create a full-window
+	 * viewport for the first one
+	 */
+	if(m_cameras.size())
+	{
+		viewport = window->addViewport(m_cameras[0]);
+		viewport->setBackgroundColour(Ogre::ColourValue(0,0,0));
+		m_cameras[0]->setAspectRatio(Ogre::Real(viewport->getActualWidth()) / Ogre::Real(viewport->getActualHeight()));
+		m_viewports.push_back(viewport);
+	}
+}
+
+void
+State::removeViewports(Ogre::RenderWindow *window)
+{
+	std::vector<Ogre::Viewport *>::iterator it;
+
+	/* Delete any viewports that we've created */
+	for(it = m_viewports.begin(); it != m_viewports.end(); it++)
+	{
+		delete (*it);
+	}
+	m_viewports.clear();
+}
+
+
+/* Event listeners */
+
+void
+State::activated(Ogre::RenderWindow *window)
+{
 	if(!m_loaded)
 	{
 		load();
 	}
-	window = Core::getInstance()->window();
-	m_viewport = window->addViewport(m_camera);
-	m_viewport->setBackgroundColour(Ogre::ColourValue(0,0,0));
-	m_camera->setAspectRatio(Ogre::Real(m_viewport->getActualWidth()) / Ogre::Real(m_viewport->getActualHeight()));
+	addViewports(window);
 }
 
 void
-State::deactivated(void)
+State::deactivated(Ogre::RenderWindow *window)
 {
-	if(m_viewport)
-	{
-		delete m_viewport;
-		m_viewport = NULL;
-	}
+	State::removeViewports(window);
 }
 
 bool
@@ -117,13 +167,12 @@ State::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	return true;
 }
 
-/* OIS event handlers */
 bool
 State::keyPressed(const OIS::KeyEvent &arg)
 {
 	if (arg.key == OIS::KC_ESCAPE)
 	{
-		Core::getInstance()->shutdown();
+		Core::getInstance()->popState();
 	}
 	return true;
 }
