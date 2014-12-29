@@ -57,7 +57,6 @@ Core::Core(void)
 	mCamera(0),
 	mSceneMgr(0),
 	mWindow(0),
-	mResourcesCfg(Ogre::StringUtil::BLANK),
 	mPluginsCfg(Ogre::StringUtil::BLANK),
 	mCursorWasVisible(false),
 	mShutDown(true),
@@ -100,18 +99,14 @@ Core::init(void)
 {
 #ifdef _DEBUG
 #ifndef OGRE_STATIC_LIB
-	mResourcesCfg = m_ResourcePath + "resources_d.cfg";
 	mPluginsCfg = m_ResourcePath + "plugins_d.cfg";
 #else
-	mResourcesCfg = "resources_d.cfg";
 	mPluginsCfg = "plugins_d.cfg";
 #endif
 #else
 #ifndef OGRE_STATIC_LIB
-	mResourcesCfg = m_ResourcePath + "resources.cfg";
 	mPluginsCfg = m_ResourcePath + "plugins.cfg";
 #else
-	mResourcesCfg = "resources.cfg";
 	mPluginsCfg = "plugins.cfg";
 #endif
 #endif
@@ -358,36 +353,6 @@ Core::createViewports(void)
 void
 Core::setupResources(void)
 {
-	// Load resource paths from config file
-	Ogre::ConfigFile cf;
-	cf.load(mResourcesCfg);
-
-	// Go through all sections & settings in the file
-	Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
-
-	Ogre::String secName, typeName, archName;
-	while (seci.hasMoreElements())
-	{
-		secName = seci.peekNextKey();
-		Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
-		Ogre::ConfigFile::SettingsMultiMap::iterator i;
-		for (i = settings->begin(); i != settings->end(); ++i)
-		{
-			typeName = i->first;
-			archName = i->second;
-
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-			// OS X does not set the working directory relative to the app.
-			// In order to make things portable on OS X we need to provide
-			// the loading with it's own bundle path location.
-			if (!Ogre::StringUtil::startsWith(archName, "/", false)) // only adjust relative directories
-				archName = Ogre::String(Ogre::macBundlePath() + "/" + archName);
-#endif
-
-			Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-				archName, typeName, secName);
-		}
-	}
 }
 
 void

@@ -87,7 +87,6 @@ namespace Jyuzau
 		Ogre::Camera*               mCamera;
 		Ogre::SceneManager*         mSceneMgr;
 		Ogre::RenderWindow*         mWindow;
-		Ogre::String                mResourcesCfg;
 		Ogre::String                mPluginsCfg;
 
 		Ogre::OverlaySystem*        mOverlaySystem;
