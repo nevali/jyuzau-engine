@@ -24,6 +24,9 @@ namespace Jyuzau
 {
 	class Scene;
 	
+	class LoadablePropMesh;
+	class LoadablePropMaterial;
+	
 	/* A Prop is an object which can be attached to scenes. They have meshes
 	 * and textures, and descendants (e.g., Actor) can include particular
 	 * behaviours.
@@ -50,42 +53,42 @@ namespace Jyuzau
 		virtual void loaded(void);
 	};
 	
-	class LoadableMesh: public LoadableObject
-	{
-		friend class Prop;
-		friend class LoadableProp;
-	public:
-		LoadableMesh(Loadable *owner, Ogre::String name, AttrList &attrs);
-		virtual bool complete(void);
-	protected:
-		Ogre::String m_source;
-
-		virtual bool addResources(Ogre::String group);
-	};
-
-	class LoadableMaterial: public LoadableObject
-	{
-		friend class Prop;
-		friend class LoadableProp;
-	public:
-		LoadableMaterial(Loadable *owner, Ogre::String name, AttrList &attrs);
-		virtual bool complete(void);
-	protected:
-		Ogre::String m_source;
-
-		virtual bool addResources(Ogre::String group);
-	};
-
 	class LoadableProp: public LoadableObject
 	{
 		friend class Prop;
 	public:
-		LoadableProp(Loadable *owner, Ogre::String name, AttrList &attrs);
+		LoadableProp(Prop *owner, Ogre::String name, AttrList &attrs);
 		virtual bool add(LoadableObject *child);
 		virtual bool complete(void);
 	protected:
-		LoadableMesh *m_mesh;
-		LoadableMaterial *m_material;
+		LoadablePropMesh *m_mesh;
+		LoadablePropMaterial *m_material;
+	};
+	
+	class LoadablePropMesh: public LoadableObject
+	{
+		friend class Prop;
+		friend class LoadableProp;
+	public:
+		LoadablePropMesh(Prop *owner, Ogre::String name, AttrList &attrs);
+		virtual bool complete(void);
+	protected:
+		Ogre::String m_source;
+
+		virtual bool addResources(Ogre::String group);
+	};
+
+	class LoadablePropMaterial: public LoadableObject
+	{
+		friend class Prop;
+		friend class LoadableProp;
+	public:
+		LoadablePropMaterial(Prop *owner, Ogre::String name, AttrList &attrs);
+		virtual bool complete(void);
+	protected:
+		Ogre::String m_source;
+
+		virtual bool addResources(Ogre::String group);
 	};
 };
 

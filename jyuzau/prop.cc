@@ -159,11 +159,11 @@ Prop::factory(Ogre::String name, AttrList &attrs)
 	}
 	if(!name.compare("mesh"))
 	{
-		return new LoadableMesh(this, name, attrs);
+		return new LoadablePropMesh(this, name, attrs);
 	}
 	if(!name.compare("material"))
 	{
-		return new LoadableMaterial(this, name, attrs);
+		return new LoadablePropMaterial(this, name, attrs);
 	}
 	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected element <" + name + ">");
 	return NULL;
@@ -185,7 +185,7 @@ Prop::loaded(void)
 
 /* A LoadableProp object encapsulates the <prop> root XML element */
 
-LoadableProp::LoadableProp(Loadable *owner, Ogre::String name, AttrList &attrs):
+LoadableProp::LoadableProp(Prop *owner, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, name, attrs),
 	m_mesh(NULL),
 	m_material(NULL)
@@ -197,11 +197,11 @@ LoadableProp::add(LoadableObject *child)
 {
 	if(!child->name().compare("mesh"))
 	{
-		m_mesh = dynamic_cast<LoadableMesh *>(child);
+		m_mesh = dynamic_cast<LoadablePropMesh *>(child);
 	}
 	else if(!child->name().compare("material"))
 	{
-		m_material = dynamic_cast<LoadableMaterial *>(child);
+		m_material = dynamic_cast<LoadablePropMaterial *>(child);
 	}
 	return LoadableObject::add(child);
 }
@@ -225,11 +225,11 @@ LoadableProp::complete()
 
 
 
-/* A LoadableMesh object encapsulates a <mesh> within a <prop>.
+/* A LoadablePropMesh object encapsulates a <mesh> within a <prop>.
  * <mesh src="foo.mesh" />
  */
 
-LoadableMesh::LoadableMesh(Loadable *owner, Ogre::String name, AttrList &attrs):
+LoadablePropMesh::LoadablePropMesh(Prop *owner, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, name, attrs),
 	m_source("")
 {
@@ -247,13 +247,13 @@ LoadableMesh::LoadableMesh(Loadable *owner, Ogre::String name, AttrList &attrs):
 }
 
 bool
-LoadableMesh::complete(void)
+LoadablePropMesh::complete(void)
 {
 	return m_source.length();
 }
 
 bool
-LoadableMesh::addResources(Ogre::String group)
+LoadablePropMesh::addResources(Ogre::String group)
 {
 	Ogre::ResourceGroupManager::getSingleton().declareResource(m_source, "Mesh", group);
 	return true;
@@ -262,11 +262,11 @@ LoadableMesh::addResources(Ogre::String group)
 
 
 
-/* A LoadableMaterial object encapsulates a <material> within a <prop>.
+/* A LoadablePropMaterial object encapsulates a <material> within a <prop>.
  * <material src="foo.material" />
  */
 
-LoadableMaterial::LoadableMaterial(Loadable *owner, Ogre::String name, AttrList &attrs):
+LoadablePropMaterial::LoadablePropMaterial(Prop *owner, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, name, attrs),
 	m_source("")
 {
@@ -284,13 +284,13 @@ LoadableMaterial::LoadableMaterial(Loadable *owner, Ogre::String name, AttrList 
 }
 
 bool
-LoadableMaterial::complete(void)
+LoadablePropMaterial::complete(void)
 {
 	return m_source.length();
 }
 
 bool
-LoadableMaterial::addResources(Ogre::String group)
+LoadablePropMaterial::addResources(Ogre::String group)
 {
 	Ogre::ResourceGroupManager::getSingleton().declareResource(m_source, "Material", group);
 	return true;
