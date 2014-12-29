@@ -25,7 +25,8 @@ libjyuzau_la_SOURCES = core.hh \
 	player.hh player.cc light.hh light.cc \
 	nsapp.mm \
 	delegate.hh delegate.mm \
-	sceneview.hh sceneview.mm
+	sceneview.hh sceneview.mm splash.hh splash.mm mainmenu.hh mainmenu.mm \
+	menu.hh menu.mm
 
 libjyuzau_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 
