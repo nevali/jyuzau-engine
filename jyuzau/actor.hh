@@ -69,6 +69,7 @@ namespace Jyuzau
 		virtual void nextWeapon(void);
 	protected:
 		Ogre::Camera *m_cameras[CT_COUNT];
+		double m_health;
 		
 		virtual Ogre::Camera *createCamera(CameraType type);
 	};

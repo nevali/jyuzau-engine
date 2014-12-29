@@ -20,7 +20,9 @@
 
 namespace Jyuzau
 {
-
+	
+	class Character;
+	
 	/* A Player is a specialisation of Actor which has the ability to be
 	 * controlled by the user.
 	 *
@@ -30,11 +32,17 @@ namespace Jyuzau
 	 */
 	class Player: public Actor
 	{
+		friend class Character;
 	public:
 		static Player *create(Ogre::String name, Scene *scene = NULL);
 		
 		Player(Ogre::String name);
 		virtual ~Player();
+	protected:
+		Character *m_character;
+		
+		virtual void characterAttached(void);
+		virtual void characterDetached(void);
 	};
 };
 

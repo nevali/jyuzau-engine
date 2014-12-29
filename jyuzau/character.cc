@@ -17,39 +17,35 @@
 # include "config.h"
 #endif
 
-#include "jyuzau/player.hh"
 #include "jyuzau/character.hh"
+#include "jyuzau/player.hh"
 
 using namespace Jyuzau;
 
-Player *
-Player::create(Ogre::String name, Scene *scene)
-{
-	Player *p;
-	
-	p = new Player(name);
-	if(!p->load())
-	{
-		delete p;
-		return NULL;
-	}
-	if(scene)
-	{
-		if(!p->attach(scene))
-		{
-			delete p;
-			return NULL;
-		}
-	}
-	return p;
-}
-
-Player::Player(Ogre::String name):
-	Actor::Actor(name),
-	m_character(NULL)
+Character::Character(Ogre::String name):
+	m_name(name),
+	m_player(NULL)
 {
 }
 
-Player::~Player()
+Character::~Character()
 {
+	if(m_player && m_player->m_character == this)
+	{
+		m_player->characterDetached();
+		m_player->m_character = NULL;
+	}
+}
+
+void
+Character::attach(Player *player)
+{
+	if(m_player && m_player->m_character == this)
+	{
+		m_player->characterDetached();
+		m_player->m_character = NULL;
+	}
+	m_player = player;
+	player->m_character = this;
+	player->characterAttached();
 }
