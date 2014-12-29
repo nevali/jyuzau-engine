@@ -35,10 +35,10 @@ DemoApp::~DemoApp()
 }
 
 void
-DemoApp::setupResources(void)
+DemoApp::createResourceGroups(void)
 {
-	Core::setupResources();
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(m_ResourcePath + "SdkTrays.zip", "Zip", "SdkTrays");
+	Core::createResourceGroups();
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(m_resourcePath + "SdkTrays.zip", "Zip", "SdkTrays");
 }
 
 void
@@ -46,10 +46,10 @@ DemoApp::createFrameListener(void)
 {
 	Core::createFrameListener();
 	
-	m_inputContext.mKeyboard = mKeyboard;
-	m_inputContext.mMouse = mMouse;
+	m_inputContext.mKeyboard = m_keyboard;
+	m_inputContext.mMouse = m_mouse;
 	
-	m_trayMgr = new OgreBites::SdkTrayManager("InterfaceName", mWindow, m_inputContext, this);
+	m_trayMgr = new OgreBites::SdkTrayManager("InterfaceName", m_window, m_inputContext, this);
 	m_trayMgr->showFrameStats(OgreBites::TL_TOPLEFT);
 	m_trayMgr->hideCursor();
 	m_trayMgr->toggleAdvancedFrameStats();
@@ -78,6 +78,7 @@ bool
 DemoApp::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
 	bool r;
+	Ogre::Camera *cam;
 	
 	r = Core::frameRenderingQueued(evt);
 	if(!r)
@@ -85,31 +86,35 @@ DemoApp::frameRenderingQueued(const Ogre::FrameEvent& evt)
 		return false;
 	}
 	m_trayMgr->frameRenderingQueued(evt);
+	cam = camera();
 
 	if (!m_trayMgr->isDialogVisible())
 	{
-		if (m_detailsPanel->isVisible())
+		if (m_detailsPanel->isVisible() && cam)
 		{
-			m_detailsPanel->setParamValue(0, Ogre::StringConverter::toString(mCamera->getDerivedPosition().x));
-			m_detailsPanel->setParamValue(1, Ogre::StringConverter::toString(mCamera->getDerivedPosition().y));
-			m_detailsPanel->setParamValue(2, Ogre::StringConverter::toString(mCamera->getDerivedPosition().z));
-			m_detailsPanel->setParamValue(4, Ogre::StringConverter::toString(mCamera->getDerivedOrientation().w));
-			m_detailsPanel->setParamValue(5, Ogre::StringConverter::toString(mCamera->getDerivedOrientation().x));
-			m_detailsPanel->setParamValue(6, Ogre::StringConverter::toString(mCamera->getDerivedOrientation().y));
-			m_detailsPanel->setParamValue(7, Ogre::StringConverter::toString(mCamera->getDerivedOrientation().z));
+			m_detailsPanel->setParamValue(0, Ogre::StringConverter::toString(cam->getDerivedPosition().x));
+			m_detailsPanel->setParamValue(1, Ogre::StringConverter::toString(cam->getDerivedPosition().y));
+			m_detailsPanel->setParamValue(2, Ogre::StringConverter::toString(cam->getDerivedPosition().z));
+			m_detailsPanel->setParamValue(4, Ogre::StringConverter::toString(cam->getDerivedOrientation().w));
+			m_detailsPanel->setParamValue(5, Ogre::StringConverter::toString(cam->getDerivedOrientation().x));
+			m_detailsPanel->setParamValue(6, Ogre::StringConverter::toString(cam->getDerivedOrientation().y));
+			m_detailsPanel->setParamValue(7, Ogre::StringConverter::toString(cam->getDerivedOrientation().z));
 		}
 	}
 	return true;
 }
 
-/* Bind a set of default keys, send everything else to the camera */
+/* Bind a set of default keys */
 bool
-DemoApp::keyPressed( const OIS::KeyEvent &arg )
+DemoApp::keyPressed(const OIS::KeyEvent &arg)
 {
+	Ogre::Camera *cam;
+	
 	if (m_trayMgr->isDialogVisible())
 	{
 		return true;
 	}
+	cam = camera();
 	if (arg.key == OIS::KC_F)
 	{
 		m_trayMgr->toggleAdvancedFrameStats();
@@ -159,12 +164,12 @@ DemoApp::keyPressed( const OIS::KeyEvent &arg )
 		Ogre::MaterialManager::getSingleton().setDefaultAnisotropy(aniso);
 		m_detailsPanel->setParamValue(9, newVal);
 	}
-	else if (arg.key == OIS::KC_R)
+	else if (arg.key == OIS::KC_R && cam)
 	{
 		Ogre::String newVal;
 		Ogre::PolygonMode pm;
 
-		switch (mCamera->getPolygonMode())
+		switch (cam->getPolygonMode())
 		{
 		case Ogre::PM_SOLID:
 			newVal = "Wireframe";
@@ -178,8 +183,7 @@ DemoApp::keyPressed( const OIS::KeyEvent &arg )
 			newVal = "Solid";
 			pm = Ogre::PM_SOLID;
 		}
-
-		mCamera->setPolygonMode(pm);
+		cam->setPolygonMode(pm);
 		m_detailsPanel->setParamValue(10, newVal);
 	}
 	else if(arg.key == OIS::KC_F5)
@@ -188,7 +192,7 @@ DemoApp::keyPressed( const OIS::KeyEvent &arg )
 	}
 	else if (arg.key == OIS::KC_SYSRQ)
 	{
-		mWindow->writeContentsToTimestampedFile("screenshot", ".jpg");
+		m_window->writeContentsToTimestampedFile("screenshot", ".jpg");
 	}
 	return Jyuzau::Core::keyPressed(arg);
 }
