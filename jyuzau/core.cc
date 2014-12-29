@@ -17,9 +17,6 @@
 # include "config.h"
 #endif
 
-#include "jyuzau/core.hh"
-#include "jyuzau/state.hh"
-
 #include <OGRE/OgreLogManager.h>
 #include <OGRE/OgreConfigFile.h>
 #include <OGRE/OgreViewport.h>
@@ -47,6 +44,10 @@
 #  endif
 #  include <OGRE/OgreStaticPluginLoader.h>
 #endif
+
+#include "jyuzau/core.hh"
+#include "jyuzau/state.hh"
+#include "jyuzau/roster.hh"
 
 using namespace Jyuzau;
 
@@ -131,6 +132,12 @@ Core::state(void)
 	return m_firstState;
 }
 
+Roster *
+Core::roster(void)
+{
+	return m_roster;
+}
+
 /* Return a pointer to the active camera */
 Ogre::Camera *
 Core::camera(void)
@@ -195,6 +202,9 @@ Core::init(void)
 	m_overlaySystem = new Ogre::OverlaySystem();
 
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+
+	/* Create the Roster */
+	createRoster();
 
 	/* Create the initial State objects */
 	createInitialState();
@@ -335,6 +345,13 @@ void
 Core::createResourceGroups(void)
 {
 	/* Can be overidden to initialise any resource groups */
+}
+
+void
+Core::createRoster(void)
+{
+	/* Can be overidden to create a custom Roster */
+	m_roster = new Roster();
 }
 
 void

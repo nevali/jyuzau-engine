@@ -22,7 +22,7 @@ libjyuzau_la_SOURCES = core.hh \
 	app.cc \
 	core.hh core.cc loadable.hh loadable.cc state.hh state.cc \
 	scene.hh scene.cc prop.hh prop.cc actor.hh actor.cc \
-	light.hh light.cc character.hh character.cc \
+	light.hh light.cc character.hh character.cc roster.hh roster.cc \
 	nsapp.mm \
 	delegate.hh delegate.mm \
 	sceneview.hh sceneview.mm splash.hh splash.mm mainmenu.hh mainmenu.mm \

@@ -35,7 +35,8 @@ namespace Jyuzau
 	class State;
 	class Scene;
 	class Player;
-
+	class Roster;
+	
 	class Core: public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener
 	{
 		friend class State;
@@ -58,6 +59,7 @@ namespace Jyuzau
 		virtual Ogre::RenderWindow *window(void);
 		virtual Ogre::OverlaySystem *overlays(void);
 		virtual State *state(void);
+		virtual Roster *roster(void);
 		
 		virtual Ogre::Camera *camera(void);
 		virtual Ogre::SceneManager *sceneManager(void);
@@ -86,11 +88,13 @@ namespace Jyuzau
 # ifdef OGRE_STATIC_LIB
 		Ogre::StaticPluginLoader m_staticPluginLoader;
 # endif
+		Roster *m_roster;
 		
 		virtual void activateState(State *state);
 		virtual void deactivateState(State *state);
 		
 		virtual void createResourceGroups(void);
+		virtual void createRoster(void);
 		virtual void createInitialState(void);
 		virtual void createFrameListener(void);
 

@@ -33,5 +33,6 @@
 # include "jyuzau/mainmenu.hh"
 # include "jyuzau/menu.hh"
 # include "jyuzau/character.hh"
+# include "jyuzau/roster.hh"
 
 #endif /*!JYUZAU_HH_*/

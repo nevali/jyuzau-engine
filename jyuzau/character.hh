@@ -39,6 +39,7 @@ namespace Jyuzau
 	class Character
 	{
 	public:
+		Character(Character &character);
 		Character(Ogre::String title = "Player", Ogre::String actor = "player");
 		virtual ~Character();
 		
@@ -46,6 +47,11 @@ namespace Jyuzau
 		 * a scene.
 		 */
 		virtual Actor *createActor(Scene *scene = NULL);
+		
+		/* Create a dummy Actor for the character - that is, an actor which
+		 * represents the character (because it uses the same assets), but is
+		 * not attached to the character itself */
+		virtual Actor *createDummy(Scene *scene = NULL);
 		
 		/* Attach the character to an existing actor */
 		virtual void attach(Actor *actor);

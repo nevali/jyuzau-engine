@@ -32,6 +32,16 @@ Character::Character(Ogre::String title, Ogre::String actorName):
 	memset(m_ammo, 0, sizeof(m_ammo));
 }
 
+Character::Character(Character &character):
+	m_actor(NULL)
+{
+	m_title = character.title();
+	m_actorName = character.actorName();
+	m_level = character.level();
+	memcpy(m_currency, character.m_currency, sizeof(m_currency));
+	memcpy(m_ammo, character.m_ammo, sizeof(m_ammo));
+}
+
 Character::~Character()
 {
 	if(m_actor && m_actor->m_character == this)
@@ -39,6 +49,26 @@ Character::~Character()
 		m_actor->characterDetached();
 		m_actor->m_character = NULL;
 	}
+}
+
+/* Create a dummy Actor representing the character, optionally placing it
+ * within a scene. The caller must delete the Actor when finished. Note that
+ * a dummy Actor is not attached to the Character, and so won't inherit its
+ * traits (it's intended for use in character selection states, and similar
+ * situations where a simple actor is required instead of a playable or
+ * otherwise interactive character).
+ */
+Actor *
+Character::createDummy(Scene *scene)
+{
+	Actor *actor;
+	
+	actor = Actor::create(m_actorName, scene);
+	if(!actor)
+	{
+		return NULL;
+	}
+	return actor;
 }
 
 /* Create a new Actor for the character, optionally placing it within
