@@ -112,6 +112,18 @@ Loadable::load(void)
 	return true;
 }
 
+Ogre::String
+Loadable::name(void)
+{
+	return m_name;
+}
+
+Ogre::String
+Loadable::kind(void)
+{
+	return m_kind;
+}
+
 void
 Loadable::loaded(void)
 {

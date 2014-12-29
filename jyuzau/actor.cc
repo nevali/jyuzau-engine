@@ -20,6 +20,7 @@
 #include <OGRE/OgreCamera.h>
 
 #include "jyuzau/actor.hh"
+#include "jyuzau/character.hh"
 
 using namespace Jyuzau;
 
@@ -46,7 +47,10 @@ Actor::create(Ogre::String name, Scene *scene)
 }
 
 Actor::Actor(Ogre::String name):
-	Prop::Prop(name, "actor")
+	Prop::Prop(name, "actor"),
+	m_character(NULL),
+	m_health(100.0f),
+	m_level(1)
 {
 	memset(m_cameras, 0, sizeof(m_cameras));
 }
@@ -76,6 +80,23 @@ Actor::camera(CameraType type)
 		m_cameras[type] = createCamera(type);
 	}
 	return m_cameras[type];
+}
+
+Character *
+Actor::character(void)
+{
+	return m_character;
+}
+
+void
+Actor::characterAttached(void)
+{
+	m_level = m_character->level();
+}
+
+void
+Actor::characterDetached(void)
+{
 }
 
 Ogre::Camera *

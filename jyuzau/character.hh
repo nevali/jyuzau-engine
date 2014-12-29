@@ -24,25 +24,49 @@
 namespace Jyuzau
 {
 	
-	class Player;
+	class Actor;
+	class Scene;
 	
 	/* A Character represents the identity and properties of a player, and is
-	 * attached to a Player object. Persistent state such as the player's name,
+	 * attached to an Actor object. Persistent state such as the player's name,
 	 * skin selection, currency, ammo, etc., are maintained in the Character
 	 * instance.
+	 *
+	 * A Character instance is also used to define the properties of special
+	 * NPCs - those that the player interacts with in particular ways to
+	 * advance the story, for example.
 	 */
 	class Character
 	{
 	public:
-		Character(Ogre::String name = "Player");
+		Character(Ogre::String title = "Player", Ogre::String actor = "player");
 		virtual ~Character();
 		
-		virtual void attach(Player *player);
+		/* Create a new Actor for the character, optionally placing it within
+		 * a scene.
+		 */
+		virtual Actor *createActor(Scene *scene = NULL);
+		
+		/* Attach the character to an existing actor */
+		virtual void attach(Actor *actor);
+		
+
+		/* Properties */
+		virtual Actor *actor(void);
+		virtual Ogre::String actorName(void);
+		virtual void setActorName(Ogre::String newName);
+		virtual Ogre::String title(void);
+		virtual void setTitle(Ogre::String newTitle);
+		virtual unsigned level(void);
+		virtual unsigned currency(int slot);
+		virtual unsigned ammo(int slot);
 	protected:
-		Ogre::String m_name;
-		Player *m_player;
-		unsigned currency[CHAR_CURRENCY_MAX + 1];
-		unsigned ammo[CHAR_WEAPON_MAX + 1];
+		Actor *m_actor;
+		Ogre::String m_actorName;
+		Ogre::String m_title;
+		unsigned m_level;
+		unsigned m_currency[CHAR_CURRENCY_MAX + 1];
+		unsigned m_ammo[CHAR_WEAPON_MAX + 1];
 	};
 	
 };

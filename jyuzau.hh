@@ -22,7 +22,6 @@
 # include "jyuzau/loadable.hh"
 # include "jyuzau/prop.hh"
 # include "jyuzau/actor.hh"
-# include "jyuzau/player.hh"
 # include "jyuzau/scene.hh"
 # include "jyuzau/light.hh"
 # ifdef __OBJC__

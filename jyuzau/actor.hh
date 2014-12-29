@@ -26,6 +26,8 @@ namespace Ogre
 namespace Jyuzau
 {
 	
+	class Character;
+	
 	enum CameraType {
 		CT_FIRSTPERSON,
 		CT_FOLLOWING,
@@ -44,6 +46,7 @@ namespace Jyuzau
 	 */
 	class Actor: public Prop
 	{
+		friend class Character;
 	public:
 		static Actor *create(Ogre::String name, Scene *scene = NULL);
 		
@@ -51,6 +54,8 @@ namespace Jyuzau
 		virtual ~Actor();
 		
 		virtual Ogre::Camera *camera(CameraType type);
+
+		virtual Character *character(void);
 
 		virtual void forward(MoveSpeed speed = MS_WALK);
 		virtual void backward(MoveSpeed speed = MS_WALK);
@@ -70,6 +75,11 @@ namespace Jyuzau
 	protected:
 		Ogre::Camera *m_cameras[CT_COUNT];
 		double m_health;
+		Character *m_character;
+		unsigned m_level;
+		
+		virtual void characterAttached(void);
+		virtual void characterDetached(void);
 		
 		virtual Ogre::Camera *createCamera(CameraType type);
 	};

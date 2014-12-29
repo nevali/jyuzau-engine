@@ -48,6 +48,8 @@ namespace Jyuzau
 		virtual bool load(void);
 		
 		virtual LoadableObject *root(void);
+		virtual Ogre::String name(void);
+		virtual Ogre::String kind(void);
 		
 		/* SAX callbacks */
 		static void sax_startElement(void *ctx, const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces, int nb_attributes, int nb_defaulted, const xmlChar **attributes);
