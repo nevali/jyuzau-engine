@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
-	<string>Jyuzau Head demo</string>
+	<string>Jyuzau Scene Viewer</string>
 	<key>CFBundleExecutable</key>
-	<string>HeadDemo</string>
+	<string>SceneView</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.github.nevali.jyuzau.engine.HeadDemo</string>
+	<string>com.github.nevali.jyuzau.engine.SceneView</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>HeadDemo</string>
+	<string>SceneView</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
