@@ -151,8 +151,6 @@ Camera::pitch(Ogre::Radian angle)
 		 */
 		pitchAngle = (2 * Ogre::Degree(Ogre::Math::ACos(pitchNode->getOrientation().w)).valueDegrees());
 		
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: pitch angle is " + std::to_string(pitchAngle));
-		
 		sign = pitchNode->getOrientation().x;
 		
 		if(pitchAngle > 90.0f)

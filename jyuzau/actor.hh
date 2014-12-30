@@ -19,6 +19,8 @@
 # include "jyuzau/prop.hh"
 # include "jyuzau/defs.hh"
 
+# include <OGRE/OgreFrameListener.h>
+
 namespace Jyuzau
 {
 	class Camera;
@@ -27,7 +29,7 @@ namespace Jyuzau
 	/* An actor is a kind of prop which can have autonomous behaviours
 	 * and cameras attached to it.
 	 */
-	class Actor: public Prop
+	class Actor: public Prop, public Ogre::FrameListener
 	{
 		friend class Character;
 	public:
@@ -43,6 +45,9 @@ namespace Jyuzau
 		
 		virtual Character *character(void);
 
+		virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
+
+		/* Basic movement primitives */
 		virtual void forward(MoveSpeed speed = MS_WALK);
 		virtual void backward(MoveSpeed speed = MS_WALK);
 		virtual void turnLeft(MoveSpeed speed = MS_WALK);
@@ -50,16 +55,40 @@ namespace Jyuzau
 		virtual void turnLeftRight(int distance);
 		virtual void strafeLeft(MoveSpeed speed = MS_WALK);
 		virtual void strafeRight(MoveSpeed speed = MS_WALK);
+		virtual void crouch(void);
+		virtual void jump(void);
+
+		/* Smoothed keyboard movement */
+		virtual void beginForward(MoveSpeed speed = MS_WALK);
+		virtual void endForward(void);
+		virtual void beginBackward(MoveSpeed speed = MS_WALK);
+		virtual void endBackward(void);
+		virtual void beginTurnLeft();
+		virtual void endTurnLeft(void);
+		virtual void beginTurnRight();
+		virtual void endTurnRight(void);
+		virtual void beginStrafeLeft(MoveSpeed speed = MS_WALK);
+		virtual void endStrafeLeft(void);
+		virtual void beginStrafeRight(MoveSpeed speed = MS_WALK);
+		virtual void endStrafeRight(void);
+		
+		/* Basic looking */
 		virtual void lookUp(void);
 		virtual void lookDown(void);
 		virtual void lookUpDown(int distance);
 		virtual void resetCamera(void);
+		virtual void zoom(void);
+		
+		/* Smoothed keyboard looking */
+		virtual void beginLookUp(void);
+		virtual void endLookUp(void);
+		virtual void beginLookDown(void);
+		virtual void endLookDown(void);
+
+		/* Weapons */
 		virtual void primaryFire(void);
 		virtual void secondaryFire(void);
 		virtual void special(void);
-		virtual void crouch(void);
-		virtual void jump(void);
-		virtual void zoom(void);
 		virtual void switchWeapon(int index);
 		virtual void prevWeapon(void);
 		virtual void nextWeapon(void);

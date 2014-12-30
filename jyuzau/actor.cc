@@ -142,6 +142,16 @@ Actor::setActiveCamera(Camera *cam)
 	m_cameras[cam->cameraType] = cam;
 }
 
+bool
+Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
+{
+	if(!m_node)
+	{
+		return false;
+	}
+	return true;
+}
+
 void
 Actor::forward(MoveSpeed speed)
 {
@@ -149,7 +159,25 @@ Actor::forward(MoveSpeed speed)
 	{
 		return;
 	}
-	m_node->translate(0, 0, -CONTROL_WALK_DISTANCE);
+	m_node->translate(0, 0, -CONTROL_WALK_DISTANCE, Ogre::Node::TS_LOCAL);
+}
+
+void
+Actor::beginForward(MoveSpeed speed)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
+Actor::endForward(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
 }
 
 void
@@ -159,7 +187,25 @@ Actor::backward(MoveSpeed speed)
 	{
 		return;
 	}
-	m_node->translate(0, 0, CONTROL_WALK_DISTANCE);
+	m_node->translate(0, 0, CONTROL_WALK_DISTANCE, Ogre::Node::TS_LOCAL);
+}
+
+void
+Actor::beginBackward(MoveSpeed speed)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
+Actor::endBackward(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
 }
 
 void
@@ -173,6 +219,24 @@ Actor::turnLeft(MoveSpeed speed)
 }
 
 void
+Actor::beginTurnLeft(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
+Actor::endTurnLeft(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
 Actor::turnRight(MoveSpeed speed)
 {
 	if(!m_node)
@@ -180,6 +244,24 @@ Actor::turnRight(MoveSpeed speed)
 		return;
 	}
 	m_node->yaw((Ogre::Radian) -CONTROL_YAW_ANGLE);
+}
+
+void
+Actor::beginTurnRight(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
+Actor::endTurnRight(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
 }
 
 void
@@ -204,8 +286,26 @@ Actor::strafeLeft(MoveSpeed speed)
 		return;
 	}
 	m_node->translate(-CONTROL_WALK_DISTANCE, 0, 0);
-	
 }
+
+void
+Actor::beginStrafeLeft(MoveSpeed speed)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
+Actor::endStrafeLeft(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
 
 void
 Actor::strafeRight(MoveSpeed speed)
@@ -215,6 +315,24 @@ Actor::strafeRight(MoveSpeed speed)
 		return;
 	}
 	m_node->translate(CONTROL_WALK_DISTANCE, 0, 0);
+}
+
+void
+Actor::beginStrafeRight(MoveSpeed speed)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
+Actor::endStrafeRight(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
 }
 
 void
@@ -231,6 +349,24 @@ Actor::lookUp(void)
 }
 
 void
+Actor::beginLookUp(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
+Actor::endLookUp(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
 Actor::lookDown(void)
 {
 	if(!m_node)
@@ -242,6 +378,25 @@ Actor::lookDown(void)
 		m_cameras[CT_FIRSTPERSON]->pitch((Ogre::Radian) CONTROL_PITCH_ANGLE);
 	}
 }
+
+void
+Actor::beginLookDown(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
+void
+Actor::endLookDown(void)
+{
+	if(!m_node)
+	{
+		return;
+	}
+}
+
 
 void
 Actor::lookUpDown(int distance)
@@ -269,7 +424,7 @@ Actor::resetCamera(void)
 	}
 	if(m_cameras[CT_FIRSTPERSON])
 	{
-		m_cameras[CT_FIRSTPERSON]->pitchNode->setOrientation(Ogre::Quaternion(0, 0, 0, 0));
+		m_cameras[CT_FIRSTPERSON]->pitchNode->resetOrientation();
 	}
 }
 

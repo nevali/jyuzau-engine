@@ -240,6 +240,12 @@ State::deactivated(Ogre::RenderWindow *window)
 bool
 State::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
+	std::vector<Actor *>::iterator ait;
+	
+	for(ait = m_actors.begin(); ait != m_actors.end(); ait++)
+	{
+		(*ait)->frameRenderingQueued(evt);
+	}
 	return true;
 }
 
