@@ -127,11 +127,11 @@ State::addViewports(Ogre::RenderWindow *window)
 	Ogre::Viewport *viewport;
 	
 	/* By default, if there is at least one camera, create a full-window
-	 * viewport for the first one
+	 * viewport for the first one at Z-Order 0
 	 */
 	if(m_cameras.size())
 	{
-		viewport = window->addViewport(m_cameras[0]);
+		viewport = window->addViewport(m_cameras[0], 0);
 		viewport->setBackgroundColour(Ogre::ColourValue(0,0,0));
 		m_cameras[0]->setAspectRatio(Ogre::Real(viewport->getActualWidth()) / Ogre::Real(viewport->getActualHeight()));
 		m_viewports.push_back(viewport);
@@ -141,12 +141,10 @@ State::addViewports(Ogre::RenderWindow *window)
 void
 State::removeViewports(Ogre::RenderWindow *window)
 {
-	std::vector<Ogre::Viewport *>::iterator it;
 
-	/* Delete any viewports that we've created */
-	for(it = m_viewports.begin(); it != m_viewports.end(); it++)
+	if(m_viewports.size())
 	{
-		delete (*it);
+		window->removeViewport(0);
 	}
 	m_viewports.clear();
 }

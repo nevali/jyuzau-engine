@@ -26,7 +26,7 @@ libjyuzau_la_SOURCES = core.hh \
 	nsapp.mm \
 	delegate.hh delegate.mm \
 	sceneview.hh sceneview.mm splash.hh splash.mm mainmenu.hh mainmenu.mm \
-	menu.hh menu.mm
+	menu.hh menu.mm charselect.hh charselect.cc
 
 libjyuzau_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 

@@ -72,7 +72,9 @@ Core::Core(void)
 	m_overlaySystem(NULL),
 	m_activeScene(NULL),
 	m_firstState(NULL),
-	m_lastState(NULL)
+	m_lastState(NULL),
+	m_inhibitStateActivation(0),
+	m_preInhibitState(NULL)
 {
 	singleton = this;
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
@@ -207,6 +209,7 @@ Core::init(void)
 	createRoster();
 
 	/* Create the initial State objects */
+	disableStateActivation();
 	createInitialState();
 	if(!m_firstState)
 	{
@@ -215,6 +218,7 @@ Core::init(void)
 	}
 	createFrameListener();
 	m_shutdown = false;
+	enableStateActivation();
 	return true;
 };
 
@@ -328,8 +332,15 @@ Core::removeState(State *state)
 void
 Core::activateState(State *state)
 {
-	state->activated(m_window);
-	state->sceneManager()->addRenderQueueListener(m_overlaySystem);
+	if(m_inhibitStateActivation)
+	{
+		state->preload();
+	}
+	else
+	{
+		state->activated(m_window);
+		state->sceneManager()->addRenderQueueListener(m_overlaySystem);
+	}
 }
 
 void
@@ -337,6 +348,31 @@ Core::deactivateState(State *state)
 {
 	state->sceneManager()->removeRenderQueueListener(m_overlaySystem);
 	state->deactivated(m_window);
+}
+
+int
+Core::disableStateActivation()
+{
+	if(!m_inhibitStateActivation)
+	{
+		m_preInhibitState = m_firstState;
+	}
+	m_inhibitStateActivation++;
+	return m_inhibitStateActivation;
+}
+
+int
+Core::enableStateActivation()
+{
+	if(m_inhibitStateActivation)
+	{
+		m_inhibitStateActivation--;
+		if(!m_inhibitStateActivation && m_preInhibitState != m_firstState)
+		{
+			activateState(m_firstState);
+		}
+	}
+	return m_inhibitStateActivation;
 }
 
 /* Initialisation methods */

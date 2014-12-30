@@ -69,6 +69,8 @@ namespace Jyuzau
 		virtual void popState(void);
 		virtual void setState(State *state);
 		virtual void removeState(State *state);
+		virtual int enableStateActivation(void);
+		virtual int disableStateActivation(void);
 		
 		/* Trigger application termination */
 		virtual void shutdown();
@@ -89,6 +91,8 @@ namespace Jyuzau
 		Ogre::StaticPluginLoader m_staticPluginLoader;
 # endif
 		Roster *m_roster;
+		int m_inhibitStateActivation;
+		State *m_preInhibitState;
 		
 		virtual void activateState(State *state);
 		virtual void deactivateState(State *state);

@@ -13,27 +13,29 @@
  *  limitations under the License.
  */
 
-#ifndef JYUZAU_HH_
-# define JYUZAU_HH_                    1
+#ifndef JYUZAU_CHARSELECT_HH_
+# define JYUZAU_CHARSELECT_HH_         1
 
-# include <OGRE/OgrePlatform.h>
-
-# include "jyuzau/core.hh"
-# include "jyuzau/loadable.hh"
-# include "jyuzau/prop.hh"
-# include "jyuzau/actor.hh"
-# include "jyuzau/scene.hh"
-# include "jyuzau/light.hh"
-# ifdef __OBJC__
-#  include "jyuzau/delegate.hh"
-# endif
-# include "jyuzau/main.hh"
 # include "jyuzau/state.hh"
-# include "jyuzau/splash.hh"
-# include "jyuzau/mainmenu.hh"
-# include "jyuzau/menu.hh"
-# include "jyuzau/character.hh"
-# include "jyuzau/roster.hh"
-# include "jyuzau/charselect.hh"
 
-#endif /*!JYUZAU_HH_*/
+namespace Jyuzau
+{
+	class Roster;
+	
+	/* Use the Roster to perform character selection (popping immediately
+	 * if there's only one available character)
+	 */
+	class CharacterSelectionState: public State
+	{
+	public:
+		CharacterSelectionState();
+	protected:
+		Roster *m_roster;
+		
+		virtual void load(void);
+		virtual void activated(Ogre::RenderWindow *window);
+	};
+	
+};
+
+#endif /*!JYUZAU_CHARSELECT_HH_*/
