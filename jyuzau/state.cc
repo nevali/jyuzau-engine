@@ -30,6 +30,7 @@ State::State():
 	m_cameras(),
 	m_viewports()
 {
+	m_core = Core::getInstance();
 }
 
 State::~State()
@@ -37,7 +38,7 @@ State::~State()
 	std::vector<StateViewportEntry>::iterator vit;
 	std::vector<Ogre::Camera *>::iterator cit;
 	
-	Core::getInstance()->removeState(this);
+	m_core->removeState(this);
 
 	/* Delete any viewports that we've created (note that we don't own
 	 * the Ogre::Viewport instance, so we can't simply delete them) */

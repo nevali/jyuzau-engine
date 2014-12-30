@@ -27,6 +27,8 @@
 
 namespace Jyuzau
 {
+	
+	class Core;
 
 	/* The State class encapsulates the game logic at any given point,
 	 * including cut-scenes, menus, and so on.
@@ -47,6 +49,7 @@ namespace Jyuzau
 		virtual Ogre::Camera *camera(int index = 0);
 		virtual int cameraCount(void);
 	protected:
+		Core *m_core;
 		State *m_prev, *m_next;
 		bool m_loaded;
 		Ogre::SceneManager *m_sceneManager;
