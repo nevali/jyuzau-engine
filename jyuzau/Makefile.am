@@ -12,9 +12,14 @@
 ##  See the License for the specific language governing permissions and
 ##  limitations under the License.
 
-AM_CPPFLAGS = @AM_CPPFLAGS@ @OGRE_CPPFLAGS@ @OIS_CPPFLAGS@
-AM_LDFLAGS = @AM_LDFLAGS@ @OGRE_LDFLAGS@ @OIS_LDFLAGS@
-LIBS = @LIBS@ @OGRE_LIBS@ @OIS_LIBS@ -framework Cocoa -framework Foundation
+AM_CPPFLAGS = @AM_CPPFLAGS@ @OGRE_CPPFLAGS@ @OGREOVERLAY_CPPFLAGS@ @OIS_CPPFLAGS@
+
+AM_LDFLAGS = @AM_LDFLAGS@ @OGRE_LDFLAGS@ @OGREOVERLAY_LDFLAGS@ @COCOA_LDFLAGS@ @OIS_LIBS@
+
+LIBS = @LIBS@ \
+	@OGREOVERLAY_LIBS@ @OGRE_LIBS@ \
+	@COCOA_LIBS@
+	@OIS_LIBS@
 
 lib_LTLIBRARIES = libjyuzau.la
 

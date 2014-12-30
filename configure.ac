@@ -31,8 +31,8 @@ AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_LDFLAGS])
 
-AM_CPPFLAGS='-I${top_builddir} -I${top_srcdir} -I${top_builddir}/sdk/include'
-AM_LDFLAGS='-L${top_builddir}/sdk/lib'
+AM_CPPFLAGS='-I${top_builddir} -I${top_srcdir} -I${top_builddir}/sdk/include -F${top_builddir}/sdk/Frameworks'
+AM_LDFLAGS='-L${abs_top_builddir}/sdk/lib -F${top_builddir}/sdk/Frameworks'
 
 AC_CONFIG_HEADER([config.h])
 
@@ -51,6 +51,14 @@ dnl Configure Jyuzau's own dependencies
 dnl -------------------------------------------------------------------
 
 BT_REQUIRE_LIBXML2
+
+COCOA_CPPFLAGS=''
+COCOA_LDFLAGS=''
+COCOA_LIBS='-framework Cocoa -framework Foundation'
+
+AC_SUBST([COCOA_CPPFLAGS])
+AC_SUBST([COCOA_LDFLAGS])
+AC_SUBST([COCOA_LIBS])
 
 dnl -------------------------------------------------------------------
 dnl Configure FreeImage
@@ -107,13 +115,23 @@ OGRE_CMAKE_FLAGS="$OGRE_CMAKE_FLAGS -DCMAKE_OSX_ARCHITECTURES=$host_cpu"
 
 ogre_builddir="ogre-build"
 test -d ${ogre_builddir} && rm -f ${ogre_builddir}/configure-stamp || exit $?
-OGRE_CPPFLAGS='-I${top_builddir}/ogre-build/sdk/include -I${top_builddir}/ogre-build/sdk/include/OGRE -I${top_builddir}/ogre-build/sdk/include/OGRE/OSX -I${top_builddir}/ogre-build/sdk/include/OGRE/Overlay -F${top_builddir}/ogre-build/sdk/lib/RelWithDebInfo'
-OGRE_LDFLAGS='-F${top_builddir}/ogre-build/sdk/lib/RelWithDebInfo'
-OGRE_LIBS='-framework Ogre -framework OgreOverlay'
+
+OGRE_CPPFLAGS='-I${top_builddir}/sdk/include -I${top_builddir}/sdk/include/OGRE -F${top_builddir}/sdk/Frameworks'
+OGRE_LDFLAGS='-F${top_builddir}/sdk/Frameworks'
+OGRE_LIBS='-framework Ogre'
 
 AC_SUBST([OGRE_CPPFLAGS])
 AC_SUBST([OGRE_LDFLAGS])
 AC_SUBST([OGRE_LIBS])
+
+OGREOVERLAY_CPPFLAGS='-I${top_builddir}/sdk/include/OGRE/Overlay -F${top_builddir}/sdk/Frameworks'
+OGREOVERLAY_LDFLAGS='-F${top_builddir}/sdk/Frameworks'
+OGREOVERLAY_LIBS='-framework OgreOverlay'
+
+AC_SUBST([OGREOVERLAY_CPPFLAGS])
+AC_SUBST([OGREOVERLAY_LDFLAGS])
+AC_SUBST([OGREOVERLAY_LIBS])
+
 AC_SUBST([OGRE_CMAKE_FLAGS])
 AC_SUBST([ogre_builddir])
 

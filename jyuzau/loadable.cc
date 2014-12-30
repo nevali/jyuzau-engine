@@ -23,7 +23,7 @@
 #include "jyuzau/loadable.hh"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <macUtils.h>
+# include <OGRE/OSX/macUtils.h>
 #endif
 
 using namespace Jyuzau;

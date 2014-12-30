@@ -53,5 +53,11 @@ all-local-ogre-configure: all-local-subdirs
 all-local-ogre: all-local-ogre-configure
 	cd "@ogre_builddir@" && $(MAKE) && $(MAKE) install
 
-all-local: all-local-subdirs all-local-ogre
+all-local-ogre-sdk: all-local-ogre
+	test -d sdk || mkdir sdk
+	test -d sdk/Frameworks || mkdir sdk/Frameworks
+	( cd "@ogre_builddir@/sdk" && tar cf - bin include ) | ( cd sdk && tar xf - )
+	( cd "@ogre_builddir@/sdk/lib/RelWithDebInfo" && tar cf - . ) | ( cd sdk/Frameworks && tar xf - )
+
+all-local: all-local-subdirs all-local-ogre-sdk
 
