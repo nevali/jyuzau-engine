@@ -31,6 +31,7 @@ namespace Jyuzau
 	class Core;
 	class Actor;
 	class Camera;
+	class Controller;
 
 	/* The State class encapsulates the game logic at any given point,
 	 * including cut-scenes, menus, and so on.
@@ -59,6 +60,7 @@ namespace Jyuzau
 		std::vector<Camera *> m_cameras;
 		std::vector<Actor *> m_actors;
 		CameraType m_defaultPlayerCameraType;
+		Controller *m_controller;
 		
 		virtual void load(void);
 		virtual void createScenes(void);

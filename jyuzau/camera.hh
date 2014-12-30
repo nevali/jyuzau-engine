@@ -20,6 +20,8 @@
 # include <OGRE/OgreString.h>
 # include <OGRE/OgreVector3.h>
 
+# include "jyuzau/defs.hh"
+
 namespace Ogre
 {
 	class Camera;
@@ -46,6 +48,8 @@ namespace Jyuzau
 		Ogre::SceneNode *pitchNode;
 		Ogre::SceneNode *rollNode;
 		Actor *actor;
+		CameraType cameraType;
+		bool limitPitch;
 		
 		Camera(Ogre::String name, Ogre::SceneManager *sceneManager);
 		virtual ~Camera();
@@ -62,6 +66,25 @@ namespace Jyuzau
 		
 		virtual void attach(Ogre::SceneNode *parentNode);
 		virtual void detach(void);
+		
+		virtual void pitch(Ogre::Radian angle);
+		
+		virtual void yaw(Ogre::Radian angle)
+		{
+			if(yawNode)
+			{
+				yawNode->yaw(angle);
+			}
+		}
+		
+		virtual void roll(Ogre::Radian angle)
+		{
+			if(rollNode)
+			{
+				rollNode->roll(angle);
+			}
+		}
+		
 	};
 };
 

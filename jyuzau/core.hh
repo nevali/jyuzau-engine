@@ -37,6 +37,7 @@ namespace Jyuzau
 	class Character;
 	class Roster;
 	class Camera;
+	class Controller;
 	
 	class Core: public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener
 	{
@@ -63,6 +64,7 @@ namespace Jyuzau
 		virtual Roster *roster(void);
 		virtual Camera *camera(int index = 0);
 		virtual Ogre::SceneManager *sceneManager(void);
+		virtual Controller *controller(void);
 		
 		/* State management */
 		virtual void pushState(State *state);
@@ -101,6 +103,7 @@ namespace Jyuzau
 		State *m_preInhibitState;
 		std::vector<Character *>m_players;
 		bool m_playersChanged;
+		Controller *m_controller;
 		
 		virtual void activateState(State *state);
 		virtual void deactivateState(State *state);
@@ -109,6 +112,7 @@ namespace Jyuzau
 		virtual void createRoster(void);
 		virtual void createInitialState(void);
 		virtual void createFrameListener(void);
+		virtual void createController(void);
 
 		/* Event listeners */
 		virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);

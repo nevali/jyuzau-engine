@@ -16,8 +16,38 @@
 #ifndef JYUZAU_CONTROLLER_HH_
 # define JYUZAU_CONTROLLER_HH_         1
 
+# include <OIS/OISEvents.h>
+# include <OIS/OISInputManager.h>
+# include <OIS/OISKeyboard.h>
+# include <OIS/OISMouse.h>
+
 namespace Jyuzau
 {
+
+	class Core;
+	class Actor;
+
+	/* The Controller maps keyboard, mouse and joypad events to playable
+	 * actors' actions.
+	 */
+	class Controller: public OIS::KeyListener, public OIS::MouseListener
+	{
+	public:
+		Controller();
+		virtual ~Controller();
+		
+		virtual void bind(Actor *actor);
+		virtual void unbindAll(void);
+		
+		/* Event injection */
+		virtual bool keyPressed(const OIS::KeyEvent &arg);
+		virtual bool keyReleased(const OIS::KeyEvent &arg);
+		virtual bool mouseMoved(const OIS::MouseEvent &arg);
+		virtual bool mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
+		virtual bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
+	protected:
+		std::vector<Actor *> m_actors;
+	};
 
 };
 

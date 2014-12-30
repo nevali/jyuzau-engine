@@ -24,6 +24,7 @@
 #include "jyuzau/character.hh"
 #include "jyuzau/actor.hh"
 #include "jyuzau/camera.hh"
+#include "jyuzau/controller.hh"
 
 using namespace Jyuzau;
 
@@ -35,6 +36,7 @@ State::State():
 	m_defaultPlayerCameraType(CT_FIRSTPERSON)
 {
 	m_core = Core::getInstance();
+	m_controller = m_core->controller();
 }
 
 State::~State()
@@ -144,7 +146,7 @@ State::createPlayers(void)
 		}
 		m_actors.push_back(a);
 		/* Temporary hack until spawn points are implemented */
-		a->setPosition(0, 0, 80);
+		a->setPosition(0, 0, 200);
 		cam = a->createCamera(m_defaultPlayerCameraType);
 		if(!cam)
 		{
@@ -188,14 +190,28 @@ State::addViewports(Ogre::RenderWindow *window)
 		vp = m_cameras[0]->createViewport(window);
 		vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
 		m_cameras[0]->matchAspectRatio();
+		if(m_cameras[0]->actor)
+		{
+			m_cameras[0]->actor->setActiveCamera(m_cameras[0]);
+		}
+	}
+	if(m_actors.size())
+	{
+		m_controller->bind(m_actors[0]);
 	}
 }
 
 void
 State::removeViewports(Ogre::RenderWindow *window)
 {
+	std::vector<Actor *>::iterator ait;
 	std::vector<Camera *>::iterator cit;
 	
+	m_controller->unbindAll();
+	for(ait = m_actors.begin(); ait != m_actors.end(); ait++)
+	{
+		(*ait)->resetActiveCameras();
+	}
 	for(cit = m_cameras.begin(); cit != m_cameras.end(); cit++)
 	{
 		(*cit)->deleteViewport();
@@ -233,31 +249,32 @@ State::keyPressed(const OIS::KeyEvent &arg)
 	if (arg.key == OIS::KC_ESCAPE)
 	{
 		Core::getInstance()->popState();
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool
 State::keyReleased(const OIS::KeyEvent &arg)
 {
-	return true;
+	return false;
 }
 
 bool
 State::mouseMoved(const OIS::MouseEvent &arg)
 {
-	return true;
+	return false;
 }
 
 bool
 State::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
-	return true;
+	return false;
 }
 
 bool
 State::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
-	return true;
+	return false;
 }
 

@@ -31,7 +31,9 @@ Camera::Camera(Ogre::String name, Ogre::SceneManager *sceneManager):
 	yawNode(NULL),
 	pitchNode(NULL),
 	rollNode(NULL),
-	actor(NULL)
+	actor(NULL),
+	cameraType(CT_UNSPEC),
+	limitPitch(false)
 {
 	camera = sceneManager->createCamera(name);
 }
@@ -128,5 +130,47 @@ Camera::detach(void)
 	{
 		delete node;
 		node = NULL;
+	}
+}
+
+void
+Camera::pitch(Ogre::Radian angle)
+{
+	Ogre::Real pitchAngle;
+	Ogre::Real sign;
+	
+	if(!pitchNode)
+	{
+		return;
+	}
+	pitchNode->pitch(angle);
+	if(limitPitch)
+	{
+		/* Limit pitch angle to between -90 and +90 (i.e., you can't look)
+		 * behind you by pitching.
+		 */
+		pitchAngle = (2 * Ogre::Degree(Ogre::Math::ACos(pitchNode->getOrientation().w)).valueDegrees());
+		
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: pitch angle is " + std::to_string(pitchAngle));
+		
+		sign = pitchNode->getOrientation().x;
+		
+		if(pitchAngle > 90.0f)
+		{
+			if(sign > 0)
+			{
+				pitchNode->setOrientation(
+					Ogre::Quaternion(
+						Ogre::Math::Sqrt(0.5f), Ogre::Math::Sqrt(0.5f), 0, 0
+				));
+			}
+			else if (sign < 0)
+			{
+				pitchNode->setOrientation(
+					Ogre::Quaternion(
+						Ogre::Math::Sqrt(0.5f), -Ogre::Math::Sqrt(0.5f), 0, 0
+				));
+			}
+		}
 	}
 }

@@ -56,33 +56,3 @@ SceneWalkState::attachScenes(void)
 {
 	m_scene->attach(m_sceneManager);
 }
-
-bool
-SceneWalkState::keyPressed(const OIS::KeyEvent &arg)
-{
-	return State::keyPressed(arg);
-}
-
-bool
-SceneWalkState::keyReleased(const OIS::KeyEvent &arg)
-{
-	return State::keyReleased(arg);
-}
-
-bool
-SceneWalkState::mouseMoved(const OIS::MouseEvent &arg)
-{
-	return State::mouseMoved(arg);
-}
-
-bool
-SceneWalkState::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
-{
-	return State::mousePressed(arg, id);
-}
-
-bool
-SceneWalkState::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
-{
-	return State::mouseReleased(arg, id);
-}

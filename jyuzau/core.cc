@@ -49,6 +49,7 @@
 #include "jyuzau/state.hh"
 #include "jyuzau/roster.hh"
 #include "jyuzau/character.hh"
+#include "jyuzau/controller.hh"
 
 using namespace Jyuzau;
 
@@ -76,7 +77,8 @@ Core::Core(void)
 	m_lastState(NULL),
 	m_inhibitStateActivation(0),
 	m_preInhibitState(NULL),
-	m_playersChanged(false)
+	m_playersChanged(false),
+	m_controller(NULL)
 {
 	singleton = this;
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
@@ -91,6 +93,7 @@ Core::~Core(void)
 	std::vector<Character *>::iterator it;
 	singleton = NULL;
 	
+	delete m_controller;
 	for(it = m_players.begin(); it != m_players.end(); it++)
 	{
 		delete (*it);
@@ -167,6 +170,13 @@ Core::sceneManager(void)
 		return m_firstState->sceneManager();
 	}
 	return NULL;
+}
+
+/* Return the Controller instance */
+Controller *
+Core::controller(void)
+{
+	return m_controller;
 }
 
 /* Trigger application termination */
@@ -253,6 +263,9 @@ Core::init(void)
 
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
+	/* Create the Controller */
+	createController();
+	
 	/* Create the Roster */
 	createRoster();
 
@@ -449,6 +462,13 @@ Core::createRoster(void)
 }
 
 void
+Core::createController(void)
+{
+	/* Can be overidden to create a custom Controller */
+	m_controller = new Controller();
+}
+
+void
 Core::createInitialState()
 {
 	/* To be overridden by subclasses in order to push a new state */
@@ -508,51 +528,51 @@ Core::frameRenderingQueued(const Ogre::FrameEvent& evt)
 bool
 Core::keyPressed(const OIS::KeyEvent &arg)
 {
-	if(!m_firstState)
+	if(m_firstState && m_firstState->keyPressed(arg))
 	{
-		return false;
+		return true;
 	}
-	return m_firstState->keyPressed(arg);
+	return m_controller->keyPressed(arg);
 }
 
 bool
 Core::keyReleased(const OIS::KeyEvent &arg)
 {
-	if(!m_firstState)
+	if(m_firstState && m_firstState->keyReleased(arg))
 	{
-		return false;
+		return true;
 	}
-	return m_firstState->keyReleased(arg);
+	return m_controller->keyReleased(arg);
 }
 
 bool
 Core::mouseMoved(const OIS::MouseEvent &arg)
 {
-	if(!m_firstState)
+	if(m_firstState && m_firstState->mouseMoved(arg))
 	{
 		return false;
 	}
-	return m_firstState->mouseMoved(arg);
+	return m_controller->mouseMoved(arg);
 }
 
 bool
 Core::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
-	if(!m_firstState)
+	if(m_firstState && m_firstState->mousePressed(arg, id))
 	{
 		return false;
 	}
-	return m_firstState->mousePressed(arg, id);
+	return m_controller->mousePressed(arg, id);
 }
 
 bool
 Core::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
-	if(!m_firstState)
+	if(m_firstState && m_firstState->mouseReleased(arg, id))
 	{
 		return false;
 	}
-	return m_firstState->mouseReleased(arg, id);
+	return m_controller->mouseReleased(arg, id);
 }
 
 void

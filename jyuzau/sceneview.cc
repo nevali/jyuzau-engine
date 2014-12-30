@@ -89,42 +89,62 @@ SceneViewState::deletePlayers(void)
 bool
 SceneViewState::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	m_cameraMan->frameRenderingQueued(evt);
+	if(m_cameraMan->frameRenderingQueued(evt))
+	{
+		return true;
+	}
 	return State::frameRenderingQueued(evt);
 }
 
-
+/* Pass all keyboard and mouse events not handled by the base class to the
+ * camera manager.
+ */
 bool
 SceneViewState::keyPressed(const OIS::KeyEvent &arg)
 {
-	m_cameraMan->injectKeyDown(arg);
-	return State::keyPressed(arg);
+	if(!State::keyPressed(arg))
+	{
+		m_cameraMan->injectKeyDown(arg);
+	}
+	return true;
 }
 
 bool
 SceneViewState::keyReleased(const OIS::KeyEvent &arg)
 {
-	m_cameraMan->injectKeyUp(arg);
-	return State::keyReleased(arg);
+	if(!State::keyReleased(arg))
+	{
+		m_cameraMan->injectKeyUp(arg);
+	}
+	return true;
 }
 
 bool
 SceneViewState::mouseMoved(const OIS::MouseEvent &arg)
 {
-	m_cameraMan->injectMouseMove(arg);
-	return State::mouseMoved(arg);
+	if(!State::mouseMoved(arg))
+	{
+		m_cameraMan->injectMouseMove(arg);
+	}
+	return true;
 }
 
 bool
 SceneViewState::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
-	m_cameraMan->injectMouseDown(arg, id);
-	return State::mousePressed(arg, id);
+	if(!State::mousePressed(arg, id))
+	{
+		m_cameraMan->injectMouseDown(arg, id);
+	}
+	return true;
 }
 
 bool
 SceneViewState::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
-	m_cameraMan->injectMouseUp(arg, id);
-	return State::mouseReleased(arg, id);
+	if(!State::mouseReleased(arg, id))
+	{
+		m_cameraMan->injectMouseUp(arg, id);
+	}
+	return true;
 }

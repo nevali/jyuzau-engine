@@ -38,15 +38,22 @@ namespace Jyuzau
 		virtual ~Actor();
 		
 		virtual Camera *createCamera(CameraType type);
-
+		virtual void resetActiveCameras(void);
+		virtual void setActiveCamera(Camera *cam);
+		
 		virtual Character *character(void);
 
 		virtual void forward(MoveSpeed speed = MS_WALK);
 		virtual void backward(MoveSpeed speed = MS_WALK);
 		virtual void turnLeft(MoveSpeed speed = MS_WALK);
 		virtual void turnRight(MoveSpeed speed = MS_WALK);
+		virtual void turnLeftRight(int distance);
 		virtual void strafeLeft(MoveSpeed speed = MS_WALK);
 		virtual void strafeRight(MoveSpeed speed = MS_WALK);
+		virtual void lookUp(void);
+		virtual void lookDown(void);
+		virtual void lookUpDown(int distance);
+		virtual void resetCamera(void);
 		virtual void primaryFire(void);
 		virtual void secondaryFire(void);
 		virtual void special(void);
@@ -60,6 +67,7 @@ namespace Jyuzau
 		double m_health;
 		Character *m_character;
 		unsigned m_level;
+		Camera *m_cameras[CT_COUNT];
 		
 		virtual void characterAttached(void);
 		virtual void characterDetached(void);

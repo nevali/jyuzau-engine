@@ -21,6 +21,12 @@
 # define CHAR_CURRENCY_MAX             5
 # define CHAR_WEAPON_MAX               10
 
+# define CONTROL_WALK_DISTANCE         5
+# define CONTROL_PITCH_FACTOR          0.005f
+# define CONTROL_YAW_FACTOR            0.005f
+# define CONTROL_PITCH_ANGLE           0.15f
+# define CONTROL_YAW_ANGLE             0.15f
+
 namespace Ogre
 {
 	class Camera;
@@ -32,6 +38,7 @@ namespace Jyuzau
 	class Character;
 
 	enum CameraType {
+		CT_UNSPEC,
 		CT_FIRSTPERSON,
 		CT_FOLLOWING,
 		/* The following must always be last */
