@@ -43,13 +43,13 @@ CharacterSelectionState::activated(Ogre::RenderWindow *window)
 	if(m_roster->count() < 1)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: No characters are available to select");
-		Core::getInstance()->popState();
+		m_core->popState();
 		return;
 	}
 	if(m_roster->count() == 1)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Only one character is available to select");
-		Core::getInstance()->popState();
+		m_core->popState();
 		return;
 	}
 	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Will perform character selection");
