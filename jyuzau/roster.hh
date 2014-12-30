@@ -20,18 +20,14 @@
 
 # include <OGRE/OgreString.h>
 
+# include "jyuzau/defs.hh"
+
 namespace Jyuzau
 {
 	class Actor;
 	class Character;
 	class Scene;
-	
-	struct RosterEntry
-	{
-		Character *character;
-		Ogre::String title;
-	};
-	
+		
 	/* The Roster provides character selection capabilities */
 	class Roster
 	{

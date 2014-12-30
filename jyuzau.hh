@@ -18,6 +18,7 @@
 
 # include <OGRE/OgrePlatform.h>
 
+# include "jyuzau/defs.hh"
 # include "jyuzau/core.hh"
 # include "jyuzau/loadable.hh"
 # include "jyuzau/prop.hh"

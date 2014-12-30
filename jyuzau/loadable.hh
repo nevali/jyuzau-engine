@@ -24,12 +24,10 @@
 
 # include <libxml/parser.h>
 
+# include "jyuzau/defs.hh"
+
 namespace Jyuzau
 {
-	typedef std::pair<Ogre::String, Ogre::String> Attr;
-	typedef std::vector<Attr> AttrList;
-	typedef AttrList::iterator AttrListIterator;
-	
 	class LoadableObject;
 	
 	/* The Loadable class represents different kinds of assets which can be

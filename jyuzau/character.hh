@@ -18,8 +18,7 @@
 
 # include <OGRE/OgreString.h>
 
-# define CHAR_CURRENCY_MAX             5
-# define CHAR_WEAPON_MAX               10
+# include "jyuzau/defs.hh"
 
 namespace Jyuzau
 {

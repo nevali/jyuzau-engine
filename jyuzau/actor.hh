@@ -17,30 +17,18 @@
 # define JYUZAU_ACTOR_HH_              1
 
 # include "jyuzau/prop.hh"
+# include "jyuzau/defs.hh"
 
 namespace Ogre
 {
 	class Camera;
-}
+};
 
 namespace Jyuzau
 {
 	
 	class Character;
-	
-	enum CameraType {
-		CT_FIRSTPERSON,
-		CT_FOLLOWING,
-		/* The following must always be last */
-		CT_COUNT
-	};
-	
-	enum MoveSpeed {
-		MS_CREEP,
-		MS_WALK,
-		MS_RUN
-	};
-	
+		
 	/* An actor is a kind of prop which can have autonomous behaviours
 	 * and cameras attached to it.
 	 */
