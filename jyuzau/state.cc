@@ -85,11 +85,11 @@ State::preload(void)
 void
 State::load(void)
 {
+	m_loaded = true;
 	createScenes();
 	createSceneManager();
 	attachScenes();
 	createPlayers();
-	m_loaded = true;
 }
 
 void
