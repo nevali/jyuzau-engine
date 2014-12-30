@@ -34,20 +34,21 @@ State::State():
 
 State::~State()
 {
-	std::vector<Ogre::Viewport *>::iterator vit;
+	std::vector<StateViewportEntry>::iterator vit;
 	std::vector<Ogre::Camera *>::iterator cit;
 	
 	Core::getInstance()->removeState(this);
 
-	/* Delete any viewports that we've created */
+	/* Delete any viewports that we've created (note that we don't own
+	 * the Ogre::Viewport instance, so we can't simply delete them) */
 	for(vit = m_viewports.begin(); vit != m_viewports.end(); vit++)
 	{
-		delete (*vit);
+		(*vit).vp->getTarget()->removeViewport((*vit).zorder);
 	}
 	/* Delete any cameras that we've created */
 	for(cit = m_cameras.begin(); cit != m_cameras.end(); cit++)
 	{
-		delete (*vit);
+		delete (*cit);
 	}
 	if(m_sceneManager)
 	{
@@ -124,16 +125,18 @@ State::createPlayers()
 void
 State::addViewports(Ogre::RenderWindow *window)
 {
-	Ogre::Viewport *viewport;
+	StateViewportEntry viewport;
 	
 	/* By default, if there is at least one camera, create a full-window
 	 * viewport for the first one at Z-Order 0
 	 */
 	if(m_cameras.size())
 	{
-		viewport = window->addViewport(m_cameras[0], 0);
-		viewport->setBackgroundColour(Ogre::ColourValue(0,0,0));
-		m_cameras[0]->setAspectRatio(Ogre::Real(viewport->getActualWidth()) / Ogre::Real(viewport->getActualHeight()));
+		viewport.zorder = 0;
+		viewport.camera = m_cameras[0];
+		viewport.vp = window->addViewport(m_cameras[0], 0);
+		viewport.vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
+		m_cameras[0]->setAspectRatio(Ogre::Real(viewport.vp->getActualWidth()) / Ogre::Real(viewport.vp->getActualHeight()));
 		m_viewports.push_back(viewport);
 	}
 }
@@ -141,10 +144,11 @@ State::addViewports(Ogre::RenderWindow *window)
 void
 State::removeViewports(Ogre::RenderWindow *window)
 {
-
-	if(m_viewports.size())
+	std::vector<StateViewportEntry>::iterator vit;
+	
+	for(vit = m_viewports.begin(); vit != m_viewports.end(); vit++)
 	{
-		window->removeViewport(0);
+		window->removeViewport((*vit).zorder);
 	}
 	m_viewports.clear();
 }

@@ -23,6 +23,8 @@
 # include <OIS/OISKeyboard.h>
 # include <OIS/OISMouse.h>
 
+# include "jyuzau/defs.hh"
+
 namespace Jyuzau
 {
 
@@ -49,7 +51,7 @@ namespace Jyuzau
 		bool m_loaded;
 		Ogre::SceneManager *m_sceneManager;
 		std::vector<Ogre::Camera *> m_cameras;
-		std::vector<Ogre::Viewport *> m_viewports;
+		std::vector<StateViewportEntry> m_viewports;
 		
 		virtual void load(void);
 		virtual void createScenes(void);

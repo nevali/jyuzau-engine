@@ -50,6 +50,13 @@ namespace Jyuzau
 		Ogre::String title;
 	};
 	
+	struct StateViewportEntry
+	{
+		int zorder;
+		Ogre::Camera *camera;
+		Ogre::Viewport *vp;
+	};
+
 	typedef std::pair<Ogre::String, Ogre::String> Attr;
 	typedef std::vector<Attr> AttrList;
 	typedef AttrList::iterator AttrListIterator;
