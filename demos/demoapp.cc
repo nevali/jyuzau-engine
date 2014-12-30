@@ -78,7 +78,7 @@ bool
 DemoApp::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
 	bool r;
-	Ogre::Camera *cam;
+	Jyuzau::Camera *cam;
 	
 	r = Core::frameRenderingQueued(evt);
 	if(!r)
@@ -92,13 +92,13 @@ DemoApp::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
 		if (m_detailsPanel->isVisible() && cam)
 		{
-			m_detailsPanel->setParamValue(0, Ogre::StringConverter::toString(cam->getDerivedPosition().x));
-			m_detailsPanel->setParamValue(1, Ogre::StringConverter::toString(cam->getDerivedPosition().y));
-			m_detailsPanel->setParamValue(2, Ogre::StringConverter::toString(cam->getDerivedPosition().z));
-			m_detailsPanel->setParamValue(4, Ogre::StringConverter::toString(cam->getDerivedOrientation().w));
-			m_detailsPanel->setParamValue(5, Ogre::StringConverter::toString(cam->getDerivedOrientation().x));
-			m_detailsPanel->setParamValue(6, Ogre::StringConverter::toString(cam->getDerivedOrientation().y));
-			m_detailsPanel->setParamValue(7, Ogre::StringConverter::toString(cam->getDerivedOrientation().z));
+			m_detailsPanel->setParamValue(0, Ogre::StringConverter::toString(cam->camera->getDerivedPosition().x));
+			m_detailsPanel->setParamValue(1, Ogre::StringConverter::toString(cam->camera->getDerivedPosition().y));
+			m_detailsPanel->setParamValue(2, Ogre::StringConverter::toString(cam->camera->getDerivedPosition().z));
+			m_detailsPanel->setParamValue(4, Ogre::StringConverter::toString(cam->camera->getDerivedOrientation().w));
+			m_detailsPanel->setParamValue(5, Ogre::StringConverter::toString(cam->camera->getDerivedOrientation().x));
+			m_detailsPanel->setParamValue(6, Ogre::StringConverter::toString(cam->camera->getDerivedOrientation().y));
+			m_detailsPanel->setParamValue(7, Ogre::StringConverter::toString(cam->camera->getDerivedOrientation().z));
 		}
 	}
 	return true;
@@ -108,7 +108,7 @@ DemoApp::frameRenderingQueued(const Ogre::FrameEvent& evt)
 bool
 DemoApp::keyPressed(const OIS::KeyEvent &arg)
 {
-	Ogre::Camera *cam;
+	Jyuzau::Camera *cam;
 	
 	if (m_trayMgr->isDialogVisible())
 	{
@@ -169,7 +169,7 @@ DemoApp::keyPressed(const OIS::KeyEvent &arg)
 		Ogre::String newVal;
 		Ogre::PolygonMode pm;
 
-		switch (cam->getPolygonMode())
+		switch (cam->camera->getPolygonMode())
 		{
 		case Ogre::PM_SOLID:
 			newVal = "Wireframe";
@@ -183,7 +183,7 @@ DemoApp::keyPressed(const OIS::KeyEvent &arg)
 			newVal = "Solid";
 			pm = Ogre::PM_SOLID;
 		}
-		cam->setPolygonMode(pm);
+		cam->camera->setPolygonMode(pm);
 		m_detailsPanel->setParamValue(10, newVal);
 	}
 	else if(arg.key == OIS::KC_F5)

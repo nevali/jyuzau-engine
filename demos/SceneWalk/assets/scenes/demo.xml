@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scene>
+	<ambientlight r="1" g="0" b="0" />
+	
+	<light id="main" x="20" y="80" z="50" />
+
+	<actor id="head1" class="Ogre" x="0" y="0" z="0" />
+	<actor id="head2" class="Ogre" x="100" y="0" z="0" />
+</scene>

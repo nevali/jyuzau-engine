@@ -29,6 +29,7 @@
 #include "jyuzau/sceneview.hh"
 #include "jyuzau/scene.hh"
 #include "jyuzau/core.hh"
+#include "jyuzau/camera.hh"
 
 using namespace Jyuzau;
 
@@ -67,16 +68,22 @@ SceneViewState::attachScenes(void)
 void
 SceneViewState::createPlayers(void)
 {
-	Ogre::Camera *cam;
+	Camera *cam;
 	
 	/* Create a simple camera which can be controlled by the camera manager */
-	cam = m_sceneManager->createCamera("PlayerCam");
+	cam = new Camera("PlayerCam", m_sceneManager);
 	cam->setPosition(Ogre::Vector3(0,0,80));
 	cam->lookAt(Ogre::Vector3(0,0,-300));
 	cam->setNearClipDistance(5);
 	m_cameras.push_back(cam);
 	
-	m_cameraMan = new OgreBites::SdkCameraMan(cam);
+	m_cameraMan = new OgreBites::SdkCameraMan(cam->camera);
+}
+
+void
+SceneViewState::deletePlayers(void)
+{
+	/* No-op */
 }
 
 bool

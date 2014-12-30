@@ -13,24 +13,12 @@
  *  limitations under the License.
  */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
+#ifndef JYUZAU_CONTROLLER_HH_
+# define JYUZAU_CONTROLLER_HH_         1
 
-#include "jyuzau/splash.hh"
-#include "jyuzau/core.hh"
-
-using namespace Jyuzau;
-
-SplashState::SplashState():
-	State::State()
+namespace Jyuzau
 {
 
-}
+};
 
-void
-SplashState::activated(Ogre::RenderWindow *window)
-{
-	State::activated(window);
-	m_core->popState();
-}
+#endif /*!JYUZAU_CONTROLLER_HH_*/

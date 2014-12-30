@@ -48,6 +48,7 @@
 #include "jyuzau/core.hh"
 #include "jyuzau/state.hh"
 #include "jyuzau/roster.hh"
+#include "jyuzau/character.hh"
 
 using namespace Jyuzau;
 
@@ -74,7 +75,8 @@ Core::Core(void)
 	m_firstState(NULL),
 	m_lastState(NULL),
 	m_inhibitStateActivation(0),
-	m_preInhibitState(NULL)
+	m_preInhibitState(NULL),
+	m_playersChanged(false)
 {
 	singleton = this;
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
@@ -86,8 +88,13 @@ Core::Core(void)
 
 Core::~Core(void)
 {
+	std::vector<Character *>::iterator it;
 	singleton = NULL;
-
+	
+	for(it = m_players.begin(); it != m_players.end(); it++)
+	{
+		delete (*it);
+	}
 	if (m_overlaySystem) delete m_overlaySystem;
 	Ogre::WindowEventUtilities::removeWindowEventListener(m_window, this);
 	windowClosed(m_window);
@@ -140,13 +147,13 @@ Core::roster(void)
 	return m_roster;
 }
 
-/* Return a pointer to the active camera */
-Ogre::Camera *
-Core::camera(void)
+/* Return a pointer to an active camera */
+Camera *
+Core::camera(int index)
 {
 	if(m_firstState)
 	{
-		return m_firstState->camera();
+		return m_firstState->camera(index);
 	}
 	return NULL;
 }
@@ -169,6 +176,47 @@ Core::shutdown()
 	m_shutdown = true;
 }
 
+/* Reset the player list */
+void
+Core::resetPlayers()
+{
+	std::vector<Character *>::iterator it;
+	
+	for(it = m_players.begin(); it != m_players.end(); it++)
+	{
+		delete (*it);
+	}
+	m_players.clear();
+	m_playersChanged = true;
+}
+
+/* Add a player to the player list. Note that Core will own the Character it's
+ * added.
+ */
+void
+Core::addPlayer(Character *player)
+{
+	m_players.push_back(player);
+	m_playersChanged = true;
+}
+
+/* Return the number of players */
+int
+Core::players(void)
+{
+	return m_players.size();
+}
+
+/* Return the player at a specific index (0 = first player) */
+Character *
+Core::player(int index)
+{
+	if(index >= m_players.size())
+	{
+		return NULL;
+	}
+	return m_players[index];
+}
 
 /* Initialise the engine, create the initial scene */
 bool
@@ -332,6 +380,16 @@ Core::removeState(State *state)
 void
 Core::activateState(State *state)
 {
+	State *p;
+	
+	if(m_playersChanged)
+	{
+		for(p = m_firstState; p; p = p->m_next)
+		{
+			p->playersChanged();
+		}
+		m_playersChanged = false;
+	}
 	if(m_inhibitStateActivation)
 	{
 		state->preload();

@@ -20,6 +20,7 @@
 #include "jyuzau/charselect.hh"
 #include "jyuzau/core.hh"
 #include "jyuzau/roster.hh"
+#include "jyuzau/character.hh"
 
 using namespace Jyuzau;
 
@@ -37,9 +38,20 @@ CharacterSelectionState::load(void)
 }
 
 void
+CharacterSelectionState::createPlayers(void)
+{
+	/* We don't want to create any actors or cameras for the existing
+	 * players, if any, so this is a no-op.
+	 */
+}
+
+void
 CharacterSelectionState::activated(Ogre::RenderWindow *window)
 {
+	Character *c;
+	
 	State::activated(window);
+	m_core->resetPlayers();
 	if(m_roster->count() < 1)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: No characters are available to select");
@@ -49,6 +61,16 @@ CharacterSelectionState::activated(Ogre::RenderWindow *window)
 	if(m_roster->count() == 1)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Only one character is available to select");
+		c = m_roster->character(0);
+		if(!c)
+		{
+			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Roster returned NULL for character #0");
+		}
+		else
+		{
+			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Adding '" + c->title() + "' as first player");
+			m_core->addPlayer(m_roster->character(0));
+		}
 		m_core->popState();
 		return;
 	}

@@ -155,6 +155,8 @@ jyuzau/Makefile
 demos/Makefile
 demos/SceneView/Makefile
 demos/SceneView/Info.plist
+demos/SceneWalk/Makefile
+demos/SceneWalk/Info.plist
 ])
 
 AC_OUTPUT

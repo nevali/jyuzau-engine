@@ -42,8 +42,8 @@ namespace Jyuzau
 		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager, Ogre::String name = "");
 	
 		virtual bool attach(Scene *scene, Ogre::String name = "", Ogre::Vector3 pos = Ogre::Vector3::ZERO);
-		virtual bool attach(Ogre::SceneManager *scene, Ogre::String name, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
-		virtual bool attach(Ogre::SceneNode *node, Ogre::String name, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
+		virtual bool attach(Ogre::SceneManager *scene, Ogre::String name = "", Ogre::Vector3 pos = Ogre::Vector3::ZERO);
+		virtual bool attach(Ogre::SceneNode *node, Ogre::String name = "", Ogre::Vector3 pos = Ogre::Vector3::ZERO);
 	protected:
 		bool m_attached;
 		Ogre::Entity *m_entity;

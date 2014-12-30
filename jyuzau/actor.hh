@@ -19,16 +19,11 @@
 # include "jyuzau/prop.hh"
 # include "jyuzau/defs.hh"
 
-namespace Ogre
-{
-	class Camera;
-};
-
 namespace Jyuzau
 {
-	
+	class Camera;
 	class Character;
-		
+
 	/* An actor is a kind of prop which can have autonomous behaviours
 	 * and cameras attached to it.
 	 */
@@ -37,11 +32,12 @@ namespace Jyuzau
 		friend class Character;
 	public:
 		static Actor *create(Ogre::String name, Scene *scene = NULL);
+		static Actor *create(Ogre::String name, Ogre::SceneManager *sceneManager);
 		
 		Actor(Ogre::String name);
 		virtual ~Actor();
 		
-		virtual Ogre::Camera *camera(CameraType type);
+		virtual Camera *createCamera(CameraType type);
 
 		virtual Character *character(void);
 
@@ -61,15 +57,12 @@ namespace Jyuzau
 		virtual void prevWeapon(void);
 		virtual void nextWeapon(void);
 	protected:
-		Ogre::Camera *m_cameras[CT_COUNT];
 		double m_health;
 		Character *m_character;
 		unsigned m_level;
 		
 		virtual void characterAttached(void);
 		virtual void characterDetached(void);
-		
-		virtual Ogre::Camera *createCamera(CameraType type);
 	};
 };
 

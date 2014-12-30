@@ -20,6 +20,8 @@
 
 # include "jyuzau/defs.hh"
 # include "jyuzau/core.hh"
+# include "jyuzau/camera.hh"
+# include "jyuzau/controller.hh"
 # include "jyuzau/loadable.hh"
 # include "jyuzau/prop.hh"
 # include "jyuzau/actor.hh"
@@ -31,6 +33,7 @@
 # include "jyuzau/main.hh"
 # include "jyuzau/state.hh"
 # include "jyuzau/sceneview.hh"
+# include "jyuzau/scenewalk.hh"
 # include "jyuzau/splash.hh"
 # include "jyuzau/mainmenu.hh"
 # include "jyuzau/menu.hh"

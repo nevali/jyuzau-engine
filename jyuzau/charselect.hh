@@ -33,6 +33,7 @@ namespace Jyuzau
 		Roster *m_roster;
 		
 		virtual void load(void);
+		virtual void createPlayers(void);
 		virtual void activated(Ogre::RenderWindow *window);
 	};
 	

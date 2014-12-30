@@ -17,20 +17,6 @@
 # include "config.h"
 #endif
 
-#include "jyuzau/splash.hh"
-#include "jyuzau/core.hh"
+#include "jyuzau/controller.hh"
 
 using namespace Jyuzau;
-
-SplashState::SplashState():
-	State::State()
-{
-
-}
-
-void
-SplashState::activated(Ogre::RenderWindow *window)
-{
-	State::activated(window);
-	m_core->popState();
-}

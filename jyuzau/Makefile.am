@@ -28,8 +28,9 @@ libjyuzau_la_SOURCES = defs.hh \
 	core.hh core.cc loadable.hh loadable.cc state.hh state.cc \
 	scene.hh scene.cc prop.hh prop.cc actor.hh actor.cc \
 	light.hh light.cc character.hh character.cc roster.hh roster.cc \
+	camera.hh camera.cc controller.hh controller.cc \
 	sceneview.hh sceneview.mm splash.hh splash.mm mainmenu.hh mainmenu.mm \
-	menu.hh menu.mm charselect.hh charselect.cc
+	menu.hh menu.mm charselect.hh charselect.cc scenewalk.hh scenewalk.cc
 
 libjyuzau_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 

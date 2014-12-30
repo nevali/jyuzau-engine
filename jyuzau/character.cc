@@ -71,6 +71,18 @@ Character::createDummy(Scene *scene)
 	return actor;
 }
 
+Actor *
+Character::createDummy(Ogre::SceneManager *sceneManager)
+{
+	Actor *actor;
+	
+	actor = Actor::create(m_actorName, sceneManager);
+	if(!actor)
+	{
+		return NULL;
+	}
+	return actor;
+}
 /* Create a new Actor for the character, optionally placing it within
  * a scene. Note that it's the caller's responsibility to delete the
  * Actor when finished.
@@ -81,6 +93,20 @@ Character::createActor(Scene *scene)
 	Actor *actor;
 	
 	actor = Actor::create(m_actorName, scene);
+	if(!actor)
+	{
+		return NULL;
+	}
+	attach(actor);
+	return actor;
+}
+
+Actor *
+Character::createActor(Ogre::SceneManager *sceneManager)
+{
+	Actor *actor;
+	
+	actor = Actor::create(m_actorName, sceneManager);
 	if(!actor)
 	{
 		return NULL;

@@ -34,8 +34,9 @@ namespace Jyuzau
 {
 	class State;
 	class Scene;
-	class Player;
+	class Character;
 	class Roster;
+	class Camera;
 	
 	class Core: public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener
 	{
@@ -60,8 +61,7 @@ namespace Jyuzau
 		virtual Ogre::OverlaySystem *overlays(void);
 		virtual State *state(void);
 		virtual Roster *roster(void);
-		
-		virtual Ogre::Camera *camera(void);
+		virtual Camera *camera(int index = 0);
 		virtual Ogre::SceneManager *sceneManager(void);
 		
 		/* State management */
@@ -72,6 +72,12 @@ namespace Jyuzau
 		virtual int enableStateActivation(void);
 		virtual int disableStateActivation(void);
 		
+		/* Players */
+		virtual int players(void);
+		virtual Character *player(int index);
+		virtual void resetPlayers(void);
+		virtual void addPlayer(Character *character);
+				
 		/* Trigger application termination */
 		virtual void shutdown();
 	protected:
@@ -93,6 +99,8 @@ namespace Jyuzau
 		Roster *m_roster;
 		int m_inhibitStateActivation;
 		State *m_preInhibitState;
+		std::vector<Character *>m_players;
+		bool m_playersChanged;
 		
 		virtual void activateState(State *state);
 		virtual void deactivateState(State *state);

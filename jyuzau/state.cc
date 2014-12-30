@@ -21,6 +21,9 @@
 
 #include "jyuzau/state.hh"
 #include "jyuzau/core.hh"
+#include "jyuzau/character.hh"
+#include "jyuzau/actor.hh"
+#include "jyuzau/camera.hh"
 
 using namespace Jyuzau;
 
@@ -28,33 +31,16 @@ State::State():
 	m_prev(NULL), m_next(NULL), m_loaded(false),
 	m_sceneManager(NULL),
 	m_cameras(),
-	m_viewports()
+	m_actors(),
+	m_defaultPlayerCameraType(CT_FIRSTPERSON)
 {
 	m_core = Core::getInstance();
 }
 
 State::~State()
 {
-	std::vector<StateViewportEntry>::iterator vit;
-	std::vector<Ogre::Camera *>::iterator cit;
-	
 	m_core->removeState(this);
-
-	/* Delete any viewports that we've created (note that we don't own
-	 * the Ogre::Viewport instance, so we can't simply delete them) */
-	for(vit = m_viewports.begin(); vit != m_viewports.end(); vit++)
-	{
-		(*vit).vp->getTarget()->removeViewport((*vit).zorder);
-	}
-	/* Delete any cameras that we've created */
-	for(cit = m_cameras.begin(); cit != m_cameras.end(); cit++)
-	{
-		delete (*cit);
-	}
-	if(m_sceneManager)
-	{
-		delete m_sceneManager;
-	}
+	deletePlayers();
 }
 
 Ogre::SceneManager *
@@ -63,7 +49,13 @@ State::sceneManager(void)
 	return m_sceneManager;
 }
 
-Ogre::Camera *
+int
+State::cameras(void)
+{
+	return m_cameras.size();
+}
+
+Camera *
 State::camera(int index)
 {
 	if(index >= m_cameras.size())
@@ -73,10 +65,12 @@ State::camera(int index)
 	return m_cameras[index];
 }
 
-int
-State::cameraCount(void)
+void
+State::playersChanged(void)
 {
-	return m_cameras.size();
+	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: players have changed");
+	deletePlayers();
+	createPlayers();
 }
 
 void
@@ -114,48 +108,96 @@ State::createSceneManager()
 }
 
 void
-State::attachScenes()
+State::attachScenes(void)
 {
 	/* This method should be overridden to attach the loaded scenes to
-	 * the scene manager
+	 * the scene manager and add any players to it.
 	 */
 }
 
 void
-State::createPlayers()
+State::createPlayers(void)
 {
-	/* This method should be overidden to create players and cameras */
+	int i, n;
+	Character *c;
+	Actor *a;
+	Camera *cam;
+	
+	/* This default implementation creates a first-person camera for each
+	 * registered player. Descendants can override this behaviour if needed.
+	 */
+	n = m_core->players();
+	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: there are " + std::to_string(n) + " players registered");
+	for(i = 0; i < n; i++)
+	{
+		c = m_core->player(i);
+		if(!c)
+		{
+			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to obtain character #" + std::to_string(i));
+			continue;
+		}
+		a = c->createActor(m_sceneManager);
+		if(!a)
+		{
+			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create actor for Character '" + c->title() + "'");
+			continue;
+		}
+		m_actors.push_back(a);
+		cam = a->createCamera(m_defaultPlayerCameraType);
+		if(!cam)
+		{
+			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create player-camera for Character '" + c->title() + "'");
+			continue;
+		}
+		m_cameras.push_back(cam);
+	}
+}
+
+void
+State::deletePlayers(void)
+{
+	std::vector<Camera *>::iterator cit;
+	std::vector<Actor *>::iterator ait;
+	
+	/* Delete any cameras that we've created */
+	for(cit = m_cameras.begin(); cit != m_cameras.end(); cit++)
+	{
+		delete (*cit);
+	}
+	m_cameras.clear();
+	/* Delete any actors */
+	for(ait = m_actors.begin(); ait != m_actors.end(); ait++)
+	{
+		delete (*ait);
+	}
+	m_actors.clear();
 }
 
 void
 State::addViewports(Ogre::RenderWindow *window)
 {
-	StateViewportEntry viewport;
+	Ogre::Viewport *vp;
 	
 	/* By default, if there is at least one camera, create a full-window
 	 * viewport for the first one at Z-Order 0
 	 */
 	if(m_cameras.size())
 	{
-		viewport.zorder = 0;
-		viewport.camera = m_cameras[0];
-		viewport.vp = window->addViewport(m_cameras[0], 0);
-		viewport.vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
-		m_cameras[0]->setAspectRatio(Ogre::Real(viewport.vp->getActualWidth()) / Ogre::Real(viewport.vp->getActualHeight()));
-		m_viewports.push_back(viewport);
+		vp = m_cameras[0]->createViewport(window);
+		vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
+		m_cameras[0]->matchAspectRatio();
 	}
 }
 
 void
 State::removeViewports(Ogre::RenderWindow *window)
 {
-	std::vector<StateViewportEntry>::iterator vit;
+	std::vector<Camera *>::iterator cit;
 	
-	for(vit = m_viewports.begin(); vit != m_viewports.end(); vit++)
+	for(cit = m_cameras.begin(); cit != m_cameras.end(); cit++)
 	{
-		window->removeViewport((*vit).zorder);
+		(*cit)->deleteViewport();
 	}
-	m_viewports.clear();
 }
 
 

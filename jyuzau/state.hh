@@ -29,6 +29,8 @@ namespace Jyuzau
 {
 	
 	class Core;
+	class Actor;
+	class Camera;
 
 	/* The State class encapsulates the game logic at any given point,
 	 * including cut-scenes, menus, and so on.
@@ -46,24 +48,28 @@ namespace Jyuzau
 		virtual void preload(void);
 		
 		virtual Ogre::SceneManager *sceneManager(void);
-		virtual Ogre::Camera *camera(int index = 0);
-		virtual int cameraCount(void);
+
+		virtual int cameras(void);
+		virtual Camera *camera(int index = 0);
 	protected:
 		Core *m_core;
 		State *m_prev, *m_next;
 		bool m_loaded;
 		Ogre::SceneManager *m_sceneManager;
-		std::vector<Ogre::Camera *> m_cameras;
-		std::vector<StateViewportEntry> m_viewports;
+		std::vector<Camera *> m_cameras;
+		std::vector<Actor *> m_actors;
+		CameraType m_defaultPlayerCameraType;
 		
 		virtual void load(void);
 		virtual void createScenes(void);
 		virtual void createSceneManager(void);
 		virtual void attachScenes(void);
 		virtual void createPlayers(void);
+		virtual void deletePlayers(void);
 		
 		virtual void activated(Ogre::RenderWindow *window);
 		virtual void deactivated(Ogre::RenderWindow *window);
+		virtual void playersChanged(void);
 		
 		virtual void addViewports(Ogre::RenderWindow *window);
 		virtual void removeViewports(Ogre::RenderWindow *window);

@@ -20,6 +20,11 @@
 
 # include "jyuzau/defs.hh"
 
+namespace Ogre
+{
+	class SceneManager;
+}
+
 namespace Jyuzau
 {
 	
@@ -46,11 +51,13 @@ namespace Jyuzau
 		 * a scene.
 		 */
 		virtual Actor *createActor(Scene *scene = NULL);
+		virtual Actor *createActor(Ogre::SceneManager *sceneManager);
 		
 		/* Create a dummy Actor for the character - that is, an actor which
 		 * represents the character (because it uses the same assets), but is
 		 * not attached to the character itself */
 		virtual Actor *createDummy(Scene *scene = NULL);
+		virtual Actor *createDummy(Ogre::SceneManager *sceneManager);
 		
 		/* Attach the character to an existing actor */
 		virtual void attach(Actor *actor);

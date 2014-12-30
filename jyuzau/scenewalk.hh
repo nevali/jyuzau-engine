@@ -13,8 +13,8 @@
  *  limitations under the License.
  */
 
-#ifndef JYUZAU_SCENEVIEW_HH_
-# define JYUZAU_SCENEVIEW_HH_          1
+#ifndef JYUZAU_SCENEWALK_HH_
+# define JYUZAU_SCENEWALK_HH_          1
 
 # include "jyuzau/state.hh"
 
@@ -28,31 +28,28 @@ namespace Jyuzau
 {
 	class Scene;
 	
-	/* A simple state engine which allows flying through a loaded scene */
-	class SceneViewState: public State
+	/* A simple state engine which allows walking through a loaded scene as
+	 * the first player.
+	 */
+	class SceneWalkState: public State
 	{
 	public:
-		SceneViewState(Ogre::String name);
-		~SceneViewState();
+		SceneWalkState(Ogre::String name);
+		~SceneWalkState();
 	protected:
 		Ogre::String m_name;
 		Scene *m_scene;
-		OgreBites::SdkCameraMan* m_cameraMan;
 		
 		virtual void createScenes(void);
 		virtual void attachScenes(void);
-		virtual void createPlayers(void);
-		virtual void deletePlayers(void);
-		
-		virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
+
 		virtual bool keyPressed(const OIS::KeyEvent &arg);
 		virtual bool keyReleased(const OIS::KeyEvent &arg);
 		virtual bool mouseMoved(const OIS::MouseEvent &arg);
 		virtual bool mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
 		virtual bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
-
 	};
 	
 };
 
-#endif /*!JYUZAU_SCENEVIEW_HH_*/
+#endif /*!JYUZAU_SCENEWALK_HH_*/
