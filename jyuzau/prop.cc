@@ -180,6 +180,23 @@ Prop::loaded(void)
 	gm->initialiseResourceGroup(m_group);
 }
 
+void
+Prop::setPosition(Ogre::Real x, Ogre::Real y, Ogre::Real z)
+{
+	if(m_node)
+	{
+		m_node->setPosition(x, y, z);
+	}
+}
+
+void
+Prop::setPosition(const Ogre::Vector3 &vec)
+{
+	if(m_node)
+	{
+		m_node->setPosition(vec);
+	}
+}
 
 
 

@@ -18,9 +18,11 @@
 #endif
 
 #include <OGRE/OgreCamera.h>
+#include <OGRE/OgreSceneNode.h>
 
 #include "jyuzau/actor.hh"
 #include "jyuzau/character.hh"
+#include "jyuzau/camera.hh"
 
 using namespace Jyuzau;
 
@@ -100,7 +102,17 @@ Actor::characterDetached(void)
 Camera *
 Actor::createCamera(CameraType type)
 {
-	return NULL;
+	Camera *cam;
+	
+	if(!m_node)
+	{
+		/* Can't create a camera if we don't yet have a node */
+		return NULL;
+	}
+	cam = new Camera(m_group + "::camera[" + std::to_string((int) type) + "]", m_node->getCreator());
+	cam->attach(m_node);
+	/* XXX adjust position, orientation, etc. */
+	return cam;
 }
 
 void

@@ -38,27 +38,9 @@ Camera::Camera(Ogre::String name, Ogre::SceneManager *sceneManager):
 
 Camera::~Camera()
 {
-	if(viewport)
-	{
-		viewport->getTarget()->removeViewport(viewport->getZOrder());
-	}
-	if(rollNode)
-	{
-		camera->detachFromParent();
-		delete rollNode;
-	}
-	if(pitchNode)
-	{
-		delete pitchNode;
-	}
-	if(yawNode)
-	{
-		delete yawNode;
-	}
-	if(node)
-	{
-		delete node;
-	}
+	deleteViewport();
+	detach();
+	camera->getSceneManager()->destroyCamera(camera);
 }
 
 Ogre::Viewport *
@@ -107,4 +89,44 @@ void
 Camera::setNearClipDistance(Ogre::Real dist)
 {
 	camera->setNearClipDistance(dist);
+}
+
+void
+Camera::attach(Ogre::SceneNode *parentNode)
+{
+	if(node)
+	{
+		detach();
+	}
+	node = parentNode->createChildSceneNode();
+	yawNode = node->createChildSceneNode();
+	pitchNode = yawNode->createChildSceneNode();
+	rollNode = pitchNode->createChildSceneNode();
+	rollNode->attachObject(camera);
+}
+
+void
+Camera::detach(void)
+{
+	if(rollNode)
+	{
+		camera->detachFromParent();
+		delete rollNode;
+		rollNode = NULL;
+	}
+	if(pitchNode)
+	{
+		delete pitchNode;
+		pitchNode = NULL;
+	}
+	if(yawNode)
+	{
+		delete yawNode;
+		yawNode = NULL;
+	}
+	if(node)
+	{
+		delete node;
+		node = NULL;
+	}
 }

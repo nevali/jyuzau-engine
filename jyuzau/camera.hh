@@ -59,6 +59,9 @@ namespace Jyuzau
 		virtual void setNearClipDistance(Ogre::Real dist);
 
 		virtual void lookAt(const Ogre::Vector3 &vec);
+		
+		virtual void attach(Ogre::SceneNode *parentNode);
+		virtual void detach(void);
 	};
 };
 

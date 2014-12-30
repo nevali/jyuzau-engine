@@ -143,6 +143,8 @@ State::createPlayers(void)
 			continue;
 		}
 		m_actors.push_back(a);
+		/* Temporary hack until spawn points are implemented */
+		a->setPosition(0, 0, 80);
 		cam = a->createCamera(m_defaultPlayerCameraType);
 		if(!cam)
 		{
