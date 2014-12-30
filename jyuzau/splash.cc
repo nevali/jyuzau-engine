@@ -18,10 +18,18 @@
 #endif
 
 #include "jyuzau/splash.hh"
+#include "jyuzau/core.hh"
 
 using namespace Jyuzau;
 
 SplashState::SplashState():
 	State::State()
 {
+
+}
+void
+SplashState::activated(Ogre::RenderWindow *window)
+{
+	State::activated(window);
+	m_core->popState();
 }

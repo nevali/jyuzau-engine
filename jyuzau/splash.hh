@@ -28,6 +28,7 @@ namespace Jyuzau
 	public:
 		SplashState();
 	protected:
+		virtual void activated(Ogre::RenderWindow *window);
 	};
 	
 };
