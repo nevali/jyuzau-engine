@@ -66,6 +66,10 @@ State::sceneManager(void)
 Ogre::Camera *
 State::camera(int index)
 {
+	if(index >= m_cameras.size())
+	{
+		return NULL;
+	}
 	return m_cameras[index];
 }
 
