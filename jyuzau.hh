@@ -30,6 +30,7 @@
 # endif
 # include "jyuzau/main.hh"
 # include "jyuzau/state.hh"
+# include "jyuzau/sceneview.hh"
 # include "jyuzau/splash.hh"
 # include "jyuzau/mainmenu.hh"
 # include "jyuzau/menu.hh"
