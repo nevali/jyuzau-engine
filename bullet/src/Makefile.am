@@ -448,6 +448,7 @@ nobase_bullet_include_HEADERS += \
 	BulletDynamics/ConstraintSolver/btHinge2Constraint.h \
 	BulletDynamics/ConstraintSolver/btUniversalConstraint.h \
 	BulletDynamics/ConstraintSolver/btSolverBody.h \
+	BulletDynamics/ConstraintSolver/btFixedConstraint.h \
 	BulletDynamics/Character/btCharacterControllerInterface.h \
 	BulletDynamics/Character/btKinematicCharacterController.h \
 	BulletDynamics/Featherstone/btMultiBody.h \
