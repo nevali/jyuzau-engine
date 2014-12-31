@@ -97,11 +97,20 @@ namespace Jyuzau
 		Character *m_character;
 		unsigned m_level;
 		Camera *m_cameras[CT_COUNT];
+		/* Movement triggers */
 		bool m_forward, m_backward, m_left, m_right, m_clockwise, m_cclockwise;
+		/* Look direction change triggers */
+		bool m_lookUp, m_lookDown;
+		/* Current movement speed */
 		MoveSpeed m_speed;
+		/* Maximum movement speed */
 		Ogre::Real m_topSpeed;
+		/* Movement velocity */
 		Ogre::Vector3 m_velocity;
+		/* Turn (rotation) velocity */
 		Ogre::Real m_rotVelocity;
+		/* Look up/down (camera pitch) velocity */
+		Ogre::Real m_camPitchVelocity;
 		
 		virtual void characterAttached(void);
 		virtual void characterDetached(void);

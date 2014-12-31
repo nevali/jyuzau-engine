@@ -78,10 +78,12 @@ Actor::Actor(Ogre::String name):
 	m_level(1),
 	m_forward(false), m_backward(false), m_left(false), m_right(false),
 	m_clockwise(false), m_cclockwise(false),
+	m_lookUp(false), m_lookDown(false),
 	m_speed(MS_WALK),
 	m_topSpeed(150.0f),
 	m_velocity(Ogre::Vector3::ZERO),
-	m_rotVelocity(0)
+	m_rotVelocity(0),
+	m_camPitchVelocity(0)
 {
 	resetActiveCameras();
 }
@@ -239,6 +241,41 @@ Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
 		m_node->yaw((Ogre::Radian) (m_rotVelocity * evt.timeSinceLastFrame));
 	}
+	/* Process camera pitching */
+	taccel = 0.0f;
+	topSpeed = 4.0f;
+	if(m_lookUp)
+	{
+		taccel += 0.25f;
+	}
+	if(m_lookDown)
+	{
+		taccel -= 0.25f;
+	}
+	if(taccel != 0.0f)
+	{
+		m_camPitchVelocity += taccel * topSpeed * evt.timeSinceLastFrame * 10;
+	}
+	else
+	{
+		m_camPitchVelocity -= m_camPitchVelocity * evt.timeSinceLastFrame * 10;
+	}
+	if(std::abs(m_rotVelocity) > topSpeed)
+	{
+		m_camPitchVelocity = topSpeed * (m_camPitchVelocity < 0.0f ? -1.0f : 1.0f);
+	}
+	else if(std::abs(m_camPitchVelocity) < minVelocity)
+	{
+		m_camPitchVelocity = 0.0f;
+	}
+	if(m_camPitchVelocity != 0.0f)
+	{
+		if(m_cameras[CT_FIRSTPERSON])
+		{
+			m_cameras[CT_FIRSTPERSON]->pitch((Ogre::Radian) (m_camPitchVelocity * evt.timeSinceLastFrame));
+		}
+	}
+	
 	return true;
 }
 
@@ -461,6 +498,7 @@ Actor::beginLookUp(void)
 	{
 		return;
 	}
+	m_lookUp = true;
 }
 
 void
@@ -470,6 +508,7 @@ Actor::endLookUp(void)
 	{
 		return;
 	}
+	m_lookUp = false;
 }
 
 void
@@ -492,6 +531,7 @@ Actor::beginLookDown(void)
 	{
 		return;
 	}
+	m_lookDown = true;
 }
 
 void
@@ -501,6 +541,7 @@ Actor::endLookDown(void)
 	{
 		return;
 	}
+	m_lookDown = false;
 }
 
 

@@ -100,10 +100,10 @@ Controller::keyPressed(const OIS::KeyEvent &arg)
 				m_actors[0]->beginTurnRight();
 				return true;
 			case OIS::KC_Z:
-				m_actors[0]->lookUp();
+				m_actors[0]->beginLookUp();
 				return true;
 			case OIS::KC_A:
-				m_actors[0]->lookDown();
+				m_actors[0]->beginLookDown();
 				return true;
 			case OIS::KC_COMMA:
 				m_actors[0]->beginStrafeLeft();
