@@ -1,0 +1,13 @@
+material floor
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.1 0.1 0.25
+			diffuse 0.1 0.1 0.1
+			emissive 0.1 0.1 0.1
+		}
+	}
+	
+}

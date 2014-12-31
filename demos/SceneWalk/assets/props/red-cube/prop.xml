@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<prop>
+	<cube w="1" h="1" d="1" />
+	<material class="red" />
+</prop>

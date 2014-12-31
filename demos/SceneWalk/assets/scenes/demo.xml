@@ -1,9 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <scene>
-	<ambientlight r="1" g="0" b="0" />
+	<ambientlight r="1" g="1" b="1" />
 	
 	<light id="main" x="20" y="80" z="50" />
 
-	<actor id="head1" class="Ogre" x="0" y="0" z="0" />
-	<actor id="head2" class="Ogre" x="100" y="0" z="0" />
+	<prop id="cube1" class="red-cube" x="-150" y="0" z="0" />
+	<prop id="cube2" class="green-cube" x="0" y="0" z="0" />
+	<prop id="cube3" class="blue-cube" x="150" y="0" z="0" />
+
+	<prop id="cube4" class="green-cube" x="-150" y="150" z="0" />
+	<prop id="cube5" class="blue-cube" x="0" y="150" z="0" />
+	<prop id="cube6" class="red-cube" x="150" y="150" z="0" />
+
+	<prop id="cube7" class="blue-cube" x="-150" y="300" z="0" />
+	<prop id="cube8" class="red-cube" x="0" y="300" z="0" />
+	<prop id="cube9" class="green-cube" x="150" y="300" z="0" />
+
+	<prop id="cube10" class="red-cube" x="-150" y="300" z="150" />
+	<prop id="cube11" class="green-cube" x="0" y="300" z="150" />
+	<prop id="cube12" class="blue-cube" x="150" y="300" z="150" />
+
+	<prop id="floor" class="floor">
+		<scale x="5" y="5" />
+		<translate y="-50" />
+		<yaw deg="-90" />
+	</prop>
+
+	<prop id="back" class="wall">
+		<scale x="5" y="2.5" />
+		<translate y="200" z="-500" />
+	</prop>
+
+	<prop id="left" class="wall">
+		<scale x="5" y="2.5" />
+		<pitch deg="90" />
+		<translate y="200" x="-500" />
+	</prop>
+
 </scene>

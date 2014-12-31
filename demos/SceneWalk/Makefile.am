@@ -22,34 +22,13 @@ SceneWalk_LDADD = ${top_builddir}/jyuzau/libjyuzau.la
 
 EXTRA_DIST = Info.plist.in
 
-noinst_DATA = plugins.cfg Info.plist \
-	assets/actors/Ogre/ogrehead.mesh assets/actors/Ogre/Ogre.material \
-	assets/actors/Ogre/GreenSkin.jpg assets/actors/Ogre/tusk.jpg \
-	assets/actors/Ogre/spheremap.png SdkTrays.zip
+noinst_DATA = plugins.cfg Info.plist SdkTrays.zip
 
-CLEANFILES = plugins.cfg Resources Frameworks \
-	assets/actors/Ogre/ogrehead.mesh assets/actors/Ogre/Ogre.material \
-	assets/actors/Ogre/GreenSkin.jpg assets/actors/Ogre/tusk.jpg \
-	assets/actors/Ogre/spheremap.png SdkTrays.zip
+CLEANFILES = plugins.cfg Resources Frameworks SdkTrays.zip
 
 DISTCLEANFILES = Info.plist
 
 SdkTrays.zip: ${top_builddir}/ogre-build/sdk/Media/packs/SdkTrays.zip
-	rm -f $@ && cp $< $@
-
-assets/actors/Ogre/ogrehead.mesh: ${top_builddir}/ogre-build/sdk/Media/models/ogrehead.mesh
-	rm -f $@ && cp $< $@
-
-assets/actors/Ogre/Ogre.material: ${top_builddir}/ogre-build/sdk/Media/materials/scripts/Ogre.material
-	rm -f $@ && cp $< $@
-
-assets/actors/Ogre/tusk.jpg: ${top_builddir}/ogre-build/sdk/Media/materials/textures/tusk.jpg
-	rm -f $@ && cp $< $@
-
-assets/actors/Ogre/GreenSkin.jpg: ${top_builddir}/ogre-build/sdk/Media/materials/textures/GreenSkin.jpg
-	rm -f $@ && cp $< $@
-
-assets/actors/Ogre/spheremap.png: ${top_builddir}/ogre-build/sdk/Media/materials/textures/spheremap.png
 	rm -f $@ && cp $< $@
 	
 plugins.cfg: ${top_builddir}/ogre-build/sdk/bin/plugins.cfg
