@@ -172,6 +172,20 @@ AC_SUBST([OGREOVERLAY_LIBS])
 AC_SUBST([OGRE_CMAKE_FLAGS])
 AC_SUBST([ogre_builddir])
 
+
+dnl -------------------------------------------------------------------
+dnl Configure Bullet
+dnl -------------------------------------------------------------------
+
+AC_CONFIG_SUBDIRS([bullet])
+
+BULLET_CPPFLAGS='-I${top_builddir}/sdk/include/bullet'
+BULLET_LIBS='-lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath'
+
+AC_SUBST([BULLET_CPPFLAGS])
+AC_SUBST([BULLET_LDFLAGS])
+AC_SUBST([BULLET_LIBS])
+
 dnl -------------------------------------------------------------------
 dnl Override _AC_OUTPUT_SUBDIRS to install bundled packages to
 dnl ${top_builddir}/sdk
@@ -179,6 +193,15 @@ dnl -------------------------------------------------------------------
 
 m4_rename([_AC_OUTPUT_SUBDIRS],[_AC_ORIG_OUTPUT_SUBDIRS])
 m4_define([_AC_OUTPUT_SUBDIRS],[
+
+export CC
+export CXX
+export OBJC
+export OBJCXX
+export CPPFLAGS
+export CFLAGS
+export CXXFLAGS
+export LDFLAGS
 
 save_prefix="$prefix"
 prefix="$ac_abs_confdir/sdk"
