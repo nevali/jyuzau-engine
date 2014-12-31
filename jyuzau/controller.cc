@@ -88,16 +88,16 @@ Controller::keyPressed(const OIS::KeyEvent &arg)
 		switch(arg.key)
 		{
 			case OIS::KC_UP:
-				m_actors[0]->forward();
+				m_actors[0]->beginForward();
 				return true;
 			case OIS::KC_DOWN:
-				m_actors[0]->backward();
+				m_actors[0]->beginBackward();
 				return true;
 			case OIS::KC_LEFT:
-				m_actors[0]->turnLeft();
+				m_actors[0]->beginTurnLeft();
 				return true;
 			case OIS::KC_RIGHT:
-				m_actors[0]->turnRight();
+				m_actors[0]->beginTurnRight();
 				return true;
 			case OIS::KC_Z:
 				m_actors[0]->lookUp();
@@ -106,10 +106,10 @@ Controller::keyPressed(const OIS::KeyEvent &arg)
 				m_actors[0]->lookDown();
 				return true;
 			case OIS::KC_COMMA:
-				m_actors[0]->strafeLeft();
+				m_actors[0]->beginStrafeLeft();
 				return true;
 			case OIS::KC_PERIOD:
-				m_actors[0]->strafeRight();
+				m_actors[0]->beginStrafeRight();
 				return true;
 			case OIS::KC_X:
 				m_actors[0]->resetCamera();
@@ -124,17 +124,57 @@ Controller::keyPressed(const OIS::KeyEvent &arg)
 bool
 Controller::keyReleased(const OIS::KeyEvent &arg)
 {
+	if(m_actors.size() > 0)
+	{
+		/* Player 1 */
+		switch(arg.key)
+		{
+			case OIS::KC_UP:
+				m_actors[0]->endForward();
+				return true;
+			case OIS::KC_DOWN:
+				m_actors[0]->endBackward();
+				return true;
+			case OIS::KC_LEFT:
+				m_actors[0]->endTurnLeft();
+				return true;
+			case OIS::KC_RIGHT:
+				m_actors[0]->endTurnRight();
+				return true;
+			case OIS::KC_Z:
+				m_actors[0]->endLookUp();
+				return true;
+			case OIS::KC_A:
+				m_actors[0]->endLookDown();
+				return true;
+			case OIS::KC_COMMA:
+				m_actors[0]->endStrafeLeft();
+				return true;
+			case OIS::KC_PERIOD:
+				m_actors[0]->endStrafeRight();
+				return true;
+			default:
+				/* No-op */;
+		}
+	}
 	return false;
 }
 
 bool
 Controller::mouseMoved(const OIS::MouseEvent &arg)
 {
+	if(arg.state.X.rel > 50 || arg.state.X.rel < -50 ||
+		arg.state.Y.rel > 50 || arg.state.Y.rel < -50)
+	{
+		/* Drop events which are out of range to prevent wild movement */
+		return false;
+	}
 	if(m_actors.size() > 0)
 	{
 		/* Player 1 */
 		m_actors[0]->turnLeftRight(arg.state.X.rel);
 		m_actors[0]->lookUpDown(arg.state.Y.rel);
+		return true;
 	}
 	return false;
 }

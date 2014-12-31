@@ -97,6 +97,11 @@ namespace Jyuzau
 		Character *m_character;
 		unsigned m_level;
 		Camera *m_cameras[CT_COUNT];
+		bool m_forward, m_backward, m_left, m_right, m_clockwise, m_cclockwise;
+		MoveSpeed m_speed;
+		Ogre::Real m_topSpeed;
+		Ogre::Vector3 m_velocity;
+		Ogre::Real m_rotVelocity;
 		
 		virtual void characterAttached(void);
 		virtual void characterDetached(void);

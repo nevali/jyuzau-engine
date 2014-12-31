@@ -394,6 +394,7 @@ void
 Core::activateState(State *state)
 {
 	State *p;
+	OIS::MouseState mstate;
 	
 	if(m_playersChanged)
 	{

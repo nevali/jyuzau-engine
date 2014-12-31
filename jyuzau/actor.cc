@@ -19,6 +19,7 @@
 
 #include <OGRE/OgreCamera.h>
 #include <OGRE/OgreSceneNode.h>
+#include <OGRE/OgreLogManager.h>
 
 #include "jyuzau/actor.hh"
 #include "jyuzau/character.hh"
@@ -74,7 +75,13 @@ Actor::Actor(Ogre::String name):
 	Prop::Prop(name, "actor"),
 	m_character(NULL),
 	m_health(100.0f),
-	m_level(1)
+	m_level(1),
+	m_forward(false), m_backward(false), m_left(false), m_right(false),
+	m_clockwise(false), m_cclockwise(false),
+	m_speed(MS_WALK),
+	m_topSpeed(150.0f),
+	m_velocity(Ogre::Vector3::ZERO),
+	m_rotVelocity(0)
 {
 	resetActiveCameras();
 }
@@ -145,9 +152,91 @@ Actor::setActiveCamera(Camera *cam)
 bool
 Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
+	Ogre::Vector3 accel;
+	Ogre::Real taccel;
+	Ogre::Quaternion orientation;
+	Ogre::Real squared;
+	Ogre::Real minVelocity = std::numeric_limits<Ogre::Real>::epsilon();
+	Ogre::Real topSpeed = (m_speed == MS_RUN ? m_topSpeed * 20 : (m_speed == MS_CREEP ? m_topSpeed / 5 : m_topSpeed));
+	
 	if(!m_node)
 	{
 		return false;
+	}
+	/* Process movement based upon m_forward, m_backward, m_left, m_right and
+	 * m_speed
+	 */
+	orientation = m_node->getOrientation();
+	accel = Ogre::Vector3::ZERO;
+	if(m_forward)
+	{
+		accel -= orientation.zAxis();
+	}
+	if(m_backward)
+	{
+		accel += orientation.zAxis();
+	}
+	if(m_left)
+	{
+		accel -= orientation.xAxis();
+	}
+	if(m_right)
+	{
+		accel += orientation.xAxis();
+	}
+	if(accel.squaredLength() != 0)
+	{
+		accel.normalise();
+		m_velocity += accel * topSpeed * evt.timeSinceLastFrame * 10;
+	}
+	else
+	{
+		m_velocity -= m_velocity * evt.timeSinceLastFrame * 10;
+	}
+	squared = m_velocity.squaredLength();
+	if(squared > topSpeed * topSpeed)
+	{
+		m_velocity.normalise();
+		m_velocity *= topSpeed;
+	}
+	else if(squared < minVelocity * minVelocity)
+	{
+		m_velocity = Ogre::Vector3::ZERO;
+	}
+	if(m_velocity != Ogre::Vector3::ZERO)
+	{
+		m_node->translate(m_velocity * evt.timeSinceLastFrame);
+	}
+	/* Process rotation */
+	taccel = 0.0f;
+	topSpeed = 4.0f;
+	if(m_clockwise)
+	{
+		taccel -= 0.25f;
+	}
+	if(m_cclockwise)
+	{
+		taccel += 0.25f;
+	}
+	if(taccel != 0.0f)
+	{
+		m_rotVelocity += taccel * topSpeed * evt.timeSinceLastFrame * 10;
+	}
+	else
+	{
+		m_rotVelocity -= m_rotVelocity * evt.timeSinceLastFrame * 10;
+	}
+	if(m_rotVelocity > topSpeed)
+	{
+		m_rotVelocity = topSpeed;
+	}
+	else if(std::abs(m_rotVelocity) < minVelocity)
+	{
+		m_rotVelocity = 0.0f;
+	}
+	if(m_rotVelocity != 0.0f)
+	{
+		m_node->yaw((Ogre::Radian) (m_rotVelocity * evt.timeSinceLastFrame));
 	}
 	return true;
 }
@@ -169,6 +258,8 @@ Actor::beginForward(MoveSpeed speed)
 	{
 		return;
 	}
+	m_forward = true;
+	m_speed = speed;
 }
 
 void
@@ -178,6 +269,7 @@ Actor::endForward(void)
 	{
 		return;
 	}
+	m_forward = false;
 }
 
 void
@@ -197,6 +289,8 @@ Actor::beginBackward(MoveSpeed speed)
 	{
 		return;
 	}
+	m_backward = true;
+	m_speed = speed;
 }
 
 void
@@ -206,6 +300,7 @@ Actor::endBackward(void)
 	{
 		return;
 	}
+	m_backward = false;
 }
 
 void
@@ -225,6 +320,7 @@ Actor::beginTurnLeft(void)
 	{
 		return;
 	}
+	m_cclockwise = true;
 }
 
 void
@@ -234,6 +330,7 @@ Actor::endTurnLeft(void)
 	{
 		return;
 	}
+	m_cclockwise = false;
 }
 
 void
@@ -253,6 +350,7 @@ Actor::beginTurnRight(void)
 	{
 		return;
 	}
+	m_clockwise = true;
 }
 
 void
@@ -262,6 +360,7 @@ Actor::endTurnRight(void)
 	{
 		return;
 	}
+	m_clockwise = false;
 }
 
 void
@@ -295,6 +394,8 @@ Actor::beginStrafeLeft(MoveSpeed speed)
 	{
 		return;
 	}
+	m_left = true;
+	m_speed = speed;
 }
 
 void
@@ -304,6 +405,7 @@ Actor::endStrafeLeft(void)
 	{
 		return;
 	}
+	m_left = false;
 }
 
 
@@ -324,6 +426,8 @@ Actor::beginStrafeRight(MoveSpeed speed)
 	{
 		return;
 	}
+	m_right = true;
+	m_speed = speed;
 }
 
 void
@@ -333,6 +437,7 @@ Actor::endStrafeRight(void)
 	{
 		return;
 	}
+	m_right = false;
 }
 
 void
