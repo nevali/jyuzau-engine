@@ -233,7 +233,8 @@ Prop::setPosition(const Ogre::Vector3 &vec)
 LoadableProp::LoadableProp(Prop *owner, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, NULL, name, attrs),
 	m_mesh(NULL),
-	m_material(NULL)
+	m_material(NULL),
+	m_prefab(NULL)
 {
 }
 
