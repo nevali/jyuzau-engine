@@ -152,15 +152,90 @@ Actor::setActiveCamera(Camera *cam)
 	m_cameras[cam->cameraType] = cam;
 }
 
+void
+Actor::accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, bool r, Ogre::Real topSpeed, Ogre::Real accelFactor, Ogre::Real deaccelFactor, Ogre::Real elapsed)
+{
+	Ogre::Quaternion orientation;
+	Ogre::Vector3 accel;
+	Ogre::Real squared;
+	Ogre::Real minVelocity = std::numeric_limits<Ogre::Real>::epsilon();
+	
+	orientation = m_node->getOrientation();
+	accel = Ogre::Vector3::ZERO;
+	if(f)
+	{
+		accel -= orientation.zAxis();
+	}
+	if(b)
+	{
+		accel += orientation.zAxis();
+	}
+	if(l)
+	{
+		accel -= orientation.xAxis();
+	}
+	if(r)
+	{
+		accel += orientation.xAxis();
+	}
+	if(accel.squaredLength() != 0.0f)
+	{
+		accel.normalise();
+		velocity += accel * topSpeed * elapsed * accelFactor;
+	}
+	else
+	{
+		velocity -= velocity * elapsed * deaccelFactor;
+	}
+	squared = velocity.squaredLength();
+	if(squared > topSpeed * topSpeed)
+	{
+		velocity.normalise();
+		velocity *= topSpeed;
+	}
+	else if(squared < minVelocity * minVelocity)
+	{
+		velocity = Ogre::Vector3::ZERO;
+	}
+}
+
+void
+Actor::accelerateRotation(Ogre::Real &velocity, bool back, bool forward, Ogre::Real topSpeed, Ogre::Real step, Ogre::Real accelFactor, Ogre::Real deaccelFactor, Ogre::Real elapsed)
+{
+	Ogre::Real taccel;
+	Ogre::Real minVelocity = std::numeric_limits<Ogre::Real>::epsilon();
+	
+	taccel = 0.0f;
+	if(back)
+	{
+		taccel += step;
+	}
+	if(forward)
+	{
+		taccel -= step;
+	}
+	if(taccel != 0.0f)
+	{
+		velocity += taccel * topSpeed * elapsed * accelFactor;
+	}
+	else
+	{
+		velocity -= velocity * elapsed * deaccelFactor;
+	}
+	if(std::abs(velocity) > topSpeed)
+	{
+		velocity = topSpeed * (velocity < 0.0f ? -1.0f : 1.0f);
+	}
+	else if(std::abs(velocity) < minVelocity)
+	{
+		velocity = 0.0f;
+	}
+}
+
 bool
 Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	Ogre::Vector3 accel;
 	Ogre::Real taccel;
-	Ogre::Quaternion orientation;
-	Ogre::Real squared;
-	Ogre::Real minVelocity = std::numeric_limits<Ogre::Real>::epsilon();
-	Ogre::Real topSpeed = (m_speed == MS_RUN ? m_topSpeed * 20 : (m_speed == MS_CREEP ? m_topSpeed / 5 : m_topSpeed));
 	
 	if(!m_node)
 	{
@@ -169,105 +244,19 @@ Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	/* Process movement based upon m_forward, m_backward, m_left, m_right and
 	 * m_speed
 	 */
-	orientation = m_node->getOrientation();
-	accel = Ogre::Vector3::ZERO;
-	if(m_forward)
-	{
-		accel -= orientation.zAxis();
-	}
-	if(m_backward)
-	{
-		accel += orientation.zAxis();
-	}
-	if(m_left)
-	{
-		accel -= orientation.xAxis();
-	}
-	if(m_right)
-	{
-		accel += orientation.xAxis();
-	}
-	if(accel.squaredLength() != 0)
-	{
-		accel.normalise();
-		m_velocity += accel * topSpeed * evt.timeSinceLastFrame * 10;
-	}
-	else
-	{
-		m_velocity -= m_velocity * evt.timeSinceLastFrame * 10;
-	}
-	squared = m_velocity.squaredLength();
-	if(squared > topSpeed * topSpeed)
-	{
-		m_velocity.normalise();
-		m_velocity *= topSpeed;
-	}
-	else if(squared < minVelocity * minVelocity)
-	{
-		m_velocity = Ogre::Vector3::ZERO;
-	}
+	accelerateXYMovement(m_velocity, m_forward, m_backward, m_left, m_right, (m_speed == MS_RUN ? m_topSpeed * 10 : (m_speed == MS_CREEP ? m_topSpeed / 5 : m_topSpeed)), 10, 10, evt.timeSinceLastFrame);
 	if(m_velocity != Ogre::Vector3::ZERO)
 	{
 		m_node->translate(m_velocity * evt.timeSinceLastFrame);
 	}
 	/* Process rotation */
-	taccel = 0.0f;
-	topSpeed = 4.0f;
-	if(m_clockwise)
-	{
-		taccel -= 0.25f;
-	}
-	if(m_cclockwise)
-	{
-		taccel += 0.25f;
-	}
-	if(taccel != 0.0f)
-	{
-		m_rotVelocity += taccel * topSpeed * evt.timeSinceLastFrame * 10;
-	}
-	else
-	{
-		m_rotVelocity -= m_rotVelocity * evt.timeSinceLastFrame * 10;
-	}
-	if(std::abs(m_rotVelocity) > topSpeed)
-	{
-		m_rotVelocity = topSpeed * (m_rotVelocity < 0.0f ? -1.0f : 1.0f);
-	}
-	else if(std::abs(m_rotVelocity) < minVelocity)
-	{
-		m_rotVelocity = 0.0f;
-	}
+	accelerateRotation(m_rotVelocity, m_cclockwise, m_clockwise, 4.0f, 0.25f, 10, 10, evt.timeSinceLastFrame);
 	if(m_rotVelocity != 0.0f)
 	{
 		m_node->yaw((Ogre::Radian) (m_rotVelocity * evt.timeSinceLastFrame));
 	}
 	/* Process camera pitching */
-	taccel = 0.0f;
-	topSpeed = 4.0f;
-	if(m_lookUp)
-	{
-		taccel += 0.25f;
-	}
-	if(m_lookDown)
-	{
-		taccel -= 0.25f;
-	}
-	if(taccel != 0.0f)
-	{
-		m_camPitchVelocity += taccel * topSpeed * evt.timeSinceLastFrame * 10;
-	}
-	else
-	{
-		m_camPitchVelocity -= m_camPitchVelocity * evt.timeSinceLastFrame * 10;
-	}
-	if(std::abs(m_rotVelocity) > topSpeed)
-	{
-		m_camPitchVelocity = topSpeed * (m_camPitchVelocity < 0.0f ? -1.0f : 1.0f);
-	}
-	else if(std::abs(m_camPitchVelocity) < minVelocity)
-	{
-		m_camPitchVelocity = 0.0f;
-	}
+	accelerateRotation(m_camPitchVelocity, m_lookUp, m_lookDown, 4.0f, 0.25f, 10, 10, evt.timeSinceLastFrame);
 	if(m_camPitchVelocity != 0.0f)
 	{
 		if(m_cameras[CT_FIRSTPERSON])

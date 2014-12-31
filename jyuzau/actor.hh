@@ -114,6 +114,9 @@ namespace Jyuzau
 		
 		virtual void characterAttached(void);
 		virtual void characterDetached(void);
+		
+		void accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, bool r, Ogre::Real topSpeed, Ogre::Real accelFactor, Ogre::Real deaccelFactor, Ogre::Real elapsed);
+		void accelerateRotation(Ogre::Real &velocity, bool back, bool forward, Ogre::Real topSpeed, Ogre::Real step, Ogre::Real accelFactor, Ogre::Real deaccelFactor, Ogre::Real elapsed);
 	};
 };
 
