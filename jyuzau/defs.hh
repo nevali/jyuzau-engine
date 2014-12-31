@@ -21,11 +21,27 @@
 # define CHAR_CURRENCY_MAX             5
 # define CHAR_WEAPON_MAX               10
 
-# define CONTROL_WALK_DISTANCE         5
-# define CONTROL_PITCH_FACTOR          0.005f
-# define CONTROL_YAW_FACTOR            0.005f
-# define CONTROL_PITCH_ANGLE           0.15f
-# define CONTROL_YAW_ANGLE             0.15f
+/* Actor movement defaults */
+# define ACTOR_WALK_SPEED              150.0f
+# define ACTOR_WALK_ACCEL              10.0f
+# define ACTOR_WALK_DECEL              10.0f
+# define ACTOR_WALK_DIST               5.0f
+# define ACTOR_RUN_FACTOR              10.0f
+# define ACTOR_CREEP_FACTOR            0.5f
+
+# define ACTOR_TURN_SPEED              4.0f
+# define ACTOR_TURN_STEP               0.25f
+# define ACTOR_TURN_ACCEL              10.0f
+# define ACTOR_TURN_DECEL              10.0f
+# define ACTOR_TURN_ANGLE              0.15f
+# define ACTOR_TURN_FACTOR             0.005f
+
+# define ACTOR_CAM_PITCH_SPEED         4.0f
+# define ACTOR_CAM_PITCH_STEP          0.25f
+# define ACTOR_CAM_PITCH_ACCEL         10.0f
+# define ACTOR_CAM_PITCH_DECEL         10.0f
+# define ACTOR_CAM_PITCH_ANGLE         0.15f
+# define ACTOR_CAM_PITCH_FACTOR        0.005f
 
 namespace Ogre
 {
@@ -46,6 +62,7 @@ namespace Jyuzau
 	};
 	
 	enum MoveSpeed {
+		MS_CURRENT,
 		MS_CREEP,
 		MS_WALK,
 		MS_RUN

@@ -49,7 +49,6 @@ namespace Jyuzau
 		virtual bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
 	protected:
 		std::vector<Actor *> m_actors;
-		MoveSpeed m_moveSpeed[1];
 	};
 
 };

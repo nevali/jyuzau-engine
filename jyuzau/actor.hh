@@ -48,28 +48,32 @@ namespace Jyuzau
 		virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 
 		/* Basic movement primitives */
-		virtual void forward(MoveSpeed speed = MS_WALK);
-		virtual void backward(MoveSpeed speed = MS_WALK);
-		virtual void turnLeft(MoveSpeed speed = MS_WALK);
-		virtual void turnRight(MoveSpeed speed = MS_WALK);
+		virtual void setSpeed(MoveSpeed speed);
+		virtual void beginRun(void);
+		virtual void endRun(void);
+		
+		virtual void forward(MoveSpeed speed = MS_CURRENT);
+		virtual void backward(MoveSpeed speed = MS_CURRENT);
+		virtual void turnLeft(MoveSpeed speed = MS_CURRENT);
+		virtual void turnRight(MoveSpeed speed = MS_CURRENT);
 		virtual void turnLeftRight(int distance);
-		virtual void strafeLeft(MoveSpeed speed = MS_WALK);
-		virtual void strafeRight(MoveSpeed speed = MS_WALK);
+		virtual void strafeLeft(MoveSpeed speed = MS_CURRENT);
+		virtual void strafeRight(MoveSpeed speed = MS_CURRENT);
 		virtual void crouch(void);
 		virtual void jump(void);
 
 		/* Smoothed keyboard movement */
-		virtual void beginForward(MoveSpeed speed = MS_WALK);
+		virtual void beginForward(MoveSpeed speed = MS_CURRENT);
 		virtual void endForward(void);
-		virtual void beginBackward(MoveSpeed speed = MS_WALK);
+		virtual void beginBackward(MoveSpeed speed = MS_CURRENT);
 		virtual void endBackward(void);
 		virtual void beginTurnLeft();
 		virtual void endTurnLeft(void);
 		virtual void beginTurnRight();
 		virtual void endTurnRight(void);
-		virtual void beginStrafeLeft(MoveSpeed speed = MS_WALK);
+		virtual void beginStrafeLeft(MoveSpeed speed = MS_CURRENT);
 		virtual void endStrafeLeft(void);
-		virtual void beginStrafeRight(MoveSpeed speed = MS_WALK);
+		virtual void beginStrafeRight(MoveSpeed speed = MS_CURRENT);
 		virtual void endStrafeRight(void);
 		
 		/* Basic looking */
@@ -97,26 +101,43 @@ namespace Jyuzau
 		Character *m_character;
 		unsigned m_level;
 		Camera *m_cameras[CT_COUNT];
-		/* Movement triggers */
-		bool m_forward, m_backward, m_left, m_right, m_clockwise, m_cclockwise;
-		/* Look direction change triggers */
-		bool m_lookUp, m_lookDown;
-		/* Current movement speed */
+
+		/* Movement */
+		bool m_forward, m_backward, m_left, m_right;
 		MoveSpeed m_speed;
-		/* Maximum movement speed */
-		Ogre::Real m_topSpeed;
-		/* Movement velocity */
 		Ogre::Vector3 m_velocity;
+		Ogre::Real m_topSpeed;
+		Ogre::Real m_moveAccel;
+		Ogre::Real m_moveDecel;
+		Ogre::Real m_moveRunFactor;
+		Ogre::Real m_moveCreepFactor;
+		Ogre::Real m_moveDistance;
+		
 		/* Turn (rotation) velocity */
+		bool m_clockwise, m_cclockwise;
 		Ogre::Real m_rotVelocity;
+		Ogre::Real m_rotSpeed;
+		Ogre::Real m_rotAccel;
+		Ogre::Real m_rotDecel;
+		Ogre::Real m_rotStep;
+		Ogre::Real m_rotAngle;
+		Ogre::Real m_rotFactor;
+		
 		/* Look up/down (camera pitch) velocity */
+		bool m_lookUp, m_lookDown;
 		Ogre::Real m_camPitchVelocity;
+		Ogre::Real m_camPitchSpeed;
+		Ogre::Real m_camPitchAccel;
+		Ogre::Real m_camPitchDecel;
+		Ogre::Real m_camPitchStep;
+		Ogre::Real m_camPitchAngle;
+		Ogre::Real m_camPitchFactor;
 		
 		virtual void characterAttached(void);
 		virtual void characterDetached(void);
 		
-		void accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, bool r, Ogre::Real topSpeed, Ogre::Real accelFactor, Ogre::Real deaccelFactor, Ogre::Real elapsed);
-		void accelerateRotation(Ogre::Real &velocity, bool back, bool forward, Ogre::Real topSpeed, Ogre::Real step, Ogre::Real accelFactor, Ogre::Real deaccelFactor, Ogre::Real elapsed);
+		void accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, bool r, Ogre::Real topSpeed, Ogre::Real accelFactor, Ogre::Real decelFactor, Ogre::Real elapsed);
+		void accelerateRotation(Ogre::Real &velocity, bool back, bool forward, Ogre::Real topSpeed, Ogre::Real step, Ogre::Real accelFactor, Ogre::Real decelFactor, Ogre::Real elapsed);
 	};
 };
 

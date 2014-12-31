@@ -27,7 +27,6 @@ using namespace Jyuzau;
 Controller::Controller():
 	m_actors()
 {
-	m_moveSpeed[0] = MS_WALK;
 }
 
 Controller::~Controller()
@@ -89,10 +88,10 @@ Controller::keyPressed(const OIS::KeyEvent &arg)
 		switch(arg.key)
 		{
 			case OIS::KC_UP:
-				m_actors[0]->beginForward(m_moveSpeed[0]);
+				m_actors[0]->beginForward();
 				return true;
 			case OIS::KC_DOWN:
-				m_actors[0]->beginBackward(m_moveSpeed[0]);
+				m_actors[0]->beginBackward();
 				return true;
 			case OIS::KC_LEFT:
 				m_actors[0]->beginTurnLeft();
@@ -107,17 +106,17 @@ Controller::keyPressed(const OIS::KeyEvent &arg)
 				m_actors[0]->beginLookDown();
 				return true;
 			case OIS::KC_COMMA:
-				m_actors[0]->beginStrafeLeft(m_moveSpeed[0]);
+				m_actors[0]->beginStrafeLeft();
 				return true;
 			case OIS::KC_PERIOD:
-				m_actors[0]->beginStrafeRight(m_moveSpeed[0]);
+				m_actors[0]->beginStrafeRight();
 				return true;
 			case OIS::KC_X:
 				m_actors[0]->resetCamera();
 				return true;
 			case OIS::KC_LSHIFT:
 			case OIS::KC_RSHIFT:
-				m_moveSpeed[0] = MS_RUN;
+				m_actors[0]->beginRun();
 				break;
 			default:
 				/* No-op */;
@@ -160,7 +159,7 @@ Controller::keyReleased(const OIS::KeyEvent &arg)
 				return true;
 			case OIS::KC_LSHIFT:
 			case OIS::KC_RSHIFT:
-				m_moveSpeed[0] = MS_WALK;
+				m_actors[0]->endRun();
 				break;
 			default:
 				/* No-op */;

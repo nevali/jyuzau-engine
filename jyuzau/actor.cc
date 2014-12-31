@@ -77,13 +77,30 @@ Actor::Actor(Ogre::String name):
 	m_health(100.0f),
 	m_level(1),
 	m_forward(false), m_backward(false), m_left(false), m_right(false),
-	m_clockwise(false), m_cclockwise(false),
-	m_lookUp(false), m_lookDown(false),
-	m_speed(MS_WALK),
-	m_topSpeed(150.0f),
 	m_velocity(Ogre::Vector3::ZERO),
-	m_rotVelocity(0),
-	m_camPitchVelocity(0)
+	m_topSpeed(ACTOR_WALK_SPEED),
+	m_moveAccel(ACTOR_WALK_ACCEL),
+	m_moveDecel(ACTOR_WALK_DECEL),
+	m_moveDistance(ACTOR_WALK_DIST),
+	m_moveRunFactor(ACTOR_RUN_FACTOR),
+	m_moveCreepFactor(ACTOR_CREEP_FACTOR),
+	m_clockwise(false), m_cclockwise(false),
+	m_rotVelocity(0.0f),
+	m_rotSpeed(ACTOR_TURN_SPEED),
+	m_rotStep(ACTOR_TURN_STEP),
+	m_rotAccel(ACTOR_TURN_ACCEL),
+	m_rotDecel(ACTOR_TURN_DECEL),
+	m_rotAngle(ACTOR_TURN_ANGLE),
+	m_rotFactor(ACTOR_TURN_FACTOR),
+	m_lookUp(false), m_lookDown(false),
+	m_camPitchVelocity(0.0f),
+	m_camPitchSpeed(ACTOR_CAM_PITCH_SPEED),
+	m_camPitchStep(ACTOR_CAM_PITCH_STEP),
+	m_camPitchAccel(ACTOR_CAM_PITCH_ACCEL),
+	m_camPitchDecel(ACTOR_CAM_PITCH_DECEL),
+	m_camPitchAngle(ACTOR_CAM_PITCH_ANGLE),
+	m_camPitchFactor(ACTOR_CAM_PITCH_FACTOR),
+	m_speed(MS_WALK)
 {
 	resetActiveCameras();
 }
@@ -126,12 +143,10 @@ Actor::createCamera(CameraType type)
 	cam = new Camera(m_group + "::camera[" + std::to_string((int) type) + "]", m_node->getCreator());
 	cam->cameraType = type;
 	cam->attach(m_node);
-	if(type == CT_FIRSTPERSON)
-	{
-		cam->limitPitch = true;
-	}
+	/* By default, limit the pitch angle from -90 to +90 degrees */
+	cam->limitPitch = true;
+	/* TODO adjust position, orientation, etc. */
 	cam->node->translate(0, 75, 150);
-	/* XXX adjust position, orientation, etc. */
 	setActiveCamera(cam);
 	return cam;
 }
@@ -153,7 +168,7 @@ Actor::setActiveCamera(Camera *cam)
 }
 
 void
-Actor::accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, bool r, Ogre::Real topSpeed, Ogre::Real accelFactor, Ogre::Real deaccelFactor, Ogre::Real elapsed)
+Actor::accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, bool r, Ogre::Real topSpeed, Ogre::Real accelFactor, Ogre::Real decelFactor, Ogre::Real elapsed)
 {
 	Ogre::Quaternion orientation;
 	Ogre::Vector3 accel;
@@ -185,7 +200,7 @@ Actor::accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, boo
 	}
 	else
 	{
-		velocity -= velocity * elapsed * deaccelFactor;
+		velocity -= velocity * elapsed * decelFactor;
 	}
 	squared = velocity.squaredLength();
 	if(squared > topSpeed * topSpeed)
@@ -200,7 +215,7 @@ Actor::accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, boo
 }
 
 void
-Actor::accelerateRotation(Ogre::Real &velocity, bool back, bool forward, Ogre::Real topSpeed, Ogre::Real step, Ogre::Real accelFactor, Ogre::Real deaccelFactor, Ogre::Real elapsed)
+Actor::accelerateRotation(Ogre::Real &velocity, bool back, bool forward, Ogre::Real topSpeed, Ogre::Real step, Ogre::Real accelFactor, Ogre::Real decelFactor, Ogre::Real elapsed)
 {
 	Ogre::Real taccel;
 	Ogre::Real minVelocity = std::numeric_limits<Ogre::Real>::epsilon();
@@ -220,7 +235,7 @@ Actor::accelerateRotation(Ogre::Real &velocity, bool back, bool forward, Ogre::R
 	}
 	else
 	{
-		velocity -= velocity * elapsed * deaccelFactor;
+		velocity -= velocity * elapsed * decelFactor;
 	}
 	if(std::abs(velocity) > topSpeed)
 	{
@@ -244,19 +259,19 @@ Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	/* Process movement based upon m_forward, m_backward, m_left, m_right and
 	 * m_speed
 	 */
-	accelerateXYMovement(m_velocity, m_forward, m_backward, m_left, m_right, (m_speed == MS_RUN ? m_topSpeed * 10 : (m_speed == MS_CREEP ? m_topSpeed / 5 : m_topSpeed)), 10, 10, evt.timeSinceLastFrame);
+	accelerateXYMovement(m_velocity, m_forward, m_backward, m_left, m_right, (m_speed == MS_RUN ? m_topSpeed * m_moveRunFactor : (m_speed == MS_CREEP ? m_topSpeed * m_moveCreepFactor : m_topSpeed)), m_moveAccel, m_moveDecel, evt.timeSinceLastFrame);
 	if(m_velocity != Ogre::Vector3::ZERO)
 	{
 		m_node->translate(m_velocity * evt.timeSinceLastFrame);
 	}
 	/* Process rotation */
-	accelerateRotation(m_rotVelocity, m_cclockwise, m_clockwise, 4.0f, 0.25f, 10, 10, evt.timeSinceLastFrame);
+	accelerateRotation(m_rotVelocity, m_cclockwise, m_clockwise, m_rotSpeed, m_rotStep, m_rotAccel, m_rotDecel, evt.timeSinceLastFrame);
 	if(m_rotVelocity != 0.0f)
 	{
 		m_node->yaw((Ogre::Radian) (m_rotVelocity * evt.timeSinceLastFrame));
 	}
 	/* Process camera pitching */
-	accelerateRotation(m_camPitchVelocity, m_lookUp, m_lookDown, 4.0f, 0.25f, 10, 10, evt.timeSinceLastFrame);
+	accelerateRotation(m_camPitchVelocity, m_lookUp, m_lookDown, m_camPitchSpeed, m_camPitchStep, m_camPitchAccel, m_camPitchDecel, evt.timeSinceLastFrame);
 	if(m_camPitchVelocity != 0.0f)
 	{
 		if(m_cameras[CT_FIRSTPERSON])
@@ -269,13 +284,41 @@ Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 }
 
 void
+Actor::beginRun()
+{
+	if(m_speed == MS_WALK)
+	{
+		setSpeed(MS_RUN);
+	}
+}
+
+void
+Actor::endRun()
+{
+	if(m_speed == MS_RUN)
+	{
+		setSpeed(MS_WALK);
+	}
+}
+
+void
+Actor::setSpeed(MoveSpeed speed)
+{
+	if(speed != MS_CURRENT)
+	{
+		m_speed = speed;
+	}
+}
+
+void
 Actor::forward(MoveSpeed speed)
 {
 	if(!m_node)
 	{
 		return;
 	}
-	m_node->translate(0, 0, -CONTROL_WALK_DISTANCE, Ogre::Node::TS_LOCAL);
+	setSpeed(speed);
+	m_node->translate(0, 0, -m_moveDistance, Ogre::Node::TS_LOCAL);
 }
 
 void
@@ -286,7 +329,7 @@ Actor::beginForward(MoveSpeed speed)
 		return;
 	}
 	m_forward = true;
-	m_speed = speed;
+	setSpeed(speed);
 }
 
 void
@@ -306,7 +349,7 @@ Actor::backward(MoveSpeed speed)
 	{
 		return;
 	}
-	m_node->translate(0, 0, CONTROL_WALK_DISTANCE, Ogre::Node::TS_LOCAL);
+	m_node->translate(0, 0, m_moveDistance, Ogre::Node::TS_LOCAL);
 }
 
 void
@@ -317,7 +360,7 @@ Actor::beginBackward(MoveSpeed speed)
 		return;
 	}
 	m_backward = true;
-	m_speed = speed;
+	setSpeed(speed);
 }
 
 void
@@ -337,7 +380,8 @@ Actor::turnLeft(MoveSpeed speed)
 	{
 		return;
 	}
-	m_node->yaw((Ogre::Radian) CONTROL_YAW_ANGLE);
+	m_node->yaw((Ogre::Radian) m_rotAngle);
+	setSpeed(speed);
 }
 
 void
@@ -367,7 +411,8 @@ Actor::turnRight(MoveSpeed speed)
 	{
 		return;
 	}
-	m_node->yaw((Ogre::Radian) -CONTROL_YAW_ANGLE);
+	setSpeed(speed);
+	m_node->yaw((Ogre::Radian) -m_rotAngle);
 }
 
 void
@@ -400,7 +445,7 @@ Actor::turnLeftRight(int distance)
 	{
 		return;
 	}
-	angle = (Ogre::Radian) -distance * CONTROL_YAW_FACTOR;
+	angle = (Ogre::Radian) -distance * m_rotFactor;
 	m_node->yaw(angle);
 }
 
@@ -411,7 +456,8 @@ Actor::strafeLeft(MoveSpeed speed)
 	{
 		return;
 	}
-	m_node->translate(-CONTROL_WALK_DISTANCE, 0, 0);
+	setSpeed(speed);
+	m_node->translate(-m_moveDistance, 0, 0);
 }
 
 void
@@ -422,7 +468,7 @@ Actor::beginStrafeLeft(MoveSpeed speed)
 		return;
 	}
 	m_left = true;
-	m_speed = speed;
+	setSpeed(speed);
 }
 
 void
@@ -443,7 +489,8 @@ Actor::strafeRight(MoveSpeed speed)
 	{
 		return;
 	}
-	m_node->translate(CONTROL_WALK_DISTANCE, 0, 0);
+	setSpeed(speed);
+	m_node->translate(m_moveDistance, 0, 0);
 }
 
 void
@@ -454,7 +501,7 @@ Actor::beginStrafeRight(MoveSpeed speed)
 		return;
 	}
 	m_right = true;
-	m_speed = speed;
+	setSpeed(speed);
 }
 
 void
@@ -476,7 +523,7 @@ Actor::lookUp(void)
 	}
 	if(m_cameras[CT_FIRSTPERSON])
 	{
-		m_cameras[CT_FIRSTPERSON]->pitch((Ogre::Radian) -CONTROL_PITCH_ANGLE);
+		m_cameras[CT_FIRSTPERSON]->pitch((Ogre::Radian) -m_camPitchAngle);
 	}
 }
 
@@ -509,7 +556,7 @@ Actor::lookDown(void)
 	}
 	if(m_cameras[CT_FIRSTPERSON])
 	{
-		m_cameras[CT_FIRSTPERSON]->pitch((Ogre::Radian) CONTROL_PITCH_ANGLE);
+		m_cameras[CT_FIRSTPERSON]->pitch((Ogre::Radian) m_camPitchAngle);
 	}
 }
 
@@ -544,7 +591,7 @@ Actor::lookUpDown(int distance)
 	{
 		return;
 	}
-	angle = (Ogre::Radian) distance * CONTROL_PITCH_FACTOR;
+	angle = (Ogre::Radian) distance * m_camPitchFactor;
 	if(m_cameras[CT_FIRSTPERSON])
 	{
 		m_cameras[CT_FIRSTPERSON]->pitch(angle);
