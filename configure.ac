@@ -16,6 +16,11 @@ AC_INIT([jyuzau-engine],m4_esyscmd([/bin/sh m4/get-version.sh]),)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([.])
 
+orig_CFLAGS="$CFLAGS"
+orig_CXXFLAGS="$CXXFLAGS"
+orig_OBJCFLAGS="$OBJCFLAGS"
+orig_OBJCXXFLAGS="$OBJCCXXFLAGS"
+
 AM_INIT_AUTOMAKE([foreign])
 AM_MAINTAINER_MODE
 
@@ -24,6 +29,38 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_OBJC
 AC_PROG_OBJCXX
+
+# If autoconf magic set CFLAGS to include -O2, change it to -O0
+if test x"$orig_CFLAGS" = x"" ; then
+	if test x"$CFLAGS" = x"-g -O2" ; then
+		CFLAGS="-g -O0"
+	elif test x"$CFLAGS" = x"-O2" ; then
+		CFLAGS="-O0"
+	fi
+fi
+if test x"$orig_CXXFLAGS" = x"" ; then
+	if test x"$CXXFLAGS" = x"-g -O2" ; then
+		CXXFLAGS="-g -O0"
+	elif test x"$CXFLAGS" = x"-O2" ; then
+		CXXFLAGS="-O0"
+	fi
+fi
+if test x"$orig_OBJCFLAGS" = x"" ; then
+	if test x"$OBJCFLAGS" = x"-g -O2" ; then
+		OBJCFLAGS="-g -O0"
+	elif test x"$OBJCFLAGS" = x"-O2" ; then
+		OBJCFLAGS="-O0"
+	fi
+fi
+if test x"$orig_OBJCXXFLAGS" = x"" ; then
+	if test x"$OBJCXXFLAGS" = x"-g -O2" ; then
+		OBJCXXFLAGS="-g -O0"
+	elif test x"$OBJCXXFLAGS" = x"-O2" ; then
+		OBJCXXFLAGS="-O0"
+	fi
+fi
+
+
 LT_INIT
 
 AC_SUBST([AM_CPPFLAGS])
