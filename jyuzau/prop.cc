@@ -17,14 +17,14 @@
 # include "config.h"
 #endif
 
+#include "jyuzau/prop.hh"
+#include "jyuzau/scene.hh"
+
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreEntity.h>
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreLogManager.h>
 #include <OGRE/OgreResourceGroupManager.h>
-
-#include "jyuzau/prop.hh"
-#include "jyuzau/scene.hh"
 
 using namespace Jyuzau;
 
@@ -69,6 +69,12 @@ Prop::~Prop()
 	{
 		delete m_entity;
 	}
+}
+
+Ogre::SceneNode *
+Prop::node(void)
+{
+	return m_node;
 }
 
 /* Attach the prop to a scene, creating the entity if necessary. Note that
@@ -124,6 +130,8 @@ Prop::attach(Ogre::SceneNode *node, Ogre::String name, Ogre::Vector3 pos)
 Ogre::Entity *
 Prop::entity(Ogre::SceneManager *scene, Ogre::String name)
 {
+	LoadableProp *prop;
+	
 	if(m_entity)
 	{
 		return m_entity;
@@ -136,13 +144,27 @@ Prop::entity(Ogre::SceneManager *scene, Ogre::String name)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a prop which has not been properly loaded");
 	}
-	m_entity = scene->createEntity(name, dynamic_cast<LoadableProp *>(m_root)->m_mesh->m_source, m_group);
+	prop = dynamic_cast<LoadableProp *>(m_root);
+	if(prop->m_mesh)
+	{
+		m_entity = scene->createEntity(name, prop->m_mesh->m_source, m_group);
+	}
+	else
+	{
+		m_entity = scene->createEntity(name, prop->m_prefab->m_type);
+	}
+	if(prop->m_material)
+	{
+		m_entity->setMaterialName(prop->m_material->m_class, m_group);
+	}
 	return m_entity;
 }
 
 LoadableObject *
 Prop::factory(Ogre::String name, AttrList &attrs)
 {
+	LoadableProp *prop;
+	
 	if(!m_root)
 	{
 		if(!name.compare(m_kind))
@@ -157,13 +179,18 @@ Prop::factory(Ogre::String name, AttrList &attrs)
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected child element <" + name + ">");
 		return NULL;
 	}
+	prop = dynamic_cast<LoadableProp *>(m_cur);
 	if(!name.compare("mesh"))
 	{
-		return new LoadablePropMesh(this, name, attrs);
+		return new LoadablePropMesh(this, prop, name, attrs);
 	}
 	if(!name.compare("material"))
 	{
-		return new LoadablePropMaterial(this, name, attrs);
+		return new LoadablePropMaterial(this, prop, name, attrs);
+	}
+	if(!name.compare("cube") || !name.compare("sphere") || !name.compare("plane"))
+	{
+		return new LoadablePropPrefab(this, prop, name, attrs);
 	}
 	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected element <" + name + ">");
 	return NULL;
@@ -200,10 +227,11 @@ Prop::setPosition(const Ogre::Vector3 &vec)
 
 
 
+
 /* A LoadableProp object encapsulates the <prop> root XML element */
 
 LoadableProp::LoadableProp(Prop *owner, Ogre::String name, AttrList &attrs):
-	LoadableObject(owner, name, attrs),
+	LoadableObject(owner, NULL, name, attrs),
 	m_mesh(NULL),
 	m_material(NULL)
 {
@@ -220,20 +248,24 @@ LoadableProp::add(LoadableObject *child)
 	{
 		m_material = dynamic_cast<LoadablePropMaterial *>(child);
 	}
+	else if(!child->name().compare("cube") || !child->name().compare("sphere") || !child->name().compare("plane"))
+	{
+		m_prefab = dynamic_cast<LoadablePropPrefab *>(child);
+	}
 	return LoadableObject::add(child);
 }
 
 bool
 LoadableProp::complete()
 {
-	if(!m_mesh)
+	if(!m_mesh && !m_prefab)
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: prop is missing a mesh");
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: prop is missing a mesh or pre-fabricated shape");
 		return false;
 	}
-	if(!m_material)
+	if(m_prefab && !m_material)
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: prop is missing material");
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: prefabricated prop is missing a material");
 		return false;
 	}
 	return LoadableObject::complete();
@@ -246,8 +278,8 @@ LoadableProp::complete()
  * <mesh src="foo.mesh" />
  */
 
-LoadablePropMesh::LoadablePropMesh(Prop *owner, Ogre::String name, AttrList &attrs):
-	LoadableObject(owner, name, attrs),
+LoadablePropMesh::LoadablePropMesh(Prop *owner, LoadableProp *parent, Ogre::String name, AttrList &attrs):
+	LoadableObject(owner, parent, name, attrs),
 	m_source("")
 {
 	AttrListIterator it;
@@ -266,7 +298,12 @@ LoadablePropMesh::LoadablePropMesh(Prop *owner, Ogre::String name, AttrList &att
 bool
 LoadablePropMesh::complete(void)
 {
-	return m_source.length();
+	if(!m_source.length())
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: prop mesh is missing a source");
+		return false;
+	}
+	return true;
 }
 
 bool
@@ -279,13 +316,40 @@ LoadablePropMesh::addResources(Ogre::String group)
 
 
 
+/* A LoadablePropPrefab object encapsulates a prefabricated object within a
+ * <prop>, one of <cube>, <sphere> or <plane>.
+ */
+LoadablePropPrefab::LoadablePropPrefab(Prop *owner, LoadableProp *parent, Ogre::String name, AttrList &attrs):
+	LoadableObject(owner, parent, name, attrs),
+	m_dimensions(1.0f, 1.0f, 1.0f)
+{
+	if(!name.compare("cube"))
+	{
+		m_type =  Ogre::SceneManager::PT_CUBE;
+	}
+	else if(!name.compare("sphere"))
+	{
+		m_type =  Ogre::SceneManager::PT_SPHERE;
+	}
+	else
+	{
+		m_type =  Ogre::SceneManager::PT_PLANE;
+	}
+}
+
+
+
+
 /* A LoadablePropMaterial object encapsulates a <material> within a <prop>.
- * <material src="foo.material" />
+ * <material src="../some/material/path.material" class="stipple" />
+ *
+ * Only useful for prefab props.
  */
 
-LoadablePropMaterial::LoadablePropMaterial(Prop *owner, Ogre::String name, AttrList &attrs):
-	LoadableObject(owner, name, attrs),
-	m_source("")
+LoadablePropMaterial::LoadablePropMaterial(Prop *owner, LoadableProp *parent, Ogre::String name, AttrList &attrs):
+	LoadableObject(owner, parent, name, attrs),
+	m_source(""),
+	m_class("")
 {
 	AttrListIterator it;
 	
@@ -297,18 +361,30 @@ LoadablePropMaterial::LoadablePropMaterial(Prop *owner, Ogre::String name, AttrL
 		{
 			m_source = p.second;
 		}
+		if(!p.first.compare("class"))
+		{
+			m_class = p.second;
+		}
 	}
 }
 
 bool
 LoadablePropMaterial::complete(void)
 {
-	return m_source.length();
+	if(!m_class.length())
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: prop material is missing a class");
+		return false;
+	}
+	return true;
 }
 
 bool
 LoadablePropMaterial::addResources(Ogre::String group)
 {
-	Ogre::ResourceGroupManager::getSingleton().declareResource(m_source, "Material", group);
+	if(m_source.length())
+	{
+		Ogre::ResourceGroupManager::getSingleton().declareResource(m_source, "Material", group);
+	}
 	return true;
 }

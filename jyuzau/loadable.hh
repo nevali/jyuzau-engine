@@ -81,13 +81,16 @@ namespace Jyuzau
 	 *
 	 * Specialisations of LoadableObject deal with different kinds of element
 	 * in different contexts.
+	 *
+	 * Note that m_name (passed as 'name' to the constructor) is the element
+	 * name, e.g., 'scene' for a <scene> element.
 	 */
 	class LoadableObject
 	{
 		friend class Loadable;
 		
 	public:
-		LoadableObject(Loadable *owner, Ogre::String name, AttrList &attrs);
+		LoadableObject(Loadable *owner, LoadableObject *parent, Ogre::String name, AttrList &attrs);
 		virtual ~LoadableObject();
 	
 		virtual Ogre::String name(void);
@@ -105,7 +108,7 @@ namespace Jyuzau
 		virtual bool addResources(Ogre::String group);
 		
 		virtual Ogre::ColourValue parseColourValue(AttrList &attrs);
-		virtual Ogre::Vector3 parseXYZ(AttrList &attrs);
+		virtual Ogre::Vector3 parseXYZ(AttrList &attrs, double x = 0, double y = 0, double z = 0);
 	};
 };
 

@@ -29,13 +29,11 @@ namespace Jyuzau
 {
 	class Prop;
 	class Light;
+	class LoadableSceneObject;
 	class LoadableSceneProp;
 	class LoadableSceneLight;
 	class LoadableSceneAmbientLight;
-	
-	typedef std::pair<LoadableSceneProp *, Prop *> SceneProp;
-	typedef std::pair<LoadableSceneLight *, Light *> SceneLight;
-	
+		
 	class Scene: public Loadable
 	{
 	public:
@@ -50,18 +48,17 @@ namespace Jyuzau
 		Ogre::SceneNode *rootNode(void);
 		
 		/* Add a Prop to the scene and take ownership of it */
-		virtual void addProp(LoadableSceneProp *sceneProp, Prop *prop);
-		virtual void addLight(LoadableSceneLight *sceneProp, Light *light);
+		virtual void addSceneObject(LoadableSceneObject *sceneObject, Loadable *object);
 		virtual void addAmbientLight(LoadableSceneAmbientLight *sceneAmblientLight);
 	protected:
 		Ogre::SceneManager *m_manager;
-		std::vector<SceneProp> m_props;
-		std::vector<SceneLight> m_lights;
+		std::vector<LoadableSceneObject *> m_objects;
 		LoadableSceneAmbientLight *m_ambient;
 		
 		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
 	};
 	
+	/* LoadableScene encapsulates the <scene> root element */
 	class LoadableScene: public LoadableObject
 	{
 		friend class Scene;
@@ -70,31 +67,58 @@ namespace Jyuzau
 	protected:
 	};
 	
-	class LoadableSceneProp: public LoadableObject
+	/* LoadableSceneObject is the base class for any object which can be
+	 * loaded into a scene and has some kind of manifestation (including
+	 * both props and dynamic lights).
+	 */
+	class LoadableSceneObject: public LoadableObject
 	{
 		friend class Scene;
+		friend class LoadableSceneTransform;
+		friend class LoadableSceneRotation;
 	public:
-		LoadableSceneProp(Scene *owner, Ogre::String name, AttrList &attrs);
+		LoadableSceneObject(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs);
 		
 		virtual Ogre::String id(void);
 		virtual bool complete(void);
-		virtual Ogre::Vector3 pos();
 	protected:
-		Ogre::String m_id, m_class;
-		Ogre::Vector3 m_pos;
-
-		virtual bool addResources(Ogre::String group);
+		Ogre::String m_id;
+		Ogre::Vector3 m_scale, m_translate;
+		Ogre::Radian m_yaw, m_pitch, m_roll;
+		
+		virtual bool attach(Scene *scene) = 0;
 	};
 	
-	class LoadableSceneActor: public LoadableSceneProp
+	/* LoadableSceneTransform encapsulates a <scale> or <translate>
+	 * within a scene object; the x, y and z attributes are parsed
+	 * and then applied to the appropriate properties of the parent.
+	 */
+	class LoadableSceneTransform: public LoadableObject
 	{
 		friend class Scene;
 	public:
-		LoadableSceneActor(Scene *owner, Ogre::String name, AttrList &attrs);
+		LoadableSceneTransform(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs);
 	protected:
-		virtual bool addResources(Ogre::String group);
+		Ogre::Vector3 m_vector;
+	};
+
+	/* LoadableSceneRotation encapsulates a <yaw>, <pitch> or <roll>
+	 * within a scene object; the rad or deg attributes are parsed
+	 * and then applied to the appropriate properties of the parent.
+	 */
+	class LoadableSceneRotation: public LoadableObject
+	{
+		friend class Scene;
+	public:
+		LoadableSceneRotation(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs);
+	protected:
+		Ogre::Radian m_angle;
 	};
 	
+	/* LoadableSceneAmbientLight encapsulates an <ambientlight> within a
+	 * <scene>.
+	 * <ambientlight r="n" g="n" b="n" a="n" />
+	 */
 	class LoadableSceneAmbientLight: public LoadableObject
 	{
 		friend class Scene;
@@ -103,24 +127,54 @@ namespace Jyuzau
 		virtual Ogre::ColourValue colorValue(void);
 	protected:
 		Ogre::ColourValue m_col;
-		
+	
 		virtual bool addResources(Ogre::String group);
 	};
-
-	class LoadableSceneLight: public LoadableObject
+	
+	
+	/* LoadableSceneProp encapsulates a <prop> within a scene
+	 * <prop id="scene-local-name" class="asset-name" x="n" y="n" z="n">
+	 */
+	class LoadableSceneProp: public LoadableSceneObject
 	{
 		friend class Scene;
 	public:
-		LoadableSceneLight(Scene *owner, Ogre::String name, AttrList &attrs);
+		LoadableSceneProp(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs);
 		
-		virtual Ogre::String id(void);
-		virtual Ogre::Vector3 pos(void);
 		virtual bool complete(void);
 	protected:
-		Ogre::String m_id;
-		Ogre::Vector3 m_pos;
+		Ogre::String m_class;
+		Prop *m_prop;
 		
 		virtual bool addResources(Ogre::String group);
+		virtual bool attach(Scene *scene);
+	};
+	
+	/* LoadableSceneActor encapsulates an <actor> within a scene, and is
+	 * simply a specialisation of LoadableSceneProp
+	 */
+	class LoadableSceneActor: public LoadableSceneProp
+	{
+		friend class Scene;
+	public:
+		LoadableSceneActor(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs);
+	protected:
+		virtual bool addResources(Ogre::String group);
+	};
+	
+	/* LoadableSceneLight encapsulates a <light> within a <scene>
+	 * <light id="scene-local-name" x="n" y="n" z="n">
+	 */
+	class LoadableSceneLight: public LoadableSceneObject
+	{
+		friend class Scene;
+	public:
+		LoadableSceneLight(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs);
+	protected:
+		Light *m_light;
+		
+		virtual bool addResources(Ogre::String group);
+		virtual bool attach(Scene *scene);
 	};
 
 };

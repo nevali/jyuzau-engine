@@ -128,6 +128,7 @@ Actor::createCamera(CameraType type)
 	{
 		cam->limitPitch = true;
 	}
+	cam->node->translate(0, 75, 150);
 	/* XXX adjust position, orientation, etc. */
 	setActiveCamera(cam);
 	return cam;
@@ -226,9 +227,9 @@ Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
 		m_rotVelocity -= m_rotVelocity * evt.timeSinceLastFrame * 10;
 	}
-	if(m_rotVelocity > topSpeed)
+	if(std::abs(m_rotVelocity) > topSpeed)
 	{
-		m_rotVelocity = topSpeed;
+		m_rotVelocity = topSpeed * (m_rotVelocity < 0.0f ? -1.0f : 1.0f);
 	}
 	else if(std::abs(m_rotVelocity) < minVelocity)
 	{

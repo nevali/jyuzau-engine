@@ -16,9 +16,10 @@
 #ifndef JYUZAU_PROP_HH_
 # define JYUZAU_PROP_HH_               1
 
-# include <OGRE/OgreVector3.h>
-
 # include "jyuzau/loadable.hh"
+
+# include <OGRE/OgreVector3.h>
+# include <OGRE/OgreSceneManager.h>
 
 namespace Jyuzau
 {
@@ -26,6 +27,7 @@ namespace Jyuzau
 	
 	class LoadablePropMesh;
 	class LoadablePropMaterial;
+	class LoadablePropPrefab;
 	
 	/* A Prop is an object which can be attached to scenes. They have meshes
 	 * and textures, and descendants (e.g., Actor) can include particular
@@ -40,6 +42,7 @@ namespace Jyuzau
 		virtual ~Prop();
 	
 		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager, Ogre::String name = "");
+		virtual Ogre::SceneNode *node(void);
 	
 		virtual bool attach(Scene *scene, Ogre::String name = "", Ogre::Vector3 pos = Ogre::Vector3::ZERO);
 		virtual bool attach(Ogre::SceneManager *scene, Ogre::String name = "", Ogre::Vector3 pos = Ogre::Vector3::ZERO);
@@ -47,6 +50,7 @@ namespace Jyuzau
 		
 		virtual void setPosition(Ogre::Real x, Ogre::Real y, Ogre::Real z);
 		virtual void setPosition(const Ogre::Vector3 &vec);
+		
 	protected:
 		bool m_attached;
 		Ogre::Entity *m_entity;
@@ -64,6 +68,7 @@ namespace Jyuzau
 		virtual bool add(LoadableObject *child);
 		virtual bool complete(void);
 	protected:
+		LoadablePropPrefab *m_prefab;
 		LoadablePropMesh *m_mesh;
 		LoadablePropMaterial *m_material;
 	};
@@ -73,12 +78,23 @@ namespace Jyuzau
 		friend class Prop;
 		friend class LoadableProp;
 	public:
-		LoadablePropMesh(Prop *owner, Ogre::String name, AttrList &attrs);
+		LoadablePropMesh(Prop *owner, LoadableProp *parent, Ogre::String name, AttrList &attrs);
 		virtual bool complete(void);
 	protected:
 		Ogre::String m_source;
 
 		virtual bool addResources(Ogre::String group);
+	};
+	
+	class LoadablePropPrefab: public LoadableObject
+	{
+		friend class Prop;
+		friend class LoadableProp;
+	public:
+		LoadablePropPrefab(Prop *owner, LoadableProp *parent, Ogre::String name, AttrList &attrs);
+	protected:
+		Ogre::SceneManager::PrefabType m_type;
+		Ogre::Vector3 m_dimensions;
 	};
 
 	class LoadablePropMaterial: public LoadableObject
@@ -86,13 +102,15 @@ namespace Jyuzau
 		friend class Prop;
 		friend class LoadableProp;
 	public:
-		LoadablePropMaterial(Prop *owner, Ogre::String name, AttrList &attrs);
+		LoadablePropMaterial(Prop *owner, LoadableProp *parent, Ogre::String name, AttrList &attrs);
 		virtual bool complete(void);
 	protected:
 		Ogre::String m_source;
-
+		Ogre::String m_class;
+		
 		virtual bool addResources(Ogre::String group);
 	};
+	
 };
 
 #endif /*!JYUZAU_PROP_HH_*/

@@ -58,6 +58,12 @@ Light::~Light()
 	}
 }
 
+Ogre::Light *
+Light::node(void)
+{
+	return m_light;
+}
+
 bool
 Light::attach(Scene *scene, Ogre::String name, Ogre::Vector3 pos)
 {

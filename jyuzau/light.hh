@@ -35,7 +35,9 @@ namespace Jyuzau
 		Light(Ogre::String name, Ogre::String kind = "light");
 		virtual ~Light();
 		
-		virtual bool attach(Scene *scene, Ogre::String name, Ogre::Vector3 pos);
+		virtual Ogre::Light *node(void);
+		
+		virtual bool attach(Scene *scene, Ogre::String name, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
 		virtual bool attach(Ogre::SceneManager *manager, Ogre::String name, Ogre::Vector3 pos);
 		virtual bool detach(void);
 	protected:

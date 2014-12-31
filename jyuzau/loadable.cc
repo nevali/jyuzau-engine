@@ -47,7 +47,6 @@ Loadable::Loadable(Ogre::String name, Ogre::String kind, bool subdir):
 	Ogre::String base;
 	
 	m_loaded = m_load_status = false;
-	
 	if (!Ogre::StringUtil::startsWith(name, "/", false))
 	{
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
@@ -152,7 +151,7 @@ Loadable::factory(Ogre::String name, AttrList &attrs)
 	/* Default loadable object factory; simply returns a new instance
 	 * of LoadableObject
 	 */
-	return new LoadableObject(this, name, attrs);
+	return new LoadableObject(this, m_root, name, attrs);
 }
 
 LoadableObject *
@@ -284,9 +283,13 @@ Loadable::sax_endElement(void *ctx, const xmlChar *localname, const xmlChar *pre
  *
  * Specialisations of LoadableObject deal with different kinds of element
  * in different contexts.
+ *
+ * Note that specifying a parent here is NOT the equivalent of calling
+ * parent->add(self): that step must still be explicitly taken (as it is
+ * by Loadable::startElement()).
  */
 
-LoadableObject::LoadableObject(Loadable *owner, Ogre::String name, AttrList &attrs):
+LoadableObject::LoadableObject(Loadable *owner, LoadableObject *parent, Ogre::String name, AttrList &attrs):
 	m_owner(owner),
 	m_name(name),
 	m_attrs(attrs)
@@ -411,9 +414,8 @@ LoadableObject::parseColourValue(AttrList &attrs)
 }
 
 Ogre::Vector3
-LoadableObject::parseXYZ(AttrList &attrs)
+LoadableObject::parseXYZ(AttrList &attrs, double x, double y, double z)
 {
-	double x = 0, y = 0, z = 0;
 	AttrListIterator it;
 	
 	for(it = m_attrs.begin(); it != m_attrs.end(); it++)
