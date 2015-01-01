@@ -27,52 +27,8 @@
 
 using namespace Jyuzau;
 
-Actor *
-Actor::create(Ogre::String name, Scene *scene)
-{
-	Actor *p;
-	
-	p = new Actor(name);
-	if(!p->load())
-	{
-		delete p;
-		return NULL;
-	}
-	if(scene)
-	{
-		if(!p->attach(scene))
-		{
-			delete p;
-			return NULL;
-		}
-	}
-	return p;
-}
-
-Actor *
-Actor::create(Ogre::String name, Ogre::SceneManager *sceneManager)
-{
-	Actor *p;
-	
-	p = new Actor(name);
-	if(!p->load())
-	{
-		delete p;
-		return NULL;
-	}
-	if(sceneManager)
-	{
-		if(!p->attach(sceneManager))
-		{
-			delete p;
-			return NULL;
-		}
-	}
-	return p;
-}
-
-Actor::Actor(Ogre::String name):
-	Prop::Prop(name, "actor"),
+Actor::Actor(Ogre::String name, State *state):
+	Prop::Prop(name, "actor", state),
 	m_character(NULL),
 	m_health(100.0f),
 	m_level(1),

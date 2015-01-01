@@ -29,6 +29,7 @@
 namespace Jyuzau
 {
 	class LoadableObject;
+	class State;
 	
 	/* The Loadable class represents different kinds of assets which can be
 	 * loaded from disk: scenes, props, actors, etc.
@@ -40,7 +41,7 @@ namespace Jyuzau
 	class Loadable
 	{
 	public:
-		Loadable(Ogre::String name, Ogre::String kind, bool subdir);
+		Loadable(Ogre::String name, Ogre::String kind, bool subdir, State *state = NULL);
 		~Loadable();
 		
 		virtual bool load(void);
@@ -48,6 +49,8 @@ namespace Jyuzau
 		virtual LoadableObject *root(void);
 		virtual Ogre::String name(void);
 		virtual Ogre::String kind(void);
+		virtual bool unique(void);
+		virtual State *state(void);
 		
 		/* SAX callbacks */
 		static void sax_startElement(void *ctx, const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces, int nb_attributes, int nb_defaulted, const xmlChar **attributes);
@@ -64,11 +67,14 @@ namespace Jyuzau
 		LoadableObject *m_root, *m_cur;
 		Loadable *m_owner;
 		std::vector<Loadable *> m_objects;
+		bool m_unique;
+		State *m_state;
 		
 		virtual bool loadDocument(Ogre::String path);
 		
 		virtual void loaded(void);
 		virtual bool addResources(Ogre::String group);
+		virtual void discard(void);
 		
 		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
 		
@@ -102,10 +108,12 @@ namespace Jyuzau
 		Ogre::String m_name;
 		bool m_loaded;
 		AttrList m_attrs;
+		bool m_discardable;
 		
 		virtual bool add(LoadableObject *child);
 		virtual void loaded(void);
 		virtual bool addResources(Ogre::String group);
+		virtual void discard(void);
 		
 		virtual Ogre::ColourValue parseColourValue(AttrList &attrs);
 		virtual Ogre::Vector3 parseXYZ(AttrList &attrs, double x = 0, double y = 0, double z = 0);

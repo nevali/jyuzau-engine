@@ -17,6 +17,11 @@
 # include "config.h"
 #endif
 
+#include "jyuzau/sceneview.hh"
+#include "jyuzau/scene.hh"
+#include "jyuzau/core.hh"
+#include "jyuzau/camera.hh"
+
 #include <OIS/OISEvents.h>
 #include <OIS/OISInputManager.h>
 #include <OIS/OISKeyboard.h>
@@ -25,11 +30,6 @@
 #include <OgreSceneManager.h>
 
 #include <OGRE/SdkCameraMan.h>
-
-#include "jyuzau/sceneview.hh"
-#include "jyuzau/scene.hh"
-#include "jyuzau/core.hh"
-#include "jyuzau/camera.hh"
 
 using namespace Jyuzau;
 
@@ -56,7 +56,7 @@ SceneViewState::~SceneViewState()
 void
 SceneViewState::createScenes()
 {
-	m_scene = Scene::create(m_name);
+	m_scene = dynamic_cast<Scene *>(factory("scene", m_name));
 }
 
 void

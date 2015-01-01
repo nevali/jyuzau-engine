@@ -17,48 +17,41 @@
 # include "config.h"
 #endif
 
-#include <OGRE/OgreLogManager.h>
-
 #include "jyuzau/scene.hh"
 #include "jyuzau/prop.hh"
 #include "jyuzau/actor.hh"
 #include "jyuzau/light.hh"
+#include "jyuzau/state.hh"
+
+#include <OGRE/OgreLogManager.h>
+
+#include "p_utils.hh"
 
 using namespace Jyuzau;
 
-Scene *
-Scene::create(Ogre::String name, Ogre::SceneManager *sceneManager)
-{
-	Scene *p;
-	
-	p = new Scene(name);
-	if(!p->load())
-	{
-		delete p;
-		return NULL;
-	}
-	if(sceneManager)
-	{
-		if(!p->attach(sceneManager))
-		{
-			delete p;
-			return NULL;
-		}
-	}
-	return p;
-}
-
-Scene::Scene(Ogre::String name):
-	Loadable::Loadable(name, "scene", false),
+Scene::Scene(Ogre::String name, State *state):
+	Loadable::Loadable(name, "scene", false, state),
 	m_manager(NULL),
 	m_objects(),
-	m_ambient(NULL)
+	m_ambient(NULL),
+	m_broadphase(NULL),
+	m_collisionConfig(NULL),
+	m_dispatcher(NULL),
+	m_dynamics(NULL),
+	m_solver(NULL),
+	m_gravity(0, 0, 0)
 {
 }
 
 
 Scene::~Scene()
 {
+	delete m_dynamics;
+	delete m_solver;
+	delete m_dispatcher;
+	delete m_collisionConfig;
+	delete m_broadphase;
+	
 	if(m_manager)
 	{
 		detach();
@@ -71,15 +64,36 @@ Scene::attach(Ogre::SceneManager *manager)
 {
 	std::vector<LoadableSceneObject *>::iterator it;
 
-	if(!m_loaded || !m_load_status)
+	if(!m_loaded)
+	{
+		if(!load())
+		{
+			return false;
+		}
+	}
+	if(!m_load_status)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a scene which has not been properly loaded");
+		return false;
+	}
+	if(!manager && m_state)
+	{
+		manager = m_state->sceneManager();
+	}
+	if(!manager)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a scene because no scene manager is available");
+		return false;
 	}
 	if(m_manager)
 	{
 		detach();
 	}
 	m_manager = manager;
+	if(!m_dynamics)
+	{
+		attachPhysics();
+	}
 	/* Apply the ambient light to the scene */
 	if(m_ambient)
 	{
@@ -184,6 +198,70 @@ Scene::addAmbientLight(LoadableSceneAmbientLight *light)
 	m_ambient = light;
 }
 
+/* Attach the physics engine to the scene */
+void
+Scene::attachPhysics(void)
+{
+	m_broadphase = new btDbvtBroadphase();
+	m_collisionConfig = new btDefaultCollisionConfiguration();
+	m_dispatcher = new btCollisionDispatcher(m_collisionConfig);
+	m_solver = new btSequentialImpulseConstraintSolver();
+	m_dynamics = new btDiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_solver, m_collisionConfig);
+	m_dynamics->setGravity(m_gravity);
+}
+
+btDynamicsWorld *
+Scene::dynamics(void)
+{
+	return m_dynamics;
+}
+
+bool
+Scene::setGravity(const Ogre::Vector3 &vec)
+{
+	if(!m_dynamics)
+	{
+		return false;
+	}
+	m_gravity = ogreVecToBullet(vec);
+	m_dynamics->setGravity(m_gravity);
+	return true;
+}
+
+bool
+Scene::setGravity(const btVector3 &vec)
+{
+	if(!m_dynamics)
+	{
+		return false;
+	}
+	m_gravity = vec;
+	m_dynamics->setGravity(m_gravity);
+	return true;
+}
+
+bool
+Scene::addRigidBody(btRigidBody *body)
+{
+	if(!m_dynamics)
+	{
+		return false;
+	}
+	m_dynamics->addRigidBody(body);
+	return true;
+}
+
+bool
+Scene::removeRigidBody(btRigidBody *body)
+{
+	if(!m_dynamics)
+	{
+		return false;
+	}
+	m_dynamics->removeRigidBody(body);
+	return true;
+}
+
 
 
 
@@ -282,7 +360,16 @@ LoadableSceneProp::complete(void)
 bool
 LoadableSceneProp::addResources(Ogre::String group)
 {
-	m_prop = Prop::create(m_class);
+	State *state;
+	
+	if((state = m_owner->state()))
+	{
+		m_prop = dynamic_cast<Prop *>(state->factory(m_name, m_class));
+	}
+	else
+	{
+		m_prop = new Prop(m_class, m_name);
+	}
 	if(!m_prop)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene prop instance");
@@ -326,7 +413,16 @@ LoadableSceneActor::LoadableSceneActor(Scene *owner, LoadableSceneObject *parent
 bool
 LoadableSceneActor::addResources(Ogre::String group)
 {
-	m_prop = Actor::create(m_class);
+	State *state;
+	
+	if((state = m_owner->state()))
+	{
+		m_prop = dynamic_cast<Actor *>(state->factory(m_name, m_class));
+	}
+	else
+	{
+		m_prop = new Actor(m_class);
+	}
 	if(!m_prop)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene actor instance");
@@ -377,7 +473,16 @@ LoadableSceneLight::LoadableSceneLight(Scene *owner, LoadableSceneObject *parent
 bool
 LoadableSceneLight::addResources(Ogre::String group)
 {
-	m_light = Light::create(m_id);
+	State *state;
+	
+	if((state = m_owner->state()))
+	{
+		m_light = dynamic_cast<Light *>(state->factory(m_name, m_id));
+	}
+	else
+	{
+		m_light = new Light(m_id);
+	}
 	if(!m_light)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene light instance");

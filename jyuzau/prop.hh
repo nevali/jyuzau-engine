@@ -21,6 +21,8 @@
 # include <OGRE/OgreVector3.h>
 # include <OGRE/OgreSceneManager.h>
 
+# include <btBulletDynamicsCommon.h>
+
 namespace Jyuzau
 {
 	class Scene;
@@ -36,9 +38,7 @@ namespace Jyuzau
 	class Prop: public Loadable
 	{
 	public:
-		static Prop *create(Ogre::String name, Scene *scene = NULL, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
-	
-		Prop(Ogre::String name, Ogre::String kind = "prop");
+		Prop(Ogre::String name, Ogre::String kind = "prop", State *state = NULL);
 		virtual ~Prop();
 	
 		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager, Ogre::String name = "");
@@ -55,7 +55,11 @@ namespace Jyuzau
 		bool m_attached;
 		Ogre::Entity *m_entity;
 		Ogre::SceneNode *m_node;
-	
+		btCollisionShape *m_collisionShape;
+		btMotionState *m_motionState;
+		btScalar m_mass;
+		btRigidBody *m_rigidBody;
+		
 		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
 		virtual void loaded(void);
 	};

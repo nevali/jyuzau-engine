@@ -30,9 +30,7 @@ namespace Jyuzau
 	class Light: public Loadable
 	{
 	public:
-		static Light *create(Ogre::String name, Scene *scene = NULL, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
-	
-		Light(Ogre::String name, Ogre::String kind = "light");
+		Light(Ogre::String name, Ogre::String kind = "light", State *state = NULL);
 		virtual ~Light();
 		
 		virtual Ogre::Light *node(void);

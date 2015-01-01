@@ -17,14 +17,16 @@
 # include "config.h"
 #endif
 
-#include <utility>
-
 #include "jyuzau/state.hh"
 #include "jyuzau/core.hh"
+#include "jyuzau/prop.hh"
+#include "jyuzau/scene.hh"
 #include "jyuzau/character.hh"
 #include "jyuzau/actor.hh"
 #include "jyuzau/camera.hh"
 #include "jyuzau/controller.hh"
+
+#include <utility>
 
 using namespace Jyuzau;
 
@@ -33,7 +35,8 @@ State::State():
 	m_sceneManager(NULL),
 	m_cameras(),
 	m_actors(),
-	m_defaultPlayerCameraType(CT_FIRSTPERSON)
+	m_defaultPlayerCameraType(CT_FIRSTPERSON),
+	m_dynamics(NULL)
 {
 	m_core = Core::getInstance();
 	m_controller = m_core->controller();
@@ -82,6 +85,37 @@ State::preload(void)
 	{
 		load();
 	}
+}
+
+/* Create an instance of an asset */
+Loadable *
+State::factory(Ogre::String m_kind, Ogre::String m_name)
+{
+	Loadable *loadable;
+	
+	/* TODO: check pool */
+	if(!m_kind.compare("scene"))
+	{
+		loadable = new Scene(m_name, this);
+	}
+	else if(!m_kind.compare("prop"))
+	{
+		loadable = new Prop(m_name, m_kind, this);
+	}
+	else if(!m_kind.compare("actor"))
+	{
+		loadable = new Actor(m_name, this);
+	}
+	else
+	{
+		return NULL;
+	}
+	if(!loadable->load())
+	{
+		delete loadable;
+		return NULL;
+	}
+	return loadable;
 }
 
 void
@@ -242,6 +276,10 @@ State::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
 	std::vector<Actor *>::iterator ait;
 	
+	if(m_dynamics)
+	{
+		m_dynamics->stepSimulation(evt.timeSinceLastFrame, DYNAMICS_MAX_SUBSTEPS);
+	}
 	for(ait = m_actors.begin(); ait != m_actors.end(); ait++)
 	{
 		(*ait)->frameRenderingQueued(evt);

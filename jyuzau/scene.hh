@@ -16,6 +16,8 @@
 #ifndef JYUZAU_SCENE_HH_
 # define JYUZAU_SCENE_HH_              1
 
+# include "jyuzau/loadable.hh"
+
 # include <utility>
 
 # include <OGRE/OgreString.h>
@@ -23,7 +25,7 @@
 # include <OGRE/OgreVector3.h>
 # include <OGRE/OgreColourValue.h>
 
-# include "jyuzau/loadable.hh"
+# include <btBulletDynamicsCommon.h>
 
 namespace Jyuzau
 {
@@ -33,13 +35,14 @@ namespace Jyuzau
 	class LoadableSceneProp;
 	class LoadableSceneLight;
 	class LoadableSceneAmbientLight;
-		
+
 	class Scene: public Loadable
 	{
 	public:
-		static Scene *create(Ogre::String name, Ogre::SceneManager *sceneManager = NULL);
+		static Scene *create(Ogre::String name, State *state);
+		static Scene *create(Ogre::String name, Ogre::SceneManager *sceneManager = NULL, State *state = NULL);
 		
-		Scene(Ogre::String name);
+		Scene(Ogre::String name, State *state = NULL);
 		virtual ~Scene();
 		
 		bool attach(Ogre::SceneManager *sceneManager);
@@ -50,12 +53,27 @@ namespace Jyuzau
 		/* Add a Prop to the scene and take ownership of it */
 		virtual void addSceneObject(LoadableSceneObject *sceneObject, Loadable *object);
 		virtual void addAmbientLight(LoadableSceneAmbientLight *sceneAmblientLight);
+		
+		/* Physics */
+		virtual btDynamicsWorld *dynamics(void);
+		virtual bool setGravity(const Ogre::Vector3 &vec);
+		virtual bool setGravity(const btVector3 &vec);
+		virtual bool addRigidBody(btRigidBody *body);
+		virtual bool removeRigidBody(btRigidBody *body);
 	protected:
 		Ogre::SceneManager *m_manager;
 		std::vector<LoadableSceneObject *> m_objects;
 		LoadableSceneAmbientLight *m_ambient;
+		btBroadphaseInterface *m_broadphase;
+		btCollisionConfiguration *m_collisionConfig;
+		btCollisionDispatcher *m_dispatcher;
+		btDynamicsWorld *m_dynamics;
+		btConstraintSolver *m_solver;
+		btVector3 m_gravity;
 		
 		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
+		
+		virtual void attachPhysics(void);
 	};
 	
 	/* LoadableScene encapsulates the <scene> root element */

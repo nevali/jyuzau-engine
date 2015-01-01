@@ -16,6 +16,8 @@
 #ifndef JYUZAU_STATE_HH_
 # define JYUZAU_STATE_HH_              1
 
+# include "jyuzau/defs.hh"
+
 # include <OGRE/OgreFrameListener.h>
 # include <OGRE/OgreSceneManager.h>
 
@@ -23,12 +25,13 @@
 # include <OIS/OISKeyboard.h>
 # include <OIS/OISMouse.h>
 
-# include "jyuzau/defs.hh"
+# include <btBulletDynamicsCommon.h>
 
 namespace Jyuzau
 {
 	
 	class Core;
+	class Loadable;
 	class Actor;
 	class Camera;
 	class Controller;
@@ -52,6 +55,8 @@ namespace Jyuzau
 
 		virtual int cameras(void);
 		virtual Camera *camera(int index = 0);
+		
+		virtual Loadable *factory(Ogre::String m_kind, Ogre::String m_name);
 	protected:
 		Core *m_core;
 		State *m_prev, *m_next;
@@ -61,6 +66,7 @@ namespace Jyuzau
 		std::vector<Actor *> m_actors;
 		CameraType m_defaultPlayerCameraType;
 		Controller *m_controller;
+		btDynamicsWorld *m_dynamics;
 		
 		virtual void load(void);
 		virtual void createScenes(void);

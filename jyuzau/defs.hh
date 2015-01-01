@@ -43,6 +43,8 @@
 # define ACTOR_CAM_PITCH_ANGLE         0.15f
 # define ACTOR_CAM_PITCH_FACTOR        0.005f
 
+# define DYNAMICS_MAX_SUBSTEPS         7 /* Allow as low as 12FPS */
+
 namespace Ogre
 {
 	class Camera;

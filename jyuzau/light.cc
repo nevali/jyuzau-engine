@@ -22,30 +22,8 @@
 
 using namespace Jyuzau;
 
-Light *
-Light::create(Ogre::String name, Scene *scene, Ogre::Vector3 pos)
-{
-	Light *p;
-	
-	p = new Light(name);
-	if(!p->load())
-	{
-		delete p;
-		return NULL;
-	}
-	if(scene)
-	{
-		if(!p->attach(scene, name, pos))
-		{
-			delete p;
-			return NULL;
-		}
-	}
-	return p;
-}
-
-Light::Light(Ogre::String name, Ogre::String kind):
-	Loadable::Loadable(name, kind, false),
+Light::Light(Ogre::String name, Ogre::String kind, State *state):
+	Loadable::Loadable(name, kind, false, state),
 	m_light(NULL)
 {
 }

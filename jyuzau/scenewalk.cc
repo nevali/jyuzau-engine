@@ -17,16 +17,16 @@
 # include "config.h"
 #endif
 
+#include "jyuzau/scenewalk.hh"
+#include "jyuzau/scene.hh"
+#include "jyuzau/core.hh"
+
 #include <OIS/OISEvents.h>
 #include <OIS/OISInputManager.h>
 #include <OIS/OISKeyboard.h>
 #include <OIS/OISMouse.h>
 
-#include <OgreSceneManager.h>
-
-#include "jyuzau/scenewalk.hh"
-#include "jyuzau/scene.hh"
-#include "jyuzau/core.hh"
+#include <OGRE/OgreSceneManager.h>
 
 using namespace Jyuzau;
 
@@ -48,7 +48,7 @@ SceneWalkState::~SceneWalkState()
 void
 SceneWalkState::createScenes()
 {
-	m_scene = Scene::create(m_name);
+	m_scene = dynamic_cast<Scene *>(factory("scene", m_name));
 }
 
 void

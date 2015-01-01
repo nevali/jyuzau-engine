@@ -28,38 +28,26 @@
 
 using namespace Jyuzau;
 
-/* Load a prop, optionally attaching it to a scene */
-Prop *
-Prop::create(Ogre::String name, Scene *scene, Ogre::Vector3 pos)
-{
-	Prop *p;
-	
-	p = new Prop(name);
-	if(!p->load())
-	{
-		delete p;
-		return NULL;
-	}
-	if(scene)
-	{
-		if(!p->attach(scene, name, pos))
-		{
-			delete p;
-			return NULL;
-		}
-	}
-	return p;
-}
-
-Prop::Prop(Ogre::String name, Ogre::String kind):
-	Loadable::Loadable(name, kind, true),
+Prop::Prop(Ogre::String name, Ogre::String kind, State *state):
+	Loadable::Loadable(name, kind, true, state),
 	m_entity(NULL),
-	m_node(NULL)
+	m_node(NULL),
+	m_mass(0.0f),
+	m_collisionShape(NULL),
+	m_motionState(NULL),
+	m_rigidBody(NULL)
 {
 }
 
 Prop::~Prop()
 {
+	if(m_rigidBody)
+	{
+		/* Scene->removeRigidBody(m_rigidbody); */
+	}
+	delete m_motionState;
+	delete m_rigidBody;
+	delete m_collisionShape;
 	if(m_node)
 	{
 		m_node->detachObject(m_entity);
@@ -140,9 +128,17 @@ Prop::entity(Ogre::SceneManager *scene, Ogre::String name)
 	{
 		name = m_group;
 	}
-	if(!m_loaded || !m_load_status)
+	if(!m_loaded)
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a prop which has not been properly loaded");
+		if(!load())
+		{
+			return NULL;
+		}
+	}
+	if(!m_load_status)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a prop (" + name + ") which has not been properly loaded");
+		return NULL;
 	}
 	prop = dynamic_cast<LoadableProp *>(m_root);
 	if(prop->m_mesh)

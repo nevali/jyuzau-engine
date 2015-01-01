@@ -28,21 +28,39 @@
 
 using namespace Jyuzau;
 
-/* The Loadable class represents different kinds of assets which can be
- * loaded from disk: scenes, props, actors, etc.
+/* Method flow:
  *
- * It manages XML parsing, creation of the appropriate LoadableObject
- * descendant instances, and provides the hooks for interfacing with
- * OGRE's resource manager.
+ * Loadable::load()                    [public]
+ *  Loadable::loadDocument()
+ *   Loadable::startElement()          [via SAX callbacks]
+ *    Loadable::factory()
+ *     [LoadableObject or descendant constructor]
+ *    Loadable::add()
+ *   Loadable::endElement()            [via SAX callbacks]
+ *    LoadableObject::loaded()         [may recurse the tree]
+ *  Loadable::complete()
+ *   LoadableObject::complete()        [may recurse the tree]
+ *  Loadable::loaded()
+ *   Loadable::addResources()
+ *    LoadableObject::addResources()   [may recurse the tree]
+ *  Loadable::discard()
+ *   delete LoadableObject             [if root is discardable, or...]
+ *   LoadableObject::discard()         [may recurse the tree]
+ *
+ * Descendants will typically include an attach() method which attaches the
+ * asset to the scene (or in the case of a Scene, attaches the scene to an
+ * Ogre::SceneManager).
  */
 
-Loadable::Loadable(Ogre::String name, Ogre::String kind, bool subdir):
+Loadable::Loadable(Ogre::String name, Ogre::String kind, bool subdir, State *state):
 	m_name(name),
 	m_kind(kind),
 	m_root(NULL),
 	m_cur(NULL),
 	m_objects(),
-	m_owner(NULL)
+	m_owner(NULL),
+	m_unique(false),
+	m_state(state)
 {
 	Ogre::String base;
 	
@@ -82,6 +100,42 @@ Loadable::~Loadable()
 	}
 }
 
+/* Property handlers */
+Ogre::String
+Loadable::name(void)
+{
+	return m_name;
+}
+
+Ogre::String
+Loadable::kind(void)
+{
+	return m_kind;
+}
+
+LoadableObject *
+Loadable::root(void)
+{
+	return m_root;
+}
+
+/* A unique object is never added to a state's object pool */
+bool
+Loadable::unique(void)
+{
+	return m_unique;
+}
+
+State *
+Loadable::state(void)
+{
+	return m_state;
+}
+
+/* The load() method is the public method for loading an asset and checking
+ * (via LoadableObject::complete()) than the asset definition wasn't
+ * incomplete.
+ */
 bool
 Loadable::load(void)
 {
@@ -104,25 +158,19 @@ Loadable::load(void)
 	if(!m_root->complete())
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: " + m_name + "[" + m_kind + "] from " + m_path + " has an incomplete definition");
+		discard();
 		return false;
 	}
 	m_load_status = true;
 	loaded();
+	discard();
 	return true;
 }
 
-Ogre::String
-Loadable::name(void)
-{
-	return m_name;
-}
-
-Ogre::String
-Loadable::kind(void)
-{
-	return m_kind;
-}
-
+/* loaded() is invoked by load() once the document has been parsed and the
+ * LoadableObject tree has been constructed. By default, loaded() invokes
+ * addResources().
+ */
 void
 Loadable::loaded(void)
 {
@@ -135,6 +183,10 @@ Loadable::loaded(void)
 	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Loaded " + m_kind + "::" + m_name + " from " + m_path);
 }
 
+/* Invoked by loaded() to trigger the LoadableObject tree to load or create any
+ * associated resources. Note at this point there is no scene manager to
+ * attach objects to.
+ */
 bool
 Loadable::addResources(Ogre::String group)
 {
@@ -145,6 +197,27 @@ Loadable::addResources(Ogre::String group)
 	return true;
 }
 
+/* Destroy any LoadableObjects marked as discardable. Invoked by load() after
+ * loaded() has completed post-load actions.
+ */
+void
+Loadable::discard(void)
+{
+	if(m_root->m_discardable)
+	{
+		delete m_root;
+		m_root = NULL;
+		m_cur = NULL;
+	}
+	else
+	{
+		m_root->discard();
+	}
+}
+
+/* Invoked by startElement() to create a new LoadableObject to add to the
+ * tree.
+ */
 LoadableObject *
 Loadable::factory(Ogre::String name, AttrList &attrs)
 {
@@ -154,12 +227,7 @@ Loadable::factory(Ogre::String name, AttrList &attrs)
 	return new LoadableObject(this, m_root, name, attrs);
 }
 
-LoadableObject *
-Loadable::root(void)
-{
-	return m_root;
-}
-
+/* Invoked by load() to parse the XML document for this asset */
 bool
 Loadable::loadDocument(Ogre::String path)
 {
@@ -198,6 +266,13 @@ Loadable::add(Loadable *child)
 	m_objects.push_back(child);
 }
 
+/* Invoked by the SAX startElementNS handler whenever an opening tag is
+ * encountered in the XML document. Unless we're ignoring part of the DOM
+ * tree (m_skip), startElement() calls factory() to create a new 
+ * LoadableObject then calls the current tree leaf's add() method to add the
+ * new object as a child (or sets the new object as m_root if there isn't a
+ * tree yet), then sets the current tree leaf to the new object.
+ */
 void
 Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces, int nb_attributes, int nb_defaulted, const xmlChar **attributes)
 {
@@ -247,6 +322,11 @@ Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xm
 	}
 }
 
+/* Invoked by the SAX startElementNS handler whenever a closing tag is
+ * encountered in the XML document. If we're currently skipping part of the
+ * tree, the skip depth (m_skip), otherwise, we adjust the current tree leaf
+ * to point to its own parent.
+ */
 void
 Loadable::endElement(const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI)
 {
@@ -278,6 +358,7 @@ Loadable::sax_endElement(void *ctx, const xmlChar *localname, const xmlChar *pre
 
 
 
+
 /* LoadableObject is the base class used to encapsulate XML elements as
  * they're loaded from asset descriptions.
  *
@@ -292,7 +373,8 @@ Loadable::sax_endElement(void *ctx, const xmlChar *localname, const xmlChar *pre
 LoadableObject::LoadableObject(Loadable *owner, LoadableObject *parent, Ogre::String name, AttrList &attrs):
 	m_owner(owner),
 	m_name(name),
-	m_attrs(attrs)
+	m_attrs(attrs),
+	m_discardable(false)
 {
 	m_first = m_last = m_prev = m_next = m_parent = NULL;
 	m_loaded = false;
@@ -317,6 +399,17 @@ LoadableObject::name(void)
 	return m_name;
 }
 
+LoadableObject *
+LoadableObject::parent(void)
+{
+	return m_parent;
+}
+
+
+/* Invoked by Loadable::complete() to check whether the asset has a complete
+ * (useable) definition. This default implementation simply recurses the
+ * children within the tree.
+ */
 bool
 LoadableObject::complete(void)
 {
@@ -332,12 +425,10 @@ LoadableObject::complete(void)
 	return true;
 }
 
-LoadableObject *
-LoadableObject::parent(void)
-{
-	return m_parent;
-}
-
+/* Add a newly-created LoadableObject as a child of this one in the tree.
+ * Invoked by Loadable::startElement() after a new LoadableObject is returned
+ * by Loadable::factory().
+ */
 bool
 LoadableObject::add(LoadableObject *child)
 {
@@ -355,6 +446,13 @@ LoadableObject::add(LoadableObject *child)
 	return true;
 }
 
+/* Invoked by Loadable::endElement() once the XML element that this
+ * LoadableObject represents has been completely parsed (i.e., all of the
+ * children in the tree are known to be present).
+ * This default implementation simply notifies any children which haven't
+ * already been notified (which will only happen if they were created through
+ * some means other than as a result of the XML parsing callbacks).
+ */
 void
 LoadableObject::loaded()
 {
@@ -370,6 +468,11 @@ LoadableObject::loaded()
 	}
 }
 
+/* Invoked by Loadable::addResources() to perform any necessary asset data
+ * loading; for example, a scene object might load meshes, materials and
+ * textures ready for use.
+ * This default implementation simply recurses the call down the tree.
+ */
 bool
 LoadableObject::addResources(Ogre::String group)
 {
@@ -381,6 +484,39 @@ LoadableObject::addResources(Ogre::String group)
 		p->addResources(group);
 	}
 	return true;
+}
+
+/* Destroy any child LoadableObjects marked as discardable */
+void
+LoadableObject::discard(void)
+{
+	LoadableObject *p;
+	
+	for(p = m_first; p; p = p->m_next)
+	{
+		if(p->m_discardable)
+		{
+			if(p->m_prev)
+			{
+				p->m_prev->m_next = p->m_next;
+			}
+			else
+			{
+				this->m_first = p->m_next;
+			}
+			if(p->m_next)
+			{
+				p->m_next->m_prev = p->m_prev;
+			}
+			else
+			{
+				this->m_last = p->m_prev;
+			}
+			p->m_prev = NULL;
+			p->m_next = NULL;
+			delete p;
+		}
+	}
 }
 
 Ogre::ColourValue
@@ -436,5 +572,3 @@ LoadableObject::parseXYZ(AttrList &attrs, double x, double y, double z)
 	}
 	return Ogre::Vector3(x, y, z);
 }
-
-
