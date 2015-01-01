@@ -320,7 +320,14 @@ Core::pushState(State *state)
 	if(state->m_next)
 	{
 		state->m_next->m_prev = state;
-		deactivateState(state->m_next);
+		if(state->overlay())
+		{
+			state->m_next->paused(m_window);
+		}
+		else
+		{
+			deactivateState(state->m_next);
+		}
 	}
 	activateState(state);
 }
@@ -329,16 +336,26 @@ Core::pushState(State *state)
 void
 Core::popState()
 {
+	bool overlay;
+	
 	if(!m_firstState)
 	{
 		return;
 	}
+	overlay = m_firstState->overlay();
 	deactivateState(m_firstState);
 	if(m_firstState->m_next)
 	{
 		m_firstState = m_firstState->m_next;
 		m_firstState->m_prev = NULL;
-		activateState(m_firstState);
+		if(overlay)
+		{
+			m_firstState->resumed(m_window);
+		}
+		else
+		{
+			activateState(m_firstState);
+		}
 	}
 	else
 	{

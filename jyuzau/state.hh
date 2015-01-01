@@ -57,6 +57,8 @@ namespace Jyuzau
 		virtual Camera *camera(int index = 0);
 		
 		virtual Loadable *factory(Ogre::String m_kind, Ogre::String m_name);
+		
+		virtual bool overlay(void);
 	protected:
 		Core *m_core;
 		State *m_prev, *m_next;
@@ -67,6 +69,7 @@ namespace Jyuzau
 		CameraType m_defaultPlayerCameraType;
 		Controller *m_controller;
 		btDynamicsWorld *m_dynamics;
+		bool m_overlay;
 		
 		virtual void load(void);
 		virtual void createScenes(void);
@@ -77,6 +80,9 @@ namespace Jyuzau
 		
 		virtual void activated(Ogre::RenderWindow *window);
 		virtual void deactivated(Ogre::RenderWindow *window);
+		virtual void paused(Ogre::RenderWindow *window);
+		virtual void resumed(Ogre::RenderWindow *window);
+
 		virtual void playersChanged(void);
 		
 		virtual void addViewports(Ogre::RenderWindow *window);

@@ -36,7 +36,8 @@ State::State():
 	m_cameras(),
 	m_actors(),
 	m_defaultPlayerCameraType(CT_FIRSTPERSON),
-	m_dynamics(NULL)
+	m_dynamics(NULL),
+	m_overlay(false)
 {
 	m_core = Core::getInstance();
 	m_controller = m_core->controller();
@@ -116,6 +117,12 @@ State::factory(Ogre::String m_kind, Ogre::String m_name)
 		return NULL;
 	}
 	return loadable;
+}
+
+bool
+State::overlay(void)
+{
+	return m_overlay;
 }
 
 void
@@ -269,6 +276,26 @@ void
 State::deactivated(Ogre::RenderWindow *window)
 {
 	State::removeViewports(window);
+}
+
+/* Invoked instead of deactivated() when an overlay state is pushed in front
+ * of us. Under normal circumstances, it should be matched by a later call
+ * to resumed() when the overlay is popped and we're made the active state
+ * again.
+ */
+void
+State::paused(Ogre::RenderWindow *window)
+{
+}
+
+/* Invoked when an overlay state is popped from in front of us */
+void
+State::resumed(Ogre::RenderWindow *window)
+{
+	if(!m_loaded)
+	{
+		load();
+	}
 }
 
 bool
