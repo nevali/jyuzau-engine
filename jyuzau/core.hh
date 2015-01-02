@@ -104,6 +104,7 @@ namespace Jyuzau
 		std::vector<Character *>m_players;
 		bool m_playersChanged;
 		Controller *m_controller;
+		Ogre::String m_caption;
 		
 		virtual void activateState(State *state);
 		virtual void deactivateState(State *state);

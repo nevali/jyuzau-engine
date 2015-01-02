@@ -78,7 +78,8 @@ Core::Core(void)
 	m_inhibitStateActivation(0),
 	m_preInhibitState(NULL),
 	m_playersChanged(false),
-	m_controller(NULL)
+	m_controller(NULL),
+	m_caption("Jyuzau")
 {
 	singleton = this;
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
@@ -258,7 +259,7 @@ Core::init(void)
 		return false;
 	}
 	
-	m_window = m_root->initialise(true, "Jyuzau");
+	m_window = m_root->initialise(true, m_caption);
 	m_overlaySystem = new Ogre::OverlaySystem();
 
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();

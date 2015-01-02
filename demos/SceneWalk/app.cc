@@ -21,23 +21,27 @@
 
 class SceneWalkApp: public DemoApp
 {
+public:
+	SceneWalkApp(): 
+		DemoApp()
+	{
+		m_caption = "Jyuzau Scene Walkthrough";
+	}
+	
 protected:
 	Jyuzau::State *splash, *charSelect, *game;
 	
-	virtual void createInitialState(void);
+	virtual void createInitialState(void)
+	{
+		splash = new Jyuzau::SplashState();
+		charSelect = new Jyuzau::CharacterSelectionState();
+		game = new Jyuzau::SceneWalkState("demo");
+
+		pushState(game);
+		pushState(charSelect);
+		pushState(splash);
+	}
 };
-
-void
-SceneWalkApp::createInitialState(void)
-{
-	splash = new Jyuzau::SplashState();
-	charSelect = new Jyuzau::CharacterSelectionState();
-	game = new Jyuzau::SceneWalkState("demo");
-
-	pushState(game);
-	pushState(charSelect);
-	pushState(splash);
-}
 
 #ifdef __cplusplus
 extern "C" {

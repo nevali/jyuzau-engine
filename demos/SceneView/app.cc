@@ -22,18 +22,22 @@
 
 class SceneViewApp: public DemoApp
 {
+public:
+	SceneViewApp(): 
+		DemoApp()
+	{
+		m_caption = "Jyuzau Scene Viewer";
+	}
+	
 protected:
 	Jyuzau::State *viewState;
 	
-	virtual void createInitialState(void);
+	virtual void createInitialState(void)
+	{
+		viewState = new Jyuzau::SceneViewState("demo");
+		pushState(viewState);
+	}
 };
-
-void
-SceneViewApp::createInitialState(void)
-{
-	viewState = new Jyuzau::SceneViewState("demo");
-	pushState(viewState);
-}
 
 #ifdef __cplusplus
 extern "C" {
