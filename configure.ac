@@ -12,7 +12,11 @@
 ##  See the License for the specific language governing permissions and
 ##  limitations under the License.
 
+dnl m4_syscmd([cd freetype2 && ./autogen.sh])
+
 AC_INIT([jyuzau-engine],m4_esyscmd([/bin/sh m4/get-version.sh]),)
+dummy="m4_esyscmd([/bin/sh gen-ft2-config.sh])"
+
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([.])
 
@@ -98,6 +102,13 @@ AC_SUBST([COCOA_LDFLAGS])
 AC_SUBST([COCOA_LIBS])
 
 dnl -------------------------------------------------------------------
+dnl Configure FreeType
+dnl -------------------------------------------------------------------
+
+OGRE_CMAKE_FLAGS="$OGRE_CMAKE_FLAGS -DFREETYPE_HOME=\${abs_top_builddir}/sdk -DFREETYPE_FT2BUILD_INCLUDE_DIR=\${abs_top_builddir}/sdk/include"
+
+
+dnl -------------------------------------------------------------------
 dnl Configure FreeImage
 dnl -------------------------------------------------------------------
 
@@ -141,8 +152,10 @@ dnl -------------------------------------------------------------------
 dnl Find CMake
 dnl -------------------------------------------------------------------
 
-CMAKE=cmake
-AC_SUBST([CMAKE])
+AC_CHECK_PROG([CMAKE],[cmake],[cmake],[no])
+if test x"$CMAKE" = x"no" ; then
+	AC_MSG_ERROR([CMake is required to build OGRE (which is used by Jyuzau) - see http://www.cmake.org/download/ or install it via your operating system's package manager.])
+fi
 
 dnl -------------------------------------------------------------------
 dnl Configure OGRE
@@ -151,7 +164,9 @@ dnl -------------------------------------------------------------------
 OGRE_CMAKE_FLAGS="$OGRE_CMAKE_FLAGS -DCMAKE_OSX_ARCHITECTURES=$host_cpu"
 
 ogre_builddir="ogre-build"
-test -d ${ogre_builddir} && rm -f ${ogre_builddir}/configure-stamp || exit $?
+if test -d ${ogre_builddir} ; then
+	rm -f ${ogre_builddir}/configure-stamp || exit $?
+fi
 
 OGRE_CPPFLAGS='-I${top_builddir}/sdk/include -I${top_builddir}/sdk/include/OGRE -F${top_builddir}/sdk/Frameworks'
 OGRE_LDFLAGS='-F${top_builddir}/sdk/Frameworks'
@@ -218,6 +233,22 @@ export LDFLAGS
 save_prefix="$prefix"
 prefix="$ac_abs_confdir/sdk"
 _AC_ORIG_OUTPUT_SUBDIRS
+
+ac_msg="=== configuring in freetype2 (`pwd`/freetype2)"
+ac_popdir=`pwd`
+ac_dir="freetype2"
+_AS_ECHO_LOG([$ac_msg])
+_AS_ECHO([$ac_msg])
+AS_MKDIR_P(["$ac_dir"])
+cd "$ac_dir"
+ac_sub_configure="$ac_srcdir/configure"
+AC_MSG_NOTICE([running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir])
+# The eval makes quoting arguments work.
+eval "\$SHELL \"\$ac_sub_configure\" $ac_sub_configure_args \
+ --cache-file=\"\$ac_sub_cache_file\"" ||
+AC_MSG_ERROR([$ac_sub_configure failed for $ac_dir])
+cd "$ac_popdir"
+
 prefix="$save_prefix"
 ])
 

@@ -10,6 +10,7 @@
 *.lib
 *.dll
 *.pc
+*.log
 Makefile.in
 Makefile
 /COPYING

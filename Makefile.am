@@ -16,11 +16,13 @@ ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = README.md
 
-DIST_SUBDIRS = freeimage zzip ois ogre bullet jyuzau demos
+DIST_SUBDIRS = freeimage freetype2 zzip ois ogre bullet jyuzau demos
 
-SUBDIRS = @subdirs@ . jyuzau demos
+SUBDIRS = @subdirs@ freetype2 . jyuzau demos
 
 noinst_HEADERS = jyuzau.hh
+
+subdir_list=freetype2 @subdirs@
 
 # OGRE is built with CMake, and doesn't understand the notion of to-be-installed
 # dependent packages. Instead, we install all of our bundled packages to
@@ -30,9 +32,12 @@ noinst_HEADERS = jyuzau.hh
 # time the engine tree is.
 
 all-local-subdirs:
-	if ! test x"@subdirs@" = x"" ; then \
-		for i in @subdirs@ ; do \
-			( cd $$i && $(MAKE) install ) ; \
+	if ! test x"$(subdir_list)" = x"" ; then \
+		for i in $(subdir_list) ; do \
+			( cd $$i && $(MAKE) ) || exit 1 ; \
+		done ; \
+		for i in $(subdir_list) ; do \
+			( cd $$i && $(MAKE) install ) || exit 1 ; \
 		done ; \
 	fi
 	cd sdk/lib && for i in *.la ; do \
