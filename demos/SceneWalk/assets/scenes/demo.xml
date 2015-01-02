@@ -20,18 +20,18 @@
 	<prop id="cube11" class="green-cube" x="0" y="300" z="150" />
 	<prop id="cube12" class="blue-cube" x="150" y="300" z="150" />
 
-	<prop id="floor" class="floor">
+	<prop id="floor" class="floor" fixed="yes">
 		<scale x="5" y="5" />
 		<translate y="-50" />
 		<yaw deg="-90" />
 	</prop>
 
-	<prop id="back" class="wall">
+	<prop id="back" class="wall" fixed="yes">
 		<scale x="5" y="2.5" />
 		<translate y="200" z="-500" />
 	</prop>
 
-	<prop id="left" class="wall">
+	<prop id="left" class="wall" fixed="yes">
 		<scale x="5" y="2.5" />
 		<pitch deg="90" />
 		<translate y="200" x="-500" />
