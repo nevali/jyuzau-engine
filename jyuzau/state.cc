@@ -25,10 +25,46 @@
 #include "jyuzau/actor.hh"
 #include "jyuzau/camera.hh"
 #include "jyuzau/controller.hh"
+#include "jyuzau/light.hh"
 
 #include <utility>
 
 using namespace Jyuzau;
+
+struct StateOverlapCallback: public btBroadphaseAabbCallback
+{
+	btVector3 m_queryAabbMin;
+	btVector3 m_queryAabbMax;
+	int m_numOverlap;
+
+	StateOverlapCallback(const btVector3 &aabbMin, const btVector3 &aabbMax );
+	
+	virtual bool process(const btBroadphaseProxy *proxy);
+};
+
+StateOverlapCallback::StateOverlapCallback(const btVector3 &aabbMin, const btVector3 &aabbMax ):
+	m_queryAabbMin(aabbMin),
+	m_queryAabbMax(aabbMax),
+	m_numOverlap(0)
+{
+}
+
+bool
+StateOverlapCallback::process(const btBroadphaseProxy* proxy)
+{
+	btVector3 proxyAabbMin,proxyAabbMax;
+	btCollisionObject* colObj0 = (btCollisionObject*)proxy->m_clientObject;
+	
+	colObj0->getCollisionShape()->getAabb(colObj0->getWorldTransform(), proxyAabbMin,proxyAabbMax);
+	if (TestAabbAgainstAabb2(proxyAabbMin,proxyAabbMax,m_queryAabbMin,m_queryAabbMax))
+	{
+		m_numOverlap++;
+	}
+	return true;
+}
+
+
+
 
 State::State():
 	m_prev(NULL), m_next(NULL), m_loaded(false),
@@ -71,6 +107,12 @@ State::camera(int index)
 	return m_cameras[index];
 }
 
+btDynamicsWorld *
+State::dynamics(void)
+{
+	return m_dynamics;
+}
+
 void
 State::playersChanged(void)
 {
@@ -106,6 +148,10 @@ State::factory(Ogre::String m_kind, Ogre::String m_name)
 	else if(!m_kind.compare("actor"))
 	{
 		loadable = new Actor(m_name, this);
+	}
+	else if(!m_kind.compare("light"))
+	{
+		loadable = new Light(m_name, m_kind, this);
 	}
 	else
 	{
@@ -179,7 +225,7 @@ State::createPlayers(void)
 			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to obtain character #" + std::to_string(i));
 			continue;
 		}
-		a = c->createActor(m_sceneManager);
+		a = c->createActor(this, m_sceneManager);
 		if(!a)
 		{
 			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create actor for Character '" + c->title() + "'");
@@ -188,6 +234,7 @@ State::createPlayers(void)
 		m_actors.push_back(a);
 		/* Temporary hack until spawn points are implemented */
 		a->setPosition(0, 0, 200);
+		a->attachPhysics();
 		cam = a->createCamera(m_defaultPlayerCameraType);
 		if(!cam)
 		{
@@ -259,6 +306,22 @@ State::removeViewports(Ogre::RenderWindow *window)
 	}
 }
 
+void
+State::sceneAttached(Scene *scene)
+{
+	m_dynamics = scene->dynamics();
+}
+
+void
+State::updatePhysics(btScalar timeSinceLastFrame)
+{
+/*	btVector3 aabbMin(1,1,1);
+	btVector3 aabbMax(2,2,2);
+	StateOverlapCallback aabbOverlap(aabbMin,aabbMax);*/
+
+	m_dynamics->stepSimulation(timeSinceLastFrame, 60);
+/*	m_dynamics->getBroadphase()->aabbTest(aabbMin, aabbMax, aabbOverlap); */
+}
 
 /* Event listeners */
 
@@ -305,7 +368,8 @@ State::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	
 	if(m_dynamics)
 	{
-		m_dynamics->stepSimulation(evt.timeSinceLastFrame, DYNAMICS_MAX_SUBSTEPS);
+		
+		updatePhysics(evt.timeSinceLastFrame);
 	}
 	for(ait = m_actors.begin(); ait != m_actors.end(); ait++)
 	{

@@ -17,13 +17,15 @@
 # include "config.h"
 #endif
 
+#include "jyuzau/actor.hh"
+#include "jyuzau/character.hh"
+#include "jyuzau/camera.hh"
+
 #include <OGRE/OgreCamera.h>
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreLogManager.h>
 
-#include "jyuzau/actor.hh"
-#include "jyuzau/character.hh"
-#include "jyuzau/camera.hh"
+#include "p_utils.hh"
 
 using namespace Jyuzau;
 
@@ -123,6 +125,25 @@ Actor::setActiveCamera(Camera *cam)
 	m_cameras[cam->cameraType] = cam;
 }
 
+bool
+Actor::createPhysics(btDynamicsWorld *dynamics)
+{
+	if(!Prop::createPhysics(dynamics))
+	{
+		return false;
+	}
+	m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags()|btCollisionObject::CF_KINEMATIC_OBJECT);
+	/* This isn't strictly accurate: it should only be players affected this
+	 * way.
+	 */
+	if(m_character)
+	{
+		m_rigidBody->setActivationState(DISABLE_DEACTIVATION);
+		m_rigidBody->setMassProps(0, btVector3(0,0,0));
+	}
+	return true;
+}
+
 void
 Actor::accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, bool r, Ogre::Real topSpeed, Ogre::Real accelFactor, Ogre::Real decelFactor, Ogre::Real elapsed)
 {
@@ -207,6 +228,7 @@ bool
 Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
 	Ogre::Real taccel;
+	Ogre::Vector3 translation;
 	
 	if(!m_node)
 	{
@@ -218,7 +240,8 @@ Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	accelerateXYMovement(m_velocity, m_forward, m_backward, m_left, m_right, (m_speed == MS_RUN ? m_topSpeed * m_moveRunFactor : (m_speed == MS_CREEP ? m_topSpeed * m_moveCreepFactor : m_topSpeed)), m_moveAccel, m_moveDecel, evt.timeSinceLastFrame);
 	if(m_velocity != Ogre::Vector3::ZERO)
 	{
-		m_node->translate(m_velocity * evt.timeSinceLastFrame);
+		translation = m_velocity * evt.timeSinceLastFrame;
+		m_node->translate(translation);
 	}
 	/* Process rotation */
 	accelerateRotation(m_rotVelocity, m_cclockwise, m_clockwise, m_rotSpeed, m_rotStep, m_rotAccel, m_rotDecel, evt.timeSinceLastFrame);

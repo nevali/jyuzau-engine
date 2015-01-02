@@ -180,7 +180,6 @@ Loadable::loaded(void)
 		m_load_status = false;
 		return;
 	}
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: Loaded " + m_kind + "::" + m_name + " from " + m_path);
 }
 
 /* Invoked by loaded() to trigger the LoadableObject tree to load or create any

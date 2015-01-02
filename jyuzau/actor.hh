@@ -133,6 +133,8 @@ namespace Jyuzau
 		virtual void characterAttached(void);
 		virtual void characterDetached(void);
 		
+		virtual bool createPhysics(btDynamicsWorld *dynamics);
+		
 		void accelerateXYMovement(Ogre::Vector3 &velocity, bool f, bool b, bool l, bool r, Ogre::Real topSpeed, Ogre::Real accelFactor, Ogre::Real decelFactor, Ogre::Real elapsed);
 		void accelerateRotation(Ogre::Real &velocity, bool back, bool forward, Ogre::Real topSpeed, Ogre::Real step, Ogre::Real accelFactor, Ogre::Real decelFactor, Ogre::Real elapsed);
 	};

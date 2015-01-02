@@ -39,7 +39,7 @@ Scene::Scene(Ogre::String name, State *state):
 	m_dispatcher(NULL),
 	m_dynamics(NULL),
 	m_solver(NULL),
-	m_gravity(0, 0, 0)
+	m_gravity(0.0f, -1000.0f, 0.0f)
 {
 }
 
@@ -93,6 +93,10 @@ Scene::attach(Ogre::SceneManager *manager)
 	if(!m_dynamics)
 	{
 		attachPhysics();
+	}
+	if(m_state)
+	{
+		m_state->sceneAttached(this);
 	}
 	/* Apply the ambient light to the scene */
 	if(m_ambient)
@@ -327,7 +331,8 @@ LoadableSceneObject::id(void)
 
 LoadableSceneProp::LoadableSceneProp(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
 	LoadableSceneObject(owner, parent, name, attrs),
-	m_class("")
+	m_class(""),
+	m_fixed(false)
 {
 	AttrListIterator it;
 	
@@ -338,6 +343,13 @@ LoadableSceneProp::LoadableSceneProp(Scene *owner, LoadableSceneObject *parent, 
 		if(!p.first.compare("class"))
 		{
 			m_class = p.second;
+		}
+		else if(!p.first.compare("fixed"))
+		{
+			if(!p.second.compare("yes"))
+			{
+				m_fixed = true;
+			}
 		}
 	}
 	if(!m_id.length())	
@@ -391,11 +403,15 @@ LoadableSceneProp::attach(Scene *scene)
 	{
 		return false;
 	}
-	node = m_prop->node();
-	node->scale(m_scale);
+	m_prop->scale(m_scale);
 	mat.FromEulerAnglesXYZ(m_yaw, m_pitch, m_roll);
-	node->setOrientation(Ogre::Quaternion(mat));
-	node->translate(m_translate);
+	m_prop->setOrientation(Ogre::Quaternion(mat));
+	m_prop->translate(m_translate);
+	m_prop->attachPhysics();
+	if(m_fixed)
+	{
+		m_prop->setFixed();
+	}
 	return true;
 }
 

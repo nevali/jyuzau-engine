@@ -163,6 +163,7 @@ namespace Jyuzau
 	protected:
 		Ogre::String m_class;
 		Prop *m_prop;
+		bool m_fixed;
 		
 		virtual bool addResources(Ogre::String group);
 		virtual bool attach(Scene *scene);

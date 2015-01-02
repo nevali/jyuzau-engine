@@ -16,9 +16,9 @@
 #ifndef JYUZAU_CHARACTER_HH_
 # define JYUZAU_CHARACTER_HH_          1
 
-# include <OGRE/OgreString.h>
-
 # include "jyuzau/defs.hh"
+
+# include <OGRE/OgreString.h>
 
 namespace Ogre
 {
@@ -30,6 +30,7 @@ namespace Jyuzau
 	
 	class Actor;
 	class Scene;
+	class State;
 	
 	/* A Character represents the identity and properties of a player, and is
 	 * attached to an Actor object. Persistent state such as the player's name,
@@ -50,14 +51,14 @@ namespace Jyuzau
 		/* Create a new Actor for the character, optionally placing it within
 		 * a scene.
 		 */
-		virtual Actor *createActor(Scene *scene = NULL);
-		virtual Actor *createActor(Ogre::SceneManager *sceneManager);
+		virtual Actor *createActor(State *state, Scene *scene = NULL);
+		virtual Actor *createActor(State *state, Ogre::SceneManager *sceneManager);
 		
 		/* Create a dummy Actor for the character - that is, an actor which
 		 * represents the character (because it uses the same assets), but is
 		 * not attached to the character itself */
-		virtual Actor *createDummy(Scene *scene = NULL);
-		virtual Actor *createDummy(Ogre::SceneManager *sceneManager);
+		virtual Actor *createDummy(State *state, Scene *scene = NULL);
+		virtual Actor *createDummy(State *state, Ogre::SceneManager *sceneManager);
 		
 		/* Attach the character to an existing actor */
 		virtual void attach(Actor *actor);

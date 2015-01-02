@@ -54,5 +54,6 @@ SceneWalkState::createScenes()
 void
 SceneWalkState::attachScenes(void)
 {
+	m_dynamics = m_scene->dynamics();
 	m_scene->attach(m_sceneManager);
 }

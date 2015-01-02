@@ -35,6 +35,7 @@ namespace Jyuzau
 	class Actor;
 	class Camera;
 	class Controller;
+	class Scene;
 
 	/* The State class encapsulates the game logic at any given point,
 	 * including cut-scenes, menus, and so on.
@@ -59,6 +60,10 @@ namespace Jyuzau
 		virtual Loadable *factory(Ogre::String m_kind, Ogre::String m_name);
 		
 		virtual bool overlay(void);
+		
+		virtual btDynamicsWorld *dynamics(void);
+		
+		virtual void sceneAttached(Scene *scene);
 	protected:
 		Core *m_core;
 		State *m_prev, *m_next;
@@ -94,6 +99,8 @@ namespace Jyuzau
 		virtual bool mouseMoved(const OIS::MouseEvent &arg);
 		virtual bool mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
 		virtual bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
+		
+		virtual void updatePhysics(btScalar timeSinceListFrame);
 	};
 
 };

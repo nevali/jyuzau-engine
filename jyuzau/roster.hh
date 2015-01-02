@@ -16,17 +16,18 @@
 #ifndef JYUZAU_ROSTER_HH_
 # define JYUZAU_ROSTER_HH_             1
 
+# include "jyuzau/defs.hh"
+
 # include <utility>
 
 # include <OGRE/OgreString.h>
-
-# include "jyuzau/defs.hh"
 
 namespace Jyuzau
 {
 	class Actor;
 	class Character;
 	class Scene;
+	class State;
 		
 	/* The Roster provides character selection capabilities */
 	class Roster
@@ -41,7 +42,7 @@ namespace Jyuzau
 		/* Return an actor representing the character, optionally adding it
 		 * to the scene. Note that the character is not attached to the actor.
 		 */
-		virtual Actor *dummy(int index = 0, Scene *scene = NULL);
+		virtual Actor *dummy(int index = 0, State *state = NULL, Scene *scene = NULL);
 		
 		/* Return the character's title */
 		virtual Ogre::String title(int index = 0);

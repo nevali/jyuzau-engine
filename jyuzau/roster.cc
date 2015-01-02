@@ -50,13 +50,13 @@ Roster::count(void)
 }
 
 Actor *
-Roster::dummy(int index, Scene *scene)
+Roster::dummy(int index, State *state, Scene *scene)
 {
 	if(index > m_entries.size())
 	{
 		return NULL;
 	}
-	return m_entries[index]->character->createDummy(scene);
+	return m_entries[index]->character->createDummy(state, scene);
 }
 
 Ogre::String

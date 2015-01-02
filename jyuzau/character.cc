@@ -59,11 +59,11 @@ Character::~Character()
  * otherwise interactive character).
  */
 Actor *
-Character::createDummy(Scene *scene)
+Character::createDummy(State *state, Scene *scene)
 {
 	Actor *actor;
 	
-	actor = new Actor(m_actorName);
+	actor = new Actor(m_actorName, state);
 	if(!actor)
 	{
 		return NULL;
@@ -76,11 +76,11 @@ Character::createDummy(Scene *scene)
 }
 
 Actor *
-Character::createDummy(Ogre::SceneManager *sceneManager)
+Character::createDummy(State *state, Ogre::SceneManager *sceneManager)
 {
 	Actor *actor;
 	
-	actor = new Actor(m_actorName);
+	actor = new Actor(m_actorName, state);
 	if(!actor)
 	{
 		return NULL;
@@ -97,11 +97,11 @@ Character::createDummy(Ogre::SceneManager *sceneManager)
  * Actor when finished.
  */
 Actor *
-Character::createActor(Scene *scene)
+Character::createActor(State *state, Scene *scene)
 {
 	Actor *actor;
 	
-	actor = new Actor(m_actorName);
+	actor = new Actor(m_actorName, state);
 	if(!actor)
 	{
 		return NULL;
@@ -115,11 +115,11 @@ Character::createActor(Scene *scene)
 }
 
 Actor *
-Character::createActor(Ogre::SceneManager *sceneManager)
+Character::createActor(State *state, Ogre::SceneManager *sceneManager)
 {
 	Actor *actor;
 	
-	actor = new Actor(m_actorName);
+	actor = new Actor(m_actorName, state);
 	if(!actor)
 	{
 		return NULL;
