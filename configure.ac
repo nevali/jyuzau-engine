@@ -187,6 +187,18 @@ AC_SUBST([BULLET_LDFLAGS])
 AC_SUBST([BULLET_LIBS])
 
 dnl -------------------------------------------------------------------
+dnl Configure Bullet
+dnl -------------------------------------------------------------------
+
+ENGINE_CPPFLAGS="-I\${top_builddir}/sdk/include $OGRE_CPPFLAGS $OGREOVERLAY_CPPFLAGS $OIS_CPPFLAGS $BULLET_CPPFLAGS $COCOA_CPPFLAGS"
+ENGINE_LDFLAGS="-L\${top_builddir}/sdk/lib $OGRE_LDFLAGS $OGREOVERLAY_LDFLAGS $OIS_LDFLAGS $BULLET_LDFLAGS $COCOA_LDFLAGS"
+ENGINE_LIBS="\${top_builddir}/jyuzau/libjyuzau.la $OGRE_LIBS $OGREOVERLAY_LIBS $OIS_LIBS $BULLET_LIBS $COCOA_LIBS"
+
+AC_SUBST([ENGINE_CPPFLAGS])
+AC_SUBST([ENGINE_LDFLAGS])
+AC_SUBST([ENGINE_LIBS])
+
+dnl -------------------------------------------------------------------
 dnl Override _AC_OUTPUT_SUBDIRS to install bundled packages to
 dnl ${top_builddir}/sdk
 dnl -------------------------------------------------------------------

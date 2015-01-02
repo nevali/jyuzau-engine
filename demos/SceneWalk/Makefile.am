@@ -12,13 +12,13 @@
 ##  See the License for the specific language governing permissions and
 ##  limitations under the License.
 
-AM_CPPFLAGS = @AM_CPPFLAGS@ @OGRE_CPPFLAGS@ @OGREOVERLAY_CPPFLAGS@ @OIS_CPPFLAGS@
-AM_LDFLAGS = @AM_LDFLAGS@ @OGRE_LDFLAGS@ @OGREOVERLAY_LDFLAGS@ @OIS_LDFLAGS@
+AM_CPPFLAGS = @AM_CPPFLAGS@ @ENGINE_CPPFLAGS@
+AM_LDFLAGS = @AM_LDFLAGS@ @ENGINE_LDFLAGS@
 
 noinst_PROGRAMS = SceneWalk
 
 SceneWalk_SOURCES = app.cc ../demoapp.cc
-SceneWalk_LDADD = ${top_builddir}/jyuzau/libjyuzau.la
+SceneWalk_LDADD = @ENGINE_LIBS@
 
 EXTRA_DIST = Info.plist.in
 
