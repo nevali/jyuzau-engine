@@ -39,7 +39,7 @@ Scene::Scene(Ogre::String name, State *state):
 	m_dispatcher(NULL),
 	m_dynamics(NULL),
 	m_solver(NULL),
-	m_gravity(0.0f, -1000.0f, 0.0f)
+	m_gravity(0.0f, 0.0f, 0.0f)
 {
 }
 
@@ -164,6 +164,10 @@ Scene::factory(Ogre::String name, AttrList &attrs)
 	{
 		return new LoadableSceneAmbientLight(this, name, attrs);
 	}
+	if(!name.compare("gravity"))
+	{
+		return new LoadableSceneGravity(this, name, attrs);
+	}
 	
 	obj = NULL;
 	if(!name.compare("prop"))
@@ -223,11 +227,11 @@ Scene::dynamics(void)
 bool
 Scene::setGravity(const Ogre::Vector3 &vec)
 {
+	m_gravity = ogreVecToBullet(vec);
 	if(!m_dynamics)
 	{
-		return false;
+		return true;
 	}
-	m_gravity = ogreVecToBullet(vec);
 	m_dynamics->setGravity(m_gravity);
 	return true;
 }
@@ -235,11 +239,11 @@ Scene::setGravity(const Ogre::Vector3 &vec)
 bool
 Scene::setGravity(const btVector3 &vec)
 {
+	m_gravity = vec;
 	if(!m_dynamics)
 	{
-		return false;
+		return true;
 	}
-	m_gravity = vec;
 	m_dynamics->setGravity(m_gravity);
 	return true;
 }
@@ -584,4 +588,18 @@ LoadableSceneRotation::LoadableSceneRotation(Scene *owner, LoadableSceneObject *
 	{
 		parent->m_roll = m_angle;
 	}
+}
+
+
+
+
+/* LoadableSceneGravity encapsulates a <gravity> within a <scene>.
+ * <gravity x="n" y="n" z="n" />
+ */
+
+LoadableSceneGravity::LoadableSceneGravity(Scene *owner,  Ogre::String name, AttrList &attrs):
+	LoadableObject(owner, NULL, name, attrs)
+{
+	m_discardable = true;
+	owner->m_gravity = ogreVecToBullet(parseXYZ(attrs));
 }

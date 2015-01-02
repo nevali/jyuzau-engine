@@ -35,9 +35,11 @@ namespace Jyuzau
 	class LoadableSceneProp;
 	class LoadableSceneLight;
 	class LoadableSceneAmbientLight;
+	class LoadableSceneGravity;
 
 	class Scene: public Loadable
 	{
+		friend class LoadableSceneGravity;
 	public:
 		static Scene *create(Ogre::String name, State *state);
 		static Scene *create(Ogre::String name, Ogre::SceneManager *sceneManager = NULL, State *state = NULL);
@@ -147,6 +149,16 @@ namespace Jyuzau
 		Ogre::ColourValue m_col;
 	
 		virtual bool addResources(Ogre::String group);
+	};
+
+	/* LoadableSceneGravity encapsulates a <gravity> within a <scene>.
+	 * <gravity x="n" y="n" z="n" />
+	 */
+	class LoadableSceneGravity: public LoadableObject
+	{
+		friend class Scene;
+	public:
+		LoadableSceneGravity(Scene *owner, Ogre::String name, AttrList &attrs);
 	};
 	
 	

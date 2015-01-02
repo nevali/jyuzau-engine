@@ -27,6 +27,7 @@ namespace Jyuzau
 {
 	class Scene;
 	
+	class LoadableProp;
 	class LoadablePropMesh;
 	class LoadablePropMaterial;
 	class LoadablePropPrefab;
@@ -37,6 +38,7 @@ namespace Jyuzau
 	 */	
 	class Prop: public Loadable, public btMotionState
 	{
+		friend class LoadableProp;
 		friend class LoadablePropMesh;
 		friend class LoadablePropMaterial;
 		friend class LoadablePropPrefab;

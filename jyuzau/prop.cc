@@ -35,7 +35,7 @@ Prop::Prop(Ogre::String name, Ogre::String kind, State *state):
 	Loadable::Loadable(name, kind, true, state),
 	m_entity(NULL),
 	m_node(NULL),
-	m_mass(1000.0f),
+	m_mass(0),
 	m_collisionShape(NULL),
 	m_inertia(0.0f, 0.0f, 0.0f),
 	m_rigidBody(NULL),
@@ -381,12 +381,22 @@ LoadableProp::LoadableProp(Prop *owner, Ogre::String name, AttrList &attrs):
 	m_material(NULL),
 	m_prefab(NULL)
 {
+	AttrListIterator it;
 	m_discardable = true;
+
+	for(it = m_attrs.begin(); it != m_attrs.end(); it++)
+	{
+		if(!(*it).first.compare("mass"))
+		{
+			owner->m_mass = atof((*it).second.c_str());
+		}
+	}
 }
 
 bool
 LoadableProp::add(LoadableObject *child)
 {
+	/* TODO: use dynamic_cast as the test mechanism instead of the names */
 	if(!child->name().compare("mesh"))
 	{
 		m_mesh = dynamic_cast<LoadablePropMesh *>(child);
