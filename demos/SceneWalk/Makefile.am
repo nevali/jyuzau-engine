@@ -31,7 +31,7 @@ DISTCLEANFILES = Info.plist
 SdkTrays.zip: ${top_builddir}/ogre-build/sdk/Media/packs/SdkTrays.zip
 	rm -f $@ && cp $< $@
 	
-plugins.cfg: ${top_builddir}/ogre-build/sdk/bin/plugins.cfg
+plugins.cfg: ${top_builddir}/engine/sdk/bin/plugins.cfg
 	rm -f $@ && cp $< $@
 
 # For Mac OS X: fix up .libs/Contents to be a symlink back here

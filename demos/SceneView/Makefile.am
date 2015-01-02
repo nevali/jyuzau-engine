@@ -52,7 +52,7 @@ assets/actors/Ogre/GreenSkin.jpg: ${top_builddir}/ogre-build/sdk/Media/materials
 assets/actors/Ogre/spheremap.png: ${top_builddir}/ogre-build/sdk/Media/materials/textures/spheremap.png
 	rm -f $@ && cp $< $@
 	
-plugins.cfg: ${top_builddir}/ogre-build/sdk/bin/plugins.cfg
+plugins.cfg: ${top_builddir}/sdk/bin/plugins.cfg
 	rm -f $@ && cp $< $@
 
 # For Mac OS X: fix up .libs/Contents to be a symlink back here
