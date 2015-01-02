@@ -6,21 +6,47 @@
 
 	<light id="main" x="20" y="80" z="50" />
 
-	<prop id="cube1" class="red-cube" x="-150" y="0" z="0" />
-	<prop id="cube2" class="green-cube" x="0" y="0" z="0" />
-	<prop id="cube3" class="blue-cube" x="150" y="0" z="0" />
+	<prop id="cube1" class="red-cube" x="-150" y="0" z="0">
+<!--		<scale x="0.5" y="0.5" z="0.5" /> -->
+	</prop>
+	<prop id="cube2" class="green-cube" x="0" y="0" z="0">
+<!--		<scale x="0.5" y="0.5" z="0.5" /> -->
+	</prop>
+		
+	<prop id="cube3" class="blue-cube" x="150" y="0" z="0">
+<!--		<scale x="0.5" y="0.5" z="0.5" /> -->
+	</prop>
+		
 
-	<prop id="cube4" class="green-cube" x="-150" y="150" z="0" />
-	<prop id="cube5" class="blue-cube" x="0" y="150" z="0" />
-	<prop id="cube6" class="red-cube" x="150" y="150" z="0" />
+	<prop id="cube4" class="green-cube" x="-150" y="150" z="0">
+		<scale x="0.75" y="0.75" z="0.75" />
+	</prop>
+		
+	<prop id="cube5" class="blue-cube" x="0" y="150" z="0">
+		<scale x="0.75" y="0.75" z="0.75" />
+	</prop>
+		
+	<prop id="cube6" class="red-cube" x="150" y="150" z="0">
+		<scale x="0.75" y="0.75" z="0.75" />
+	</prop>
 
-	<prop id="cube7" class="blue-cube" x="-150" y="300" z="0" />
-	<prop id="cube8" class="red-cube" x="0" y="300" z="0" />
-	<prop id="cube9" class="green-cube" x="150" y="300" z="0" />
-
+	<prop id="cube7" class="blue-cube" x="-150" y="300" z="0">
+		<scale x="0.5" y="0.5" z="0.5" />
+	</prop>
+		
+	<prop id="cube8" class="red-cube" x="0" y="300" z="0">
+		<scale x="0.5" y="0.5" z="0.5" />
+	</prop>
+		
+	<prop id="cube9" class="green-cube" x="150" y="300" z="0">
+		<scale x="0.5" y="0.5" z="0.5" />
+	</prop>
+		
 	<prop id="cube10" class="red-cube" x="-150" y="300" z="150" />
 	<prop id="cube11" class="green-cube" x="0" y="300" z="150" />
 	<prop id="cube12" class="blue-cube" x="150" y="300" z="150" />
+
+	<actor id="sphere" class="player" y="400" z="100" />
 
 	<prop id="floor" class="floor" fixed="yes">
 		<scale x="5" y="5" />
@@ -33,10 +59,22 @@
 		<translate y="200" z="-500" />
 	</prop>
 
+	<prop id="front" class="wall" fixed="yes">
+		<pitch deg="180" />
+		<scale x="5" y="2.5" />
+		<translate y="200" z="500" />
+	</prop>
+
 	<prop id="left" class="wall" fixed="yes">
 		<scale x="5" y="2.5" />
 		<pitch deg="90" />
 		<translate y="200" x="-500" />
+	</prop>
+
+	<prop id="right" class="wall" fixed="yes">
+		<scale x="5" y="2.5" />
+		<pitch deg="-90" />
+		<translate y="200" x="500" />
 	</prop>
 
 </scene>
