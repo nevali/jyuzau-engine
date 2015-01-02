@@ -132,12 +132,12 @@ Actor::createPhysics(btDynamicsWorld *dynamics)
 	{
 		return false;
 	}
-	m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags()|btCollisionObject::CF_KINEMATIC_OBJECT);
 	/* This isn't strictly accurate: it should only be players affected this
 	 * way.
 	 */
 	if(m_character)
 	{
+		m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags()|btCollisionObject::CF_KINEMATIC_OBJECT);
 		m_rigidBody->setActivationState(DISABLE_DEACTIVATION);
 		m_rigidBody->setMassProps(0, btVector3(0,0,0));
 	}
