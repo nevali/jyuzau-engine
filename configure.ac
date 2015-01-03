@@ -214,6 +214,20 @@ AC_SUBST([ENGINE_LDFLAGS])
 AC_SUBST([ENGINE_LIBS])
 
 dnl -------------------------------------------------------------------
+dnl Configure Lua
+dnl -------------------------------------------------------------------
+
+AC_CONFIG_SUBDIRS([liblua])
+
+LUA_CPPFLAGS=""
+LUA_LDFLAGS=""
+LUA_LIBS="-llua"
+
+AC_SUBST([LUA_CPPFLAGS])
+AC_SUBST([LUA_LDFLAGS])
+AC_SUBST([LUA_LIBS])
+
+dnl -------------------------------------------------------------------
 dnl Override _AC_OUTPUT_SUBDIRS to install bundled packages to
 dnl ${top_builddir}/sdk
 dnl -------------------------------------------------------------------
