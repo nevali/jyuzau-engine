@@ -30,7 +30,7 @@
 using namespace Jyuzau;
 
 Scene::Scene(Ogre::String name, State *state):
-	Loadable::Loadable(name, "scene", false, state),
+	Loadable::Loadable(name, state, "scene", false),
 	m_manager(NULL),
 	m_objects(),
 	m_ambient(NULL),
@@ -378,14 +378,8 @@ LoadableSceneProp::addResources(Ogre::String group)
 {
 	State *state;
 	
-	if((state = m_owner->state()))
-	{
-		m_prop = dynamic_cast<Prop *>(state->factory(m_name, m_class));
-	}
-	else
-	{
-		m_prop = new Prop(m_class, m_name);
-	}
+	state = m_owner->state();
+	m_prop = dynamic_cast<Prop *>(state->factory(m_name, m_class));
 	if(!m_prop)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene prop instance");
@@ -435,14 +429,8 @@ LoadableSceneActor::addResources(Ogre::String group)
 {
 	State *state;
 	
-	if((state = m_owner->state()))
-	{
-		m_prop = dynamic_cast<Actor *>(state->factory(m_name, m_class));
-	}
-	else
-	{
-		m_prop = new Actor(m_class);
-	}
+	state = m_owner->state();
+	m_prop = dynamic_cast<Actor *>(state->factory(m_name, m_class));
 	if(!m_prop)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene actor instance");
@@ -495,14 +483,8 @@ LoadableSceneLight::addResources(Ogre::String group)
 {
 	State *state;
 	
-	if((state = m_owner->state()))
-	{
-		m_light = dynamic_cast<Light *>(state->factory(m_name, m_id));
-	}
-	else
-	{
-		m_light = new Light(m_id);
-	}
+	state = m_owner->state();
+	m_light = dynamic_cast<Light *>(state->factory(m_name, m_id));
 	if(!m_light)
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene light instance");
@@ -539,6 +521,7 @@ LoadableSceneLight::attach(Scene *scene)
 LoadableSceneTransform::LoadableSceneTransform(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, parent, name, attrs)
 {
+	m_discardable = true;
 	m_vector = parseXYZ(attrs);
 	if(!name.compare("scale"))
 	{
@@ -563,6 +546,7 @@ LoadableSceneRotation::LoadableSceneRotation(Scene *owner, LoadableSceneObject *
 {
 	AttrListIterator it;
 	
+	m_discardable = true;
 	for(it = m_attrs.begin(); it != m_attrs.end(); it++)
 	{
 		Attr p = *it;

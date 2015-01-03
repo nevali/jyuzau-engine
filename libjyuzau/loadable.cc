@@ -30,6 +30,7 @@ using namespace Jyuzau;
 
 /* Method flow:
  *
+ * Loadable::Loadable()                [public constructor]
  * Loadable::load()                    [public]
  *  Loadable::loadDocument()
  *   Loadable::startElement()          [via SAX callbacks]
@@ -46,13 +47,13 @@ using namespace Jyuzau;
  *  Loadable::discard()
  *   delete LoadableObject             [if root is discardable, or...]
  *   LoadableObject::discard()         [may recurse the tree]
- *
+ * 
  * Descendants will typically include an attach() method which attaches the
  * asset to the scene (or in the case of a Scene, attaches the scene to an
  * Ogre::SceneManager).
  */
 
-Loadable::Loadable(Ogre::String name, Ogre::String kind, bool subdir, State *state):
+Loadable::Loadable(Ogre::String name, State *state, Ogre::String kind, bool subdir):
 	m_name(name),
 	m_kind(kind),
 	m_root(NULL),

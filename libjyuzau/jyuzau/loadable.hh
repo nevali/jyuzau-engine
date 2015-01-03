@@ -41,7 +41,7 @@ namespace Jyuzau
 	class Loadable
 	{
 	public:
-		Loadable(Ogre::String name, Ogre::String kind, bool subdir, State *state = NULL);
+		Loadable(Ogre::String name, State *state, Ogre::String kind, bool subdir);
 		~Loadable();
 		
 		virtual bool load(void);

@@ -41,10 +41,7 @@ namespace Jyuzau
 	{
 		friend class LoadableSceneGravity;
 	public:
-		static Scene *create(Ogre::String name, State *state);
-		static Scene *create(Ogre::String name, Ogre::SceneManager *sceneManager = NULL, State *state = NULL);
-		
-		Scene(Ogre::String name, State *state = NULL);
+		Scene(Ogre::String name, State *state);
 		virtual ~Scene();
 		
 		bool attach(Ogre::SceneManager *sceneManager);

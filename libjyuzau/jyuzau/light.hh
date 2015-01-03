@@ -30,7 +30,7 @@ namespace Jyuzau
 	class Light: public Loadable
 	{
 	public:
-		Light(Ogre::String name, Ogre::String kind = "light", State *state = NULL);
+		Light(Ogre::String name, State *state, Ogre::String kind = "light");
 		virtual ~Light();
 		
 		virtual Ogre::Light *node(void);

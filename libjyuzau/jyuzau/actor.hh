@@ -33,7 +33,7 @@ namespace Jyuzau
 	{
 		friend class Character;
 	public:
-		Actor(Ogre::String name, State *state = NULL);
+		Actor(Ogre::String name, State *state, Ogre::String kind = "actor");
 		virtual ~Actor();
 		
 		virtual Camera *createCamera(CameraType type);

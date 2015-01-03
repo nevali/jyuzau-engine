@@ -22,8 +22,8 @@
 
 using namespace Jyuzau;
 
-Light::Light(Ogre::String name, Ogre::String kind, State *state):
-	Loadable::Loadable(name, kind, false, state),
+Light::Light(Ogre::String name, State *state, Ogre::String kind):
+	Loadable::Loadable(name, state, kind, false),
 	m_light(NULL)
 {
 }

@@ -31,8 +31,8 @@
 
 using namespace Jyuzau;
 
-Prop::Prop(Ogre::String name, Ogre::String kind, State *state):
-	Loadable::Loadable(name, kind, true, state),
+Prop::Prop(Ogre::String name, State *state, Ogre::String kind):
+	Loadable::Loadable(name, state, kind, true),
 	m_entity(NULL),
 	m_node(NULL),
 	m_mass(0),

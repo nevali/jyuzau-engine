@@ -143,7 +143,7 @@ State::factory(Ogre::String m_kind, Ogre::String m_name)
 	}
 	else if(!m_kind.compare("prop"))
 	{
-		loadable = new Prop(m_name, m_kind, this);
+		loadable = new Prop(m_name, this, m_kind);
 	}
 	else if(!m_kind.compare("actor"))
 	{
@@ -151,7 +151,7 @@ State::factory(Ogre::String m_kind, Ogre::String m_name)
 	}
 	else if(!m_kind.compare("light"))
 	{
-		loadable = new Light(m_name, m_kind, this);
+		loadable = new Light(m_name, this, m_kind);
 	}
 	else
 	{

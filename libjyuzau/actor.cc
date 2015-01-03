@@ -29,8 +29,8 @@
 
 using namespace Jyuzau;
 
-Actor::Actor(Ogre::String name, State *state):
-	Prop::Prop(name, "actor", state),
+Actor::Actor(Ogre::String name, State *state, Ogre::String kind):
+	Prop::Prop(name, state, kind),
 	m_character(NULL),
 	m_health(100.0f),
 	m_level(1),

@@ -43,7 +43,7 @@ namespace Jyuzau
 		friend class LoadablePropMaterial;
 		friend class LoadablePropPrefab;
 	public:
-		Prop(Ogre::String name, Ogre::String kind = "prop", State *state = NULL);
+		Prop(Ogre::String name, State *state, Ogre::String kind = "prop");
 		virtual ~Prop();
 	
 		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager, Ogre::String name = "");
