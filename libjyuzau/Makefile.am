@@ -12,6 +12,8 @@
 ##  See the License for the specific language governing permissions and
 ##  limitations under the License.
 
+SUBDIRS = jyuzau
+
 AM_CPPFLAGS = @AM_CPPFLAGS@ @OGRE_CPPFLAGS@ @OGREOVERLAY_CPPFLAGS@ @OIS_CPPFLAGS@ @BULLET_CPPFLAGS@ @LUA_CPPFLAGS@
 
 AM_LDFLAGS = @AM_LDFLAGS@ @OGRE_LDFLAGS@ @OGREOVERLAY_LDFLAGS@ @COCOA_LDFLAGS@  @BULLET_LDFLAGS@ @LUA_LDFLAGS@
@@ -22,14 +24,13 @@ LIBS = @LIBS@ \
 
 lib_LTLIBRARIES = libjyuzau.la
 
-libjyuzau_la_SOURCES = defs.hh \
-	main.hh app.cc nsapp.mm delegate.hh delegate.mm \
-	core.hh core.cc loadable.hh loadable.cc state.hh state.cc \
-	scene.hh scene.cc prop.hh prop.cc actor.hh actor.cc \
-	light.hh light.cc character.hh character.cc roster.hh roster.cc \
-	camera.hh camera.cc controller.hh controller.cc \
-	sceneview.hh sceneview.mm splash.hh splash.mm mainmenu.hh mainmenu.mm \
-	menu.hh menu.mm charselect.hh charselect.cc scenewalk.hh scenewalk.cc
+include_HEADERS = jyuzau.hh
+
+libjyuzau_la_SOURCES = p_utils.hh \
+	app.cc nsapp.mm delegate.mm core.cc loadable.cc state.cc \
+	scene.cc prop.cc actor.cc light.cc character.cc roster.cc \
+	camera.cc controller.cc sceneview.mm splash.mm mainmenu.mm \
+	menu.mm charselect.cc scenewalk.cc
 
 libjyuzau_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 

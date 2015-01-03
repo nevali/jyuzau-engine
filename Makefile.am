@@ -16,9 +16,9 @@ ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = README.md
 
-DIST_SUBDIRS = freeimage freetype2 zzip ois ogre bullet jyuzau demos
+DIST_SUBDIRS = freeimage freetype2 zzip ois ogre bullet libjyuzau demos
 
-SUBDIRS = @subdirs@ freetype2 . jyuzau demos
+SUBDIRS = @subdirs@ freetype2 . libjyuzau demos
 
 noinst_HEADERS = jyuzau.hh
 
