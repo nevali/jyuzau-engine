@@ -6,11 +6,17 @@ bin_PROGRAMS = lua luac
 
 lib_LTLIBRARIES = liblua.la
 
+include_HEADERS = \
+	upstream/src/lua.h upstream/src/luaconf.h upstream/src/lualib.h \
+	upstream/src/lauxlib.h upstream/src/lua.hpp
+
 lua_SOURCES = upstream/src/lua.c
 lua_LDADD = liblua.la
 
 luac_SOURCES = upstream/src/luac.c
 luac_LDADD = liblua.la
+
+man1_MANS = upstream/doc/lua.1 upstream/doc/luac.1
 
 liblua_la_SOURCES = \
 	upstream/src/lapi.c upstream/src/lcode.c upstream/src/lctype.c \
