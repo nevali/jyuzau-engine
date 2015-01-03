@@ -41,7 +41,9 @@ Prop::Prop(Ogre::String name, Ogre::String kind, State *state):
 	m_rigidBody(NULL),
 	m_mesh(""),
 	m_material(""),
-	m_prefabType(Ogre::SceneManager::PT_CUBE)
+	m_prefabType(Ogre::SceneManager::PT_CUBE),
+	m_restitution(0.25f),
+	m_friction(0.5f)
 {
 }
 
@@ -178,8 +180,8 @@ Prop::createPhysics(btDynamicsWorld *dynamics)
 	m_collisionShape->setUserPointer(this);
 	m_collisionShape->calculateLocalInertia(m_mass, m_inertia);
 	btRigidBody::btRigidBodyConstructionInfo ci(m_mass, this, m_collisionShape, m_inertia);
-/*	ci.m_restitution = 1.0f;
-	ci.m_friction = 0.5f; */
+	ci.m_restitution = m_restitution;
+	ci.m_friction = m_friction;
 	m_rigidBody = new btRigidBody(ci);
 	return true;
 }
@@ -389,6 +391,14 @@ LoadableProp::LoadableProp(Prop *owner, Ogre::String name, AttrList &attrs):
 		if(!(*it).first.compare("mass"))
 		{
 			owner->m_mass = atof((*it).second.c_str());
+		}
+		else if(!(*it).first.compare("restitution"))
+		{
+			owner->m_restitution = atof((*it).second.c_str());
+		}
+		else if(!(*it).first.compare("friction"))
+		{
+			owner->m_friction = atof((*it).second.c_str());
 		}
 	}
 }

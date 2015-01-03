@@ -76,6 +76,8 @@ namespace Jyuzau
 		btVector3 m_inertia;
 		btScalar m_mass;
 		btRigidBody *m_rigidBody;
+		btScalar m_restitution;
+		btScalar m_friction;
 		
 		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
 		virtual void loaded(void);
