@@ -14,6 +14,25 @@ LT_INIT
 AC_SUBST([AM_CPPFLAGS])
 AC_SUBST([AM_CFLAGS])
 
+AC_CANONICAL_HOST
+
+AC_MSG_CHECKING([which system-specific features to enable for $host_os])
+case "$host_os" in
+	linux-gnu)
+		AC_DEFINE_UNQUOTED([LUA_USE_LINUX],[1],[Define to enable Linux-specific features])
+		AC_MSG_RESULT([Linux])
+		;;
+	darwin*)
+		AC_DEFINE_UNQUOTED([LUA_USE_MACOSX],[1],[Define to enable Darwin-specific features])
+		AC_MSG_RESULT([Darwin])
+		;;
+	*)
+		AC_MSG_RESULT([none])
+		;;
+esac
+
+AC_CHECK_LIB([readline],[hist_init])
+
 AC_CONFIG_FILES([
 Makefile
 ])
