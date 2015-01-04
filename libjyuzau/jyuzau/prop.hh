@@ -1,4 +1,4 @@
-/* Copyright 2014 Mo McRoberts.
+/* Copyright 2014-2015 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #ifndef JYUZAU_PROP_HH_
 # define JYUZAU_PROP_HH_               1
 
-# include "jyuzau/loadable.hh"
+# include "jyuzau/node.hh"
 
 # include <OGRE/OgreVector3.h>
 # include <OGRE/OgreSceneManager.h>
@@ -35,34 +35,25 @@ namespace Jyuzau
 	/* A Prop is an object which can be attached to scenes. They have meshes
 	 * and textures, and descendants (e.g., Actor) can include particular
 	 * behaviours.
+	 *
+	 * Props have physical properties (mass, intertia, a collision shape, etc.)
 	 */	
-	class Prop: public Loadable, public btMotionState
+	class Prop: public Node, public btMotionState
 	{
 		friend class LoadableProp;
 		friend class LoadablePropMesh;
 		friend class LoadablePropMaterial;
 		friend class LoadablePropPrefab;
 	public:
-		Prop(Ogre::String name, State *state, Ogre::String kind = "prop");
+		Prop(const Prop &object);
+		Prop(Ogre::String className, State *state, Ogre::String kind = "prop");
 		virtual ~Prop();
 	
-		virtual Ogre::Entity *entity(Ogre::SceneManager *sceneManager, Ogre::String name = "");
-		virtual Ogre::SceneNode *node(void);
+		virtual Loadable *clone(void) const;
 	
-		virtual bool attach(Scene *scene, Ogre::String name = "");
-		virtual bool attach(Ogre::SceneManager *scene, Ogre::String name = "");
-		virtual bool attach(Ogre::SceneNode *node, Ogre::String name = "");
-		virtual bool attachPhysics(void);
-		
-		virtual void setPosition(Ogre::Real x, Ogre::Real y, Ogre::Real z);
-		virtual void setPosition(const Ogre::Vector3 &vec);
-		virtual void scale(const Ogre::Vector3 &vec);
-		virtual void translate(const Ogre::Vector3 &vec);
-		virtual void setOrientation(const Ogre::Quaternion &quaternion);
-		
-		virtual void setFixed(void);
-		virtual void updatePhysics(void);
+		virtual void setFixed(bool isFixed = false);
 
+		/* btMotionState interface */
 		virtual void getWorldTransform(btTransform &worldTrans) const;
 		virtual void setWorldTransform(const btTransform &worldTrans);
 	protected:
@@ -71,7 +62,6 @@ namespace Jyuzau
 		Ogre::String m_material;
 		Ogre::SceneManager::PrefabType m_prefabType;
 		Ogre::Entity *m_entity;
-		Ogre::SceneNode *m_node;
 		btCollisionShape *m_collisionShape;
 		btVector3 m_inertia;
 		btScalar m_mass;
@@ -79,11 +69,15 @@ namespace Jyuzau
 		btScalar m_restitution;
 		btScalar m_friction;
 		
-		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
-		virtual void loaded(void);
-		
+		virtual bool attachToSceneNode(Scene *scene, Ogre::SceneNode *parentNode, Ogre::String id);
+		virtual Ogre::Entity *createEntity(Ogre::SceneManager *sceneManager, Ogre::String name = "");
 		virtual bool createNode(Ogre::SceneNode *parentNode, Ogre::String name);
 		virtual bool createPhysics(btDynamicsWorld *dynamics);
+		virtual bool attachPhysics(btDynamicsWorld *dynamics);
+		
+		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
+		virtual bool addResources(Ogre::String groupName);
+		
 	};
 	
 	class LoadableProp: public LoadableObject
@@ -91,12 +85,14 @@ namespace Jyuzau
 		friend class Prop;
 	public:
 		LoadableProp(Prop *owner, Ogre::String name, AttrList &attrs);
-		virtual bool add(LoadableObject *child);
+
 		virtual bool complete(void);
 	protected:
 		LoadablePropPrefab *m_prefab;
 		LoadablePropMesh *m_mesh;
 		LoadablePropMaterial *m_material;
+		
+		virtual bool addChild(LoadableObject *child);
 	};
 	
 	class LoadablePropMesh: public LoadableObject

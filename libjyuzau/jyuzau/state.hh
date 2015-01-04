@@ -1,4 +1,4 @@
-/* Copyright 2014 Mo McRoberts.
+/* Copyright 2014-2015 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -51,24 +51,26 @@ namespace Jyuzau
 		virtual ~State();
 		
 		virtual void preload(void);
-		
-		virtual Ogre::SceneManager *sceneManager(void);
 
-		virtual int cameras(void);
+		/* Properties */
+		virtual Ogre::SceneManager *sceneManager(void) const;
+		virtual bool overlay(void) const;
+		virtual btDynamicsWorld *dynamics(void) const;
+		virtual int cameras(void) const;
 		virtual Camera *camera(int index = 0);
 		
+		/* Object management */
+		virtual void addToPool(const Loadable *object);
 		virtual Loadable *factory(Ogre::String m_kind, Ogre::String m_name);
 		
-		virtual bool overlay(void);
-		
-		virtual btDynamicsWorld *dynamics(void);
-		
 		virtual void sceneAttached(Scene *scene);
+		virtual void sceneDetached(Scene *scene);
 	protected:
 		Core *m_core;
 		State *m_prev, *m_next;
 		bool m_loaded;
 		Ogre::SceneManager *m_sceneManager;
+		Scene *m_currentScene;
 		std::vector<Camera *> m_cameras;
 		std::vector<Actor *> m_actors;
 		CameraType m_defaultPlayerCameraType;
@@ -80,8 +82,9 @@ namespace Jyuzau
 		virtual void createScenes(void);
 		virtual void createSceneManager(void);
 		virtual void attachScenes(void);
-		virtual void createPlayers(void);
-		virtual void deletePlayers(void);
+
+		virtual void createPlayers(Scene *scene);
+		virtual void deletePlayers(Scene *scene);
 		
 		virtual void activated(Ogre::RenderWindow *window);
 		virtual void deactivated(Ogre::RenderWindow *window);

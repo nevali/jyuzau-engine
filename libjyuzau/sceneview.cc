@@ -62,11 +62,10 @@ SceneViewState::createScenes()
 void
 SceneViewState::attachScenes(void)
 {
-	if(!m_scene)
+	if(m_scene)
 	{
-		return;
+		m_scene->attach();
 	}
-	m_scene->attach(m_sceneManager);
 }
 
 void

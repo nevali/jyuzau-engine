@@ -17,10 +17,11 @@
 # include "config.h"
 #endif
 
+#include "jyuzau/loadable.hh"
+#include "jyuzau/state.hh"
+
 #include <OGRE/OgreLogManager.h>
 #include <OGRE/OgreColourValue.h>
-
-#include "jyuzau/loadable.hh"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 # include <OGRE/OSX/macUtils.h>
@@ -54,7 +55,7 @@ using namespace Jyuzau;
  */
 
 Loadable::Loadable():
-	m_name(""),
+	m_className(""),
 	m_kind(""),
 	m_container(""),
 	m_path(""),
@@ -71,7 +72,7 @@ Loadable::Loadable():
 
 /* Note that m_owner is not copied from the source instance */
 Loadable::Loadable(const Loadable &object):
-	m_name(""),
+	m_className(""),
 	m_kind(""),
 	m_container(""),
 	m_path(""),
@@ -89,7 +90,7 @@ Loadable::Loadable(const Loadable &object):
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot duplicate a loadable instance which has an incomplete definition");
 		return;
 	}
-	m_name = object.m_name;
+	m_className = object.m_className;
 	m_kind = object.m_kind;
 	m_container = object.m_container;
 	m_path = object.m_path;
@@ -99,8 +100,8 @@ Loadable::Loadable(const Loadable &object):
 	m_state = object.m_state;
 }
 
-Loadable::Loadable(Ogre::String name, State *state, Ogre::String kind, bool subdir):
-	m_name(name),
+Loadable::Loadable(Ogre::String className, State *state, Ogre::String kind, bool subdir):
+	m_className(className),
 	m_kind(kind),
 	m_container(""),
 	m_path(""),
@@ -115,7 +116,7 @@ Loadable::Loadable(Ogre::String name, State *state, Ogre::String kind, bool subd
 {
 	Ogre::String base;
 	
-	if (!Ogre::StringUtil::startsWith(name, "/", false))
+	if (!Ogre::StringUtil::startsWith(className, "/", false))
 	{
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 		base = Ogre::String(Ogre::macBundlePath() + "/Contents/Resources/assets/" + kind + "s");
@@ -125,15 +126,15 @@ Loadable::Loadable(Ogre::String name, State *state, Ogre::String kind, bool subd
 	}
 	if(subdir)
 	{
-		m_container = Ogre::String(base + "/" + name);
+		m_container = Ogre::String(base + "/" + className);
 		m_path = Ogre::String(m_container + "/" + kind + ".xml");
 	}
 	else
 	{
 		m_container = base;
-		m_path = m_container + "/" + name + ".xml";
+		m_path = m_container + "/" + className + ".xml";
 	}
-	m_group = Ogre::String(m_kind + "::" + m_name);
+	m_group = Ogre::String(kind + "::" + className);
 }
 
 Loadable::~Loadable()
@@ -151,16 +152,16 @@ Loadable::~Loadable()
 }
 
 Loadable *
-Loadable::clone(void)
+Loadable::clone(void) const
 {
 	return new Loadable(*this);
 }
 
 /* Property handlers */
 Ogre::String
-Loadable::name(void) const
+Loadable::className(void) const
 {
-	return m_name;
+	return m_className;
 }
 
 Ogre::String
@@ -203,28 +204,44 @@ Loadable::load(void)
 	m_load_status = false;
 	if(!m_path.length())
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to load " + m_name + "[" + m_kind + "] which has no path");
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to load " + m_className + "[" + m_kind + "] which has no path");
 		return false;
 	}
 	if(!loadDocument(m_path))
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to load " + m_name + "[" + m_kind + "] from " + m_path);
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to load " + m_className + "[" + m_kind + "] from " + m_path);
 		return false;
 	}
-	if(!m_root)
+	if(!complete())
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: no suitable root found in " + m_path);
-		return false;
-	}
-	if(!m_root->complete())
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: " + m_name + "[" + m_kind + "] from " + m_path + " has an incomplete definition");
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: " + m_className + "[" + m_kind + "] from " + m_path + " has an incomplete definition");
 		discard();
 		return false;
 	}
 	m_load_status = true;
 	didFinishLoading();
 	discard();
+	if(!m_unique)
+	{
+		m_state->addToPool(this);
+	}
+	return true;
+}
+
+/* Utility method invoked by load() to check if an object's definition is
+ * complete.
+ */
+bool
+Loadable::complete(void) const
+{
+	if(!m_root)
+	{
+		return false;
+	}
+	if(!m_root->complete())
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -248,9 +265,9 @@ Loadable::didFinishLoading(void)
  * manager to attach objects to.
  */
 bool
-Loadable::addResources(Ogre::String group)
+Loadable::addResources(Ogre::String groupName)
 {
-	if(m_root && !m_root->addResources(group))
+	if(m_root && !m_root->addResources(groupName))
 	{
 		return false;
 	}
@@ -263,6 +280,10 @@ Loadable::addResources(Ogre::String group)
 void
 Loadable::discard(void)
 {
+	if(!m_root)
+	{
+		return;
+	}
 	if(m_root->m_discardable)
 	{
 		delete m_root;
@@ -279,12 +300,12 @@ Loadable::discard(void)
  * tree.
  */
 LoadableObject *
-Loadable::factory(Ogre::String name, AttrList &attrs)
+Loadable::factory(Ogre::String kind, AttrList &attrs)
 {
 	/* Default loadable object factory; simply returns a new instance
 	 * of LoadableObject
 	 */
-	return new LoadableObject(this, m_root, name, attrs);
+	return new LoadableObject(this, m_cur, kind, attrs);
 }
 
 /* Invoked by load() to parse the XML document for this asset */
@@ -433,7 +454,7 @@ Loadable::sax_endElement(void *ctx, const xmlChar *localname, const xmlChar *pre
 
 LoadableObject::LoadableObject(const LoadableObject &object):
 	m_owner(NULL),
-	m_name(""),
+	m_kind(""),
 	m_attrs(),
 	m_discardable(true)
 {
@@ -449,7 +470,7 @@ LoadableObject::LoadableObject(const LoadableObject &object):
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot duplicate a loadable object instance which is discardable");
 		return;	
 	}
-	m_name = object.m_name;
+	m_kind = object.m_kind;
 	m_attrs = object.m_attrs;
 	m_discardable = object.m_discardable;
 	m_loaded = object.m_loaded;
@@ -457,9 +478,9 @@ LoadableObject::LoadableObject(const LoadableObject &object):
 }
 
 
-LoadableObject::LoadableObject(Loadable *owner, LoadableObject *parent, Ogre::String name, AttrList &attrs):
+LoadableObject::LoadableObject(Loadable *owner, LoadableObject *parent, Ogre::String kind, AttrList &attrs):
 	m_owner(owner),
-	m_name(name),
+	m_kind(kind),
 	m_attrs(attrs),
 	m_discardable(false)
 {
@@ -487,9 +508,9 @@ LoadableObject::clone(void)
 }
 
 Ogre::String
-LoadableObject::name(void) const
+LoadableObject::kind(void) const
 {
-	return m_name;
+	return m_kind;
 }
 
 LoadableObject *
@@ -617,6 +638,39 @@ LoadableObject::discard(void)
 			delete p;
 		}
 	}
+}
+
+/* Attach this object, and its children, to its owner. For example, a
+ * LoadableSceneProp will attach itself to the Scene which owns it.
+ */
+bool
+LoadableObject::attach(void)
+{
+	LoadableObject *p;
+	
+	for(p = m_first; p; p = p->m_next)
+	{
+		if(!p->attach())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool
+LoadableObject::detach(void)
+{
+	LoadableObject *p;
+	
+	for(p = m_first; p; p = p->m_next)
+	{
+		if(!p->detach())
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 /* Utility method to parse a colour value specified in the attribute list */

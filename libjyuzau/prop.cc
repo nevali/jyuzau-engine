@@ -1,4 +1,4 @@
-/* Copyright 2014 Mo McRoberts.
+/* Copyright 2014-2015 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -31,10 +31,25 @@
 
 using namespace Jyuzau;
 
-Prop::Prop(Ogre::String name, State *state, Ogre::String kind):
-	Loadable::Loadable(name, state, kind, true),
+Prop::Prop(const Prop &object):
+	Node::Node(object),
 	m_entity(NULL),
-	m_node(NULL),
+	m_collisionShape(NULL),
+	m_rigidBody(NULL),
+	m_prefabType(Ogre::SceneManager::PT_CUBE)
+{
+	m_mass = object.m_mass;
+	m_inertia = object.m_inertia;
+	m_mesh = object.m_mesh;
+	m_material = object.m_material;
+	m_prefabType = object.m_prefabType;
+	m_restitution = object.m_restitution;
+	m_friction = object.m_friction;
+}
+
+Prop::Prop(Ogre::String name, State *state, Ogre::String kind):
+	Node::Node(name, state, kind, true),
+	m_entity(NULL),
 	m_mass(0),
 	m_collisionShape(NULL),
 	m_inertia(0.0f, 0.0f, 0.0f),
@@ -59,6 +74,7 @@ Prop::~Prop()
 	{
 		m_node->detachObject(m_entity);
 		delete m_node;
+		m_node = NULL;
 	}
 	if(m_entity)
 	{
@@ -66,79 +82,109 @@ Prop::~Prop()
 	}
 }
 
-Ogre::SceneNode *
-Prop::node(void)
+Loadable *
+Prop::clone(void) const
 {
-	return m_node;
+	return new Prop(*this);
+}
+
+/* Define this object as physically immovable (used for walls, etc.) */
+void
+Prop::setFixed(bool isFixed)
+{
+	int flags;
+	
+	if(m_rigidBody)
+	{
+		flags = m_rigidBody->getCollisionFlags();
+		if(isFixed)
+		{
+			m_rigidBody->setCollisionFlags(flags | btCollisionObject::CF_STATIC_OBJECT);
+			m_rigidBody->setMassProps(0, btVector3(0, 0, 0));
+			m_rigidBody->clearForces();
+		}
+		else
+		{
+			m_rigidBody->setCollisionFlags(flags & ~btCollisionObject::CF_STATIC_OBJECT);
+			m_rigidBody->setMassProps(m_mass, btVector3(0, 0, 0));
+			m_rigidBody->clearForces();
+		}
+	}
 }
 
 /* Attach the prop to a scene, creating the entity if necessary. Note that
- * the name supplied must be unique in the scene (and if the entity is being
+ * the id supplied must be unique in the scene (and if the entity is being
  * created, a unique entity name, too). The position defaults to [0, 0, 0],
- * and the name defaults to the group name (class::name).
+ * and the id defaults to the group name (kind::class).
  */
 bool
-Prop::attach(Scene *scene, Ogre::String name)
-{
-	/* Attach the Prop to the root node of the Scene */
-	return attach(scene->rootNode(), name);
-}
-
-bool
-Prop::attach(Ogre::SceneManager *scene, Ogre::String name)
-{
-	/* Attach the Prop to the root node of the SceneManager */
-	return attach(scene->getRootSceneNode(), name);
-}
-
-bool
-Prop::attach(Ogre::SceneNode *node, Ogre::String name)
-{
-	Ogre::Entity *ent;
-	Ogre::SceneManager *manager = node->getCreator();
-	
-	if(!name.length())
-	{
-		name = m_group;
-	}
-	if(m_node)
-	{
-		return m_node;
-	}
-	if(!entity(manager, name))
-	{
-		return false;
-	}
-	if(!createNode(node, name))
-	{
-		return false;
-	}
-	return true;
-}
-
-bool
-Prop::attachPhysics(void)
+Prop::attachToSceneNode(Scene *scene, Ogre::SceneNode *parentNode, Ogre::String id)
 {
 	btDynamicsWorld *dynamics;
-	
-	if(!m_state || !(dynamics = m_state->dynamics()))
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach physics to a prop " + m_group + " which has no associated state with dynamics");
-		return false;
-	}
-	if(!createPhysics(dynamics) || !m_rigidBody)
+
+	if(!Node::attachToSceneNode(scene, parentNode, id))
 	{
 		return false;
 	}
-	dynamics->addRigidBody(m_rigidBody);
+	dynamics = scene->dynamics();
+	if(dynamics)
+	{
+		if(!createPhysics(dynamics))
+		{
+			return false;
+		}
+		if(!attachPhysics(dynamics))
+		{
+			return false;
+		}
+	}
 	return true;
 }
 
-bool
-Prop::createNode(Ogre::SceneNode *parentNode, Ogre::String name)
+/* Obtain an Ogre::Entity for this prop. If unspecified, the name will default
+ * to the group name (class::name) of the prop. When invoked by attach(),
+ * the node name supplied will be re-used as the entity name here unless the
+ * the entity has already been created.
+ */
+Ogre::Entity *
+Prop::createEntity(Ogre::SceneManager *sceneManager, Ogre::String id)
 {
-	m_node = parentNode->createChildSceneNode(name);
-	if(!m_node)
+	LoadableProp *prop;
+	
+	/* If an entity already exists, return it */
+	if(m_entity)
+	{
+		return m_entity;
+	}
+	if(m_mesh.length())
+	{
+		/* If the prop has a mesh, create the entity using that */
+		m_entity = sceneManager->createEntity(id, m_mesh, m_group);
+	}
+	else
+	{
+		/* Otherwise, use the prefab type */
+		m_entity = sceneManager->createEntity(id, m_prefabType);
+	}
+	if(m_material.length())
+	{
+		/* If there's a specific material to apply, do so */
+		m_entity->setMaterialName(m_material, m_group);
+	}
+	return m_entity;
+}
+
+/* Utility method invoked by attachSceneNode() in order to create the scene
+ * node.
+ */
+bool
+Prop::createNode(Ogre::SceneNode *parentNode, Ogre::String id)
+{
+	if(!createEntity(parentNode->getCreator(), id))
+	{
+		return false;
+	}
+	if(!Node::createNode(parentNode, id))
 	{
 		return false;
 	}
@@ -146,6 +192,9 @@ Prop::createNode(Ogre::SceneNode *parentNode, Ogre::String name)
 	return true;
 }
 
+/* Utility method invoked by attachSceneNode() in order to define the physical
+ * properties of the prop.
+ */
 bool
 Prop::createPhysics(btDynamicsWorld *dynamics)
 {
@@ -186,45 +235,21 @@ Prop::createPhysics(btDynamicsWorld *dynamics)
 	return true;
 }
 
-void
-Prop::scale(const Ogre::Vector3 &vec)
+/* Utility method invoked by attachSceneNode() in order to attach the rigid
+ * body to the dynamics world.
+ */
+bool
+Prop::attachPhysics(btDynamicsWorld *dynamics)
 {
-	if(m_node)
+	if(!m_rigidBody)
 	{
-		m_node->scale(vec);
+		return false;
 	}
+	dynamics->addRigidBody(m_rigidBody);
+	return true;
 }
 
-void 
-Prop::translate(const Ogre::Vector3 &vec)
-{
-	if(m_node)
-	{
-		m_node->translate(vec);
-	}
-}
-
-void
-Prop::setOrientation(const Ogre::Quaternion &quaternion)
-{
-	if(m_node)
-	{
-		m_node->setOrientation(quaternion);
-	}
-}
-
-
-void
-Prop::setFixed(void)
-{
-	if(m_rigidBody)
-	{
-		m_rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-		m_rigidBody->setMassProps(0, btVector3(0, 0, 0));
-		m_rigidBody->clearForces();
-	}
-}
-
+/* btMotionState interface */
 void
 Prop::getWorldTransform(btTransform &worldTrans) const
 {
@@ -255,121 +280,57 @@ Prop::setWorldTransform(const btTransform &worldTrans)
 	m_node->setPosition(pos.x(), pos.y(), pos.z());
 }
 
-void
-Prop::updatePhysics(void)
-{
-	
-}
-
-/* Obtain an Ogre::Entity for this prop. If unspecified, the name will default
- * to the group name (class::name) of the prop. When invoked by attach(),
- * the node name supplied will be re-used as the entity name here unless the
- * the entity has already been created.
- */
-Ogre::Entity *
-Prop::entity(Ogre::SceneManager *scene, Ogre::String name)
-{
-	LoadableProp *prop;
-	
-	if(m_entity)
-	{
-		return m_entity;
-	}
-	if(!name.length())
-	{
-		name = m_group;
-	}
-	if(!m_loaded)
-	{
-		if(!load())
-		{
-			return NULL;
-		}
-	}
-	if(!m_load_status)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a prop (" + name + ") which has not been properly loaded");
-		return NULL;
-	}
-	prop = dynamic_cast<LoadableProp *>(m_root);
-	if(m_mesh.length())
-	{
-		m_entity = scene->createEntity(name, m_mesh, m_group);
-	}
-	else
-	{
-		m_entity = scene->createEntity(name, m_prefabType);
-	}
-	if(m_material.length())
-	{
-		m_entity->setMaterialName(m_material, m_group);
-	}
-	return m_entity;
-}
-
+/* Construct a new LoadableObject as the <prop> is being loaded */
 LoadableObject *
-Prop::factory(Ogre::String name, AttrList &attrs)
+Prop::factory(Ogre::String kind, AttrList &attrs)
 {
 	LoadableProp *prop;
 	
 	if(!m_root)
 	{
-		if(!name.compare(m_kind))
+		if(!kind.compare(m_kind))
 		{
-			return new LoadableProp(this, name, attrs);
+			return new LoadableProp(this, kind, attrs);
 		}
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected root element <" + name + ">");
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected root element <" + kind + ">");
 		return NULL;
 	}
-	if(m_cur != m_root)
+	if(m_cur == m_root)
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected child element <" + name + ">");
+		prop = dynamic_cast<LoadableProp *>(m_cur);
+		if(!kind.compare("mesh"))
+		{
+			return new LoadablePropMesh(this, prop, kind, attrs);
+		}
+		if(!kind.compare("material"))
+		{
+			return new LoadablePropMaterial(this, prop, kind, attrs);
+		}
+		if(!kind.compare("cube") || !kind.compare("sphere") || !kind.compare("plane"))
+		{
+			return new LoadablePropPrefab(this, prop, kind, attrs);
+		}
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected element <" + kind + ">");
 		return NULL;
 	}
-	prop = dynamic_cast<LoadableProp *>(m_cur);
-	if(!name.compare("mesh"))
-	{
-		return new LoadablePropMesh(this, prop, name, attrs);
-	}
-	if(!name.compare("material"))
-	{
-		return new LoadablePropMaterial(this, prop, name, attrs);
-	}
-	if(!name.compare("cube") || !name.compare("sphere") || !name.compare("plane"))
-	{
-		return new LoadablePropPrefab(this, prop, name, attrs);
-	}
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected element <" + name + ">");
+	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected child element <" + kind + ">");
 	return NULL;
 }
 
-void
-Prop::loaded(void)
+/* Inform the OGRE Resource Manager about the prop */
+bool
+Prop::addResources(Ogre::String groupName)
 {
 	Ogre::ResourceGroupManager *gm;
 	
 	gm = Ogre::ResourceGroupManager::getSingletonPtr();
 	gm->addResourceLocation(m_container, "FileSystem", m_group);
-	Loadable::loaded();
+	if(!Loadable::addResources(groupName))
+	{
+		return false;
+	}
 	gm->initialiseResourceGroup(m_group);
-}
-
-void
-Prop::setPosition(Ogre::Real x, Ogre::Real y, Ogre::Real z)
-{
-	if(m_node)
-	{
-		m_node->setPosition(x, y, z);
-	}
-}
-
-void
-Prop::setPosition(const Ogre::Vector3 &vec)
-{
-	if(m_node)
-	{
-		m_node->setPosition(vec);
-	}
+	return true;
 }
 
 
@@ -404,22 +365,25 @@ LoadableProp::LoadableProp(Prop *owner, Ogre::String name, AttrList &attrs):
 }
 
 bool
-LoadableProp::add(LoadableObject *child)
+LoadableProp::addChild(LoadableObject *child)
 {
-	/* TODO: use dynamic_cast as the test mechanism instead of the names */
-	if(!child->name().compare("mesh"))
+	LoadablePropMesh *mesh;
+	LoadablePropMaterial *material;
+	LoadablePropPrefab *prefab;
+	
+	if((mesh = dynamic_cast<LoadablePropMesh *>(child)))
 	{
-		m_mesh = dynamic_cast<LoadablePropMesh *>(child);
+		m_mesh = mesh;
 	}
-	else if(!child->name().compare("material"))
+	else if((material = dynamic_cast<LoadablePropMaterial *>(child)))
 	{
-		m_material = dynamic_cast<LoadablePropMaterial *>(child);
+		m_material = material;
 	}
-	else if(!child->name().compare("cube") || !child->name().compare("sphere") || !child->name().compare("plane"))
+	else if((prefab = dynamic_cast<LoadablePropPrefab *>(child)))
 	{
-		m_prefab = dynamic_cast<LoadablePropPrefab *>(child);
+		m_prefab = prefab;
 	}
-	return LoadableObject::add(child);
+	return LoadableObject::addChild(child);
 }
 
 bool
@@ -549,9 +513,6 @@ LoadablePropMaterial::LoadablePropMaterial(Prop *owner, LoadableProp *parent, Og
 bool
 LoadablePropMaterial::complete(void)
 {
-	/* XXX this should be moved to a check in Prop::Complete() conditional
-	 * upon whether this is a prefab prop or not.
-	 */
 	if(!m_class.length())
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: prop material is missing a class");

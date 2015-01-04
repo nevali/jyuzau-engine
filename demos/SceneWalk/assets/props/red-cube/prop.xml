@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<prop mass="1">
+<prop mass="1" friction="0" restitution="1">
 	<cube w="1" h="1" d="1" />
 	<material class="red" />
 </prop>

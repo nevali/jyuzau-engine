@@ -22,8 +22,13 @@
 
 using namespace Jyuzau;
 
+Light::Light(const Light &object):
+	Node::Node(object)
+{
+}
+
 Light::Light(Ogre::String name, State *state, Ogre::String kind):
-	Loadable::Loadable(name, state, kind, false),
+	Node::Node(name, state, kind, false),
 	m_light(NULL)
 {
 }
@@ -32,51 +37,46 @@ Light::~Light()
 {
 	if(m_light)
 	{
-		delete m_light;
+		detach();
 	}
 }
 
+Loadable *
+Light::clone(void) const
+{
+	return new Light(*this);
+}
+
 Ogre::Light *
-Light::node(void)
+Light::light(void) const
 {
 	return m_light;
 }
 
 bool
-Light::attach(Scene *scene, Ogre::String name, Ogre::Vector3 pos)
+Light::attachToSceneNode(Scene *scene, Ogre::SceneNode *parentNode, Ogre::String id)
 {
-	return attach(scene->rootNode()->getCreator(), name, pos);
-}
-
-bool
-Light::attach(Ogre::SceneManager *manager, Ogre::String name, Ogre::Vector3 pos)
-{
-	if(m_light)
-	{
-		return true;
-	}
-	if(!name.length())
-	{
-		name = m_group;
-	}
-	m_light = manager->createLight(name);
+	Ogre::SceneManager *manager;
+	
+	manager = scene->sceneManager();
+	m_light = manager->createLight(id);
 	if(!m_light)
 	{
 		return false;
 	}
-	m_light->setPosition(pos);
+	parentNode->attachObject(m_light);
 	return true;
 }
 
-bool
+void
 Light::detach(void)
 {
 	if(m_light)
 	{
+		m_light->detachFromParent();
 		delete m_light;
 		m_light = NULL;
 	}
-	return true;
 }
 
 
@@ -84,31 +84,16 @@ Light::detach(void)
  * from anywhere.
  */
 bool
-Light::load(void)
-{
-	if(m_loaded)
-	{
-		return m_load_status;
-	}
-	m_loaded = true;
-	m_load_status = false;
-	if(m_root)
-	{
-		if(!m_root->complete())
-		{
-			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: " + m_name + "[" + m_kind + "] from " + m_path + " has an incomplete definition");
-			return false;
-		}
-	}
-	m_load_status = true;
-	loaded();
-	return true;
-}
-
-bool
 Light::loadDocument(Ogre::String path)
 {
 	(void) path;
 	
 	return true;
 }
+
+bool
+Light::complete(void) const
+{
+	return true;
+}
+

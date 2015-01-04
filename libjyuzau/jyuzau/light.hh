@@ -16,32 +16,33 @@
 #ifndef JYUZAU_LIGHT_HH_
 # define JYUZAU_LIGHT_HH_              1
 
+# include "jyuzau/node.hh"
+
 # include <OGRE/OgreVector3.h>
 # include <OGRE/OgreColourValue.h>
 # include <OGRE/OgreSceneManager.h>
 # include <OGRE/OgreString.h>
 
-# include "jyuzau/loadable.hh"
-
 namespace Jyuzau
 {
 	class Scene;
 	
-	class Light: public Loadable
+	class Light: public Node
 	{
 	public:
+		Light(const Light &object);
 		Light(Ogre::String name, State *state, Ogre::String kind = "light");
 		virtual ~Light();
 		
-		virtual Ogre::Light *node(void);
-		
-		virtual bool attach(Scene *scene, Ogre::String name, Ogre::Vector3 pos = Ogre::Vector3::ZERO);
-		virtual bool attach(Ogre::SceneManager *manager, Ogre::String name, Ogre::Vector3 pos);
-		virtual bool detach(void);
+		virtual Loadable *clone(void) const;
+		virtual Ogre::Light *light(void) const;
 	protected:
 		Ogre::Light *m_light;
 
-		virtual bool load(void);
+		virtual bool complete(void) const;
+
+		virtual bool attachToSceneNode(Scene *scene, Ogre::SceneNode *parentNode, Ogre::String id);
+		virtual void detach(void);
 		virtual bool loadDocument(Ogre::String path);
 	};
 };

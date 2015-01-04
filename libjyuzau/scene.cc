@@ -1,4 +1,4 @@
-/* Copyright 2014 Mo McRoberts.
+/* Copyright 2014-2015 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -29,97 +29,61 @@
 
 using namespace Jyuzau;
 
-Scene::Scene(Ogre::String name, State *state):
-	Loadable::Loadable(name, state, "scene", false),
+Scene::Scene(const Scene &scene):
+	Loadable::Loadable(scene),
 	m_manager(NULL),
-	m_objects(),
-	m_ambient(NULL),
 	m_broadphase(NULL),
 	m_collisionConfig(NULL),
 	m_dispatcher(NULL),
 	m_dynamics(NULL),
 	m_solver(NULL),
-	m_gravity(0.0f, 0.0f, 0.0f)
+	m_gravity(scene.m_gravity),
+	m_hasAmbientLight(scene.m_hasAmbientLight),
+	m_ambientColour(scene.m_ambientColour)
 {
 }
 
+Scene::Scene(Ogre::String className, State *state):
+	Loadable::Loadable(className, state, "scene", false),
+	m_manager(NULL),
+	m_broadphase(NULL),
+	m_collisionConfig(NULL),
+	m_dispatcher(NULL),
+	m_dynamics(NULL),
+	m_solver(NULL),
+	m_gravity(0.0f, 0.0f, 0.0f),
+	m_hasAmbientLight(false),
+	m_ambientColour(0.5f, 0.5f, 0.5f, 1.0f)
+{
+}
 
 Scene::~Scene()
 {
+	if(m_manager)
+	{
+		detach();
+	}
 	delete m_dynamics;
 	delete m_solver;
 	delete m_dispatcher;
 	delete m_collisionConfig;
 	delete m_broadphase;
-	
-	if(m_manager)
-	{
-		detach();
-	}
 }
 
-/* Attach the loaded objects to the scene manager */
-bool
-Scene::attach(Ogre::SceneManager *manager)
+Loadable *
+Scene::clone(void)
 {
-	std::vector<LoadableSceneObject *>::iterator it;
-
-	if(!m_loaded)
-	{
-		if(!load())
-		{
-			return false;
-		}
-	}
-	if(!m_load_status)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a scene which has not been properly loaded");
-		return false;
-	}
-	if(!manager && m_state)
-	{
-		manager = m_state->sceneManager();
-	}
-	if(!manager)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a scene because no scene manager is available");
-		return false;
-	}
-	if(m_manager)
-	{
-		detach();
-	}
-	m_manager = manager;
-	if(!m_dynamics)
-	{
-		attachPhysics();
-	}
-	if(m_state)
-	{
-		m_state->sceneAttached(this);
-	}
-	/* Apply the ambient light to the scene */
-	if(m_ambient)
-	{
-		manager->setAmbientLight(m_ambient->colorValue());
-	}
-	/* Attach all of the objects to the scene */
-	for(it = m_objects.begin(); it != m_objects.end(); it++)
-	{
-		(*it)->attach(this);
-	}
-	return true;
+	return new Scene(*this);
 }
 
-bool
-Scene::detach(void)
+Ogre::SceneManager *
+Scene::sceneManager(void) const
 {
-	m_manager = NULL;
-	return true;
+	return m_manager;
 }
 
 Ogre::SceneNode *
-Scene::rootNode(void)
+Scene::rootNode(void) const
 {
 	if(!m_manager)
 	{
@@ -128,100 +92,16 @@ Scene::rootNode(void)
 	return m_manager->getRootSceneNode();
 }
 
-LoadableObject *
-Scene::factory(Ogre::String name, AttrList &attrs)
-{
-	LoadableSceneObject *obj;
-	
-	if(!m_root)
-	{
-		if(!name.compare(m_kind))
-		{
-			return new LoadableScene(this, name, attrs);
-		}
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected root element <" + name + ">");
-		return NULL;
-	}
-	/* Props can have transforms applied to them */
-	if((obj = dynamic_cast<LoadableSceneObject *>(m_cur)))
-	{
-		if(!name.compare("scale") || !name.compare("translate"))
-		{
-			return new LoadableSceneTransform(this, obj, name, attrs);
-		}
-		if(!name.compare("yaw") || !name.compare("pitch") || !name.compare("roll"))
-		{
-			return new LoadableSceneRotation(this, obj, name, attrs);
-		}
-	}
-	if(m_cur != m_root)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected child element <" + name + ">");
-		return NULL;
-	}
-
-	if(!name.compare("ambientlight"))
-	{
-		return new LoadableSceneAmbientLight(this, name, attrs);
-	}
-	if(!name.compare("gravity"))
-	{
-		return new LoadableSceneGravity(this, name, attrs);
-	}
-	
-	obj = NULL;
-	if(!name.compare("prop"))
-	{
-		return new LoadableSceneProp(this, obj, name, attrs);
-	}
-	if(!name.compare("actor"))
-	{
-		return new LoadableSceneActor(this, obj, name, attrs);
-	}
-	if(!name.compare("light"))
-	{
-		return new LoadableSceneLight(this, obj, name, attrs);
-	}
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected element <" + name + ">");
-	return NULL;
-}
-
-/* Add a LoadableSceneObject to the list of objects to be attached to the
- * scene, and take ownership of the actual loaded object.
- */
-void
-Scene::addSceneObject(LoadableSceneObject *sceneObject, Loadable *object)
-{
-	/* Take ownership of the object itself */
-	add(object);
-	/* Add the LoadableSceneObject to our object list (see the attach()
-	 * method for this list's traversal)
-	 */
-	m_objects.push_back(sceneObject);
-}
-
-void
-Scene::addAmbientLight(LoadableSceneAmbientLight *light)
-{
-	m_ambient = light;
-}
-
-/* Attach the physics engine to the scene */
-void
-Scene::attachPhysics(void)
-{
-	m_broadphase = new btDbvtBroadphase();
-	m_collisionConfig = new btDefaultCollisionConfiguration();
-	m_dispatcher = new btCollisionDispatcher(m_collisionConfig);
-	m_solver = new btSequentialImpulseConstraintSolver();
-	m_dynamics = new btDiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_solver, m_collisionConfig);
-	m_dynamics->setGravity(m_gravity);
-}
-
 btDynamicsWorld *
-Scene::dynamics(void)
+Scene::dynamics(void) const
 {
 	return m_dynamics;
+}
+
+Ogre::Vector3
+Scene::gravity(void) const
+{
+	return bulletVecToOgre(m_gravity);
 }
 
 bool
@@ -246,6 +126,153 @@ Scene::setGravity(const btVector3 &vec)
 	}
 	m_dynamics->setGravity(m_gravity);
 	return true;
+}
+
+
+/* Attach the loaded objects to the State's scene manager */
+bool
+Scene::attach(void)
+{
+	std::vector<LoadableSceneObject *>::iterator it;
+	Ogre::SceneManager *manager;
+	
+	if(!m_loaded)
+	{
+		if(!load())
+		{
+			return false;
+		}
+	}
+	if(!m_load_status)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a scene which has not been properly loaded");
+		return false;
+	}
+	manager = m_state->sceneManager();
+	if(!manager)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot attach a scene because no scene manager is available");
+		return false;
+	}
+	if(m_manager)
+	{
+		detach();
+	}
+	m_manager = manager;
+	/* Apply scene properties */
+	if(m_hasAmbientLight)
+	{
+		manager->setAmbientLight(m_ambientColour);
+	}
+	/* Attach all of the objects to the scene */
+	m_root->attach();
+	/* Inform the State that this scene has been attached */
+	m_state->sceneAttached(this);
+	return true;
+}
+
+bool
+Scene::detach(void)
+{
+	std::vector<Loadable *>::iterator it;
+
+	m_state->sceneDetached(this);
+	/* Delete the nodes in the scene that we own */
+	for(it = m_objects.begin(); it != m_objects.end(); it++)
+	{
+		delete (*it);
+	}
+	m_objects.clear();
+	m_manager = NULL;
+	return true;
+}
+
+bool
+Scene::load(void)
+{
+	if(!Loadable::load())
+	{
+		return false;
+	}
+	if(!m_dynamics)
+	{
+		createPhysics();
+	}
+	return true;
+}
+
+LoadableObject *
+Scene::factory(Ogre::String kind, AttrList &attrs)
+{
+	LoadableSceneObject *obj;
+	
+	if(!m_root)
+	{
+		if(!kind.compare(m_kind))
+		{
+			return new LoadableScene(this, kind, attrs);
+		}
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected root element <" + kind + ">");
+		return NULL;
+	}
+	if(m_cur == m_root)
+	{
+		/* Scene properties */
+		if(!kind.compare("ambientlight"))
+		{
+			return new LoadableSceneAmbientLight(this, kind, attrs);
+		}
+		if(!kind.compare("gravity"))
+		{
+			return new LoadableSceneGravity(this, kind, attrs);
+		}
+	}
+	/* Props can have transforms applied to them */
+	if((obj = dynamic_cast<LoadableSceneObject *>(m_cur)))
+	{
+		if(!kind.compare("scale") || !kind.compare("translate"))
+		{
+			return new LoadableSceneTransform(this, obj, kind, attrs);
+		}
+		if(!kind.compare("yaw") || !kind.compare("pitch") || !kind.compare("roll"))
+		{
+			return new LoadableSceneRotation(this, obj, kind, attrs);
+		}
+	}
+	if((m_cur == m_root) || obj)
+	{
+		/* Scene objects which can occur either at the root, or within
+		 * another scene object.
+		 */
+		if(!kind.compare("prop"))
+		{
+			return new LoadableSceneProp(this, obj, kind, attrs);
+		}
+		if(!kind.compare("actor"))
+		{
+			return new LoadableSceneActor(this, obj, kind, attrs);
+		}
+		if(!kind.compare("light"))
+		{
+			return new LoadableSceneLight(this, obj, kind, attrs);
+		}
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected child element <" + kind + ">");
+		return NULL;
+	}
+	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: unexpected element <" + kind + ">");
+	return NULL;
+}
+
+/* Create the physics engine for the scene */
+void
+Scene::createPhysics(void)
+{
+	m_broadphase = new btDbvtBroadphase();
+	m_collisionConfig = new btDefaultCollisionConfiguration();
+	m_dispatcher = new btCollisionDispatcher(m_collisionConfig);
+	m_solver = new btSequentialImpulseConstraintSolver();
+	m_dynamics = new btDiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_solver, m_collisionConfig);
+	m_dynamics->setGravity(m_gravity);
 }
 
 bool
@@ -275,9 +302,33 @@ Scene::removeRigidBody(btRigidBody *body)
 
 /* LoadableScene encapsulates the <scene> root element */
 
+LoadableScene::LoadableScene(const LoadableScene &object):
+	LoadableObject::LoadableObject(object)
+{
+}
+
 LoadableScene::LoadableScene(Loadable *owner, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, NULL, name, attrs)
 {
+}
+
+LoadableObject *
+LoadableScene::clone(void) const
+{
+	return new LoadableScene(*this);
+}
+
+
+
+/* LoadableSceneProperty is the base class for encapsulating any
+ * XML node which does nothing more than parse property values which
+ * apply to its parent or the scene. By nature, all LoadableSceneProperty
+ * instances are discardable.
+ */
+LoadableSceneProperty::LoadableSceneProperty(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
+	LoadableObject(owner, parent, name, attrs)
+{
+	m_discardable = true;
 }
 
 
@@ -287,6 +338,17 @@ LoadableScene::LoadableScene(Loadable *owner, Ogre::String name, AttrList &attrs
  * loaded into a scene and has some kind of manifestation (including
  * both props and lights).
  */
+
+LoadableSceneObject::LoadableSceneObject(const LoadableSceneObject &object):
+	LoadableObject(object)
+{
+	m_id = object.m_id;
+	m_scale = object.m_scale;
+	m_translate = object.m_translate;
+	m_yaw = object.m_yaw;
+	m_pitch = object.m_pitch;
+	m_roll = object.m_roll;
+}
 
 LoadableSceneObject::LoadableSceneObject(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
 	LoadableObject(owner, parent, name, attrs),
@@ -310,20 +372,120 @@ LoadableSceneObject::LoadableSceneObject(Scene *owner, LoadableSceneObject *pare
 }
 
 bool
-LoadableSceneObject::complete(void)
+LoadableSceneObject::complete(void) const
 {
 	if(!m_id.length())
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: scene object <" + m_name + "> is missing an ID");
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: scene object <" + m_kind + "> is missing an ID");
 		return false;
 	}
 	return LoadableObject::complete();
 }
 
 Ogre::String
-LoadableSceneObject::id(void)
+LoadableSceneObject::id(void) const
 {
 	return m_id;
+}
+
+Node *
+LoadableSceneObject::node(void) const
+{
+	return m_node;
+}
+
+/* Invoked by Scene::attach() in order to ask the object (and its children) to
+ * instantiate itself and add it to the scene.
+ */
+bool
+LoadableSceneObject::attach(void)
+{
+	LoadableSceneObject *parent;
+	Node *parentNode, *node;
+	State *state;
+	Scene *scene;
+
+	state = m_owner->state();
+	node = createNode(state);
+	if(!node)
+	{
+		return false;
+	}
+	scene = dynamic_cast<Scene *>(m_owner);
+	parent = dynamic_cast<LoadableSceneObject *>(m_parent);
+	if(parent)
+	{
+		parentNode = parent->node();
+	}
+	else
+	{
+		parentNode = NULL;
+	}
+	if(!applyProperties(node))
+	{
+		return false;
+	}
+	if(!attachNode(scene, parentNode, node))
+	{
+		return false;
+	}
+	/* Give ownership of the new Node to the scene */
+	scene->addObject(node);
+	m_node = node;
+	/* Now attach any children */
+	return LoadableObject::attach();
+}
+
+bool
+LoadableSceneObject::detach(void)
+{
+	/* Detach any children */
+	LoadableObject::detach();
+	/* Discard our associated node */
+	/* As the Scene owns the node itself, we don't have to be responsible
+	 * for freeing it.
+	 */
+	m_node = NULL;
+	return true;
+}
+
+/* Utility method invoked by attach() to attach the scene object's Node
+ * to the scene itself.
+ */
+bool
+LoadableSceneObject::attachNode(Scene *scene, Node *parentNode, Node *newNode)
+{
+	if(parentNode)
+	{
+		if(!newNode->attachToScene(parentNode, m_id))
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if(!newNode->attachToScene(scene, m_id))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+/* Utility method invoked by attach() to apply any properties to a new
+ * node.
+ */
+bool
+LoadableSceneObject::applyProperties(Node *newNode)
+{
+	Ogre::Matrix3 mat;
+	
+	newNode->translate(m_translate);
+	newNode->scale(m_scale);
+	newNode->yaw(m_yaw);
+	newNode->pitch(m_pitch);
+	newNode->roll(m_roll);
+	return true;
 }
 
 
@@ -333,9 +495,16 @@ LoadableSceneObject::id(void)
  * <prop id="scene-local-name" class="asset-name" x="n" y="n" z="n">
  */
 
-LoadableSceneProp::LoadableSceneProp(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
-	LoadableSceneObject(owner, parent, name, attrs),
-	m_class(""),
+LoadableSceneProp::LoadableSceneProp(const LoadableSceneProp &object):
+	LoadableSceneObject(object)
+{
+	m_className = object.m_className;
+	m_fixed = object.m_fixed;
+}
+
+LoadableSceneProp::LoadableSceneProp(Scene *owner, LoadableSceneObject *parent, Ogre::String kind, AttrList &attrs):
+	LoadableSceneObject(owner, parent, kind, attrs),
+	m_className(""),
 	m_fixed(false)
 {
 	AttrListIterator it;
@@ -346,7 +515,7 @@ LoadableSceneProp::LoadableSceneProp(Scene *owner, LoadableSceneObject *parent, 
 		
 		if(!p.first.compare("class"))
 		{
-			m_class = p.second;
+			m_className = p.second;
 		}
 		else if(!p.first.compare("fixed"))
 		{
@@ -356,27 +525,86 @@ LoadableSceneProp::LoadableSceneProp(Scene *owner, LoadableSceneObject *parent, 
 			}
 		}
 	}
-	if(!m_id.length())	
+	if(!m_id.length())
 	{
-		m_id = m_class;
+		m_id = m_className;
 	}
 }
 
-bool
-LoadableSceneProp::complete(void)
+LoadableObject *
+LoadableSceneProp::clone(void) const
 {
-	if(!m_class.length())
+	return new LoadableSceneProp(*this);
+}
+
+bool
+LoadableSceneProp::complete(void) const
+{
+	if(!m_className.length())
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: scene prop is missing a class");
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: scene " + m_kind + " is missing a class");
 		return false;
 	}
 	return LoadableSceneObject::complete();
 }
 
+Ogre::String
+LoadableSceneProp::className(void) const
+{
+	return m_className;
+}
+
+bool
+LoadableSceneProp::fixed(void) const
+{
+	return m_fixed;
+}
+
+Node *
+LoadableSceneProp::createNode(State *state)
+{
+	Loadable *p;
+	Prop *prop;
+
+	p = state->factory(m_kind, m_className);
+	if(!p)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create " + m_kind + " instance");
+		return NULL;
+	}
+	prop = dynamic_cast<Prop *>(p);
+	if(!prop)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: factory-returned " + m_kind + " (" + m_className + ") instance was not a prop");
+		delete p;
+		return NULL;
+	}
+	return prop;
+}
+
+bool
+LoadableSceneProp::applyProperties(Node *newNode)
+{
+	Prop *prop;
+	
+	if(!LoadableSceneObject::applyProperties(newNode))
+	{
+		return false;
+	}
+	prop = dynamic_cast<Prop *>(newNode);
+	if(m_fixed)
+	{
+		prop->setFixed();
+	}
+	return true;
+}
+
+/*
 bool
 LoadableSceneProp::addResources(Ogre::String group)
 {
 	State *state;
+	Ogre::Matrix3 mat;
 	
 	state = m_owner->state();
 	m_prop = dynamic_cast<Prop *>(state->factory(m_name, m_class));
@@ -385,33 +613,31 @@ LoadableSceneProp::addResources(Ogre::String group)
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene prop instance");
 		return false;
 	}
-	/* Allow the scene to take ownership of the prop */
 	(dynamic_cast<Scene *> (m_owner))->addSceneObject(this, m_prop);
-	return true;
-}
-
-bool
-LoadableSceneProp::attach(Scene *scene)
-{
-	Ogre::SceneNode *node;
-	Ogre::Matrix3 mat;
-	
-	/* TODO: attach to parent node if there is one */
-	if(!m_prop->attach(scene, m_id))
-	{
-		return false;
-	}
 	m_prop->scale(m_scale);
 	mat.FromEulerAnglesXYZ(m_yaw, m_pitch, m_roll);
 	m_prop->setOrientation(Ogre::Quaternion(mat));
 	m_prop->translate(m_translate);
-	m_prop->attachPhysics();
 	if(m_fixed)
 	{
 		m_prop->setFixed();
 	}
 	return true;
-}
+} */
+
+/*
+bool
+LoadableSceneProp::attach(Scene *scene)
+{
+	Ogre::SceneNode *node;
+
+	if(!m_prop->attach(scene, m_id))
+	{
+		return false;
+	}
+	return true;
+} */
+
 
 
 
@@ -419,25 +645,69 @@ LoadableSceneProp::attach(Scene *scene)
  * simply a specialisation of LoadableSceneProp
  */
 
+LoadableSceneActor::LoadableSceneActor(const LoadableSceneActor &object):
+	LoadableSceneProp(object)
+{
+}
+
 LoadableSceneActor::LoadableSceneActor(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
 	LoadableSceneProp(owner, parent, name, attrs)
 {
 }
 
-bool
-LoadableSceneActor::addResources(Ogre::String group)
+LoadableObject *
+LoadableSceneActor::clone(void) const
 {
-	State *state;
-	
-	state = m_owner->state();
-	m_prop = dynamic_cast<Actor *>(state->factory(m_name, m_class));
-	if(!m_prop)
+	return new LoadableSceneActor(*this);
+}
+
+
+
+
+/* LoadableSceneLight encapsulates a <light> within a <scene>
+ * <light id="scene-local-name" x="n" y="n" z="n">
+ */
+
+LoadableSceneLight::LoadableSceneLight(const LoadableSceneLight &object):
+	LoadableSceneObject(object)
+{
+}
+
+LoadableSceneLight::LoadableSceneLight(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
+	LoadableSceneObject(owner, parent, name, attrs)
+{
+}
+
+LoadableObject *
+LoadableSceneLight::clone(void) const
+{
+	return new LoadableSceneLight(*this);
+}
+
+/* Because lights don't have classes (i.e., no XML description), they're not
+ * a descendant of LoadableSceneProp and so can't share the createNode
+ * implementation.
+ */
+Node *
+LoadableSceneLight::createNode(State *state)
+{
+	Loadable *p;
+	Light *light;
+
+	p = state->factory(m_kind, m_id);
+	if(!p)
 	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene actor instance");
-		return false;
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create " + m_kind + " instance");
+		return NULL;
 	}
-	(dynamic_cast<Scene *> (m_owner))->addSceneObject(this, m_prop);
-	return true;
+	light = dynamic_cast<Light *>(p);
+	if(!light)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: factory-returned " + m_kind + " (" + m_id + ") instance was not a light");
+		delete p;
+		return NULL;
+	}
+	return light;
 }
 
 
@@ -448,67 +718,10 @@ LoadableSceneActor::addResources(Ogre::String group)
  */
 
 LoadableSceneAmbientLight::LoadableSceneAmbientLight(Scene *owner,  Ogre::String name, AttrList &attrs):
-	LoadableObject(owner, NULL, name, attrs)
+	LoadableSceneProperty(owner, NULL, name, attrs)
 {
-	m_col = parseColourValue(attrs);
-}
-
-Ogre::ColourValue
-LoadableSceneAmbientLight::colorValue(void)
-{
-	return m_col;
-}
-
-bool
-LoadableSceneAmbientLight::addResources(Ogre::String group)
-{
-	(dynamic_cast<Scene *> (m_owner))->addAmbientLight(this);
-	return true;
-}
-
-
-
-
-/* LoadableSceneLight encapsulates a <light> within a <scene>
- * <light id="scene-local-name" x="n" y="n" z="n">
- */
-
-LoadableSceneLight::LoadableSceneLight(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
-	LoadableSceneObject(owner, parent, name, attrs)
-{
-}
-
-bool
-LoadableSceneLight::addResources(Ogre::String group)
-{
-	State *state;
-	
-	state = m_owner->state();
-	m_light = dynamic_cast<Light *>(state->factory(m_name, m_id));
-	if(!m_light)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create scene light instance");
-		return false;
-	}
-	(dynamic_cast<Scene *> (m_owner))->addSceneObject(this, m_light);
-	return true;
-}
-
-bool
-LoadableSceneLight::attach(Scene *scene)
-{
-	Ogre::Light *node;
-	
-	/* TODO: attach to parent node if there is one */
-	if(!m_light->attach(scene, m_id))
-	{
-		return false;
-	}
-	node = m_light->node();
-/*	node->scale(m_scale); */
-/*	node->rotate(m_rotate); */
-	node->setPosition(m_translate);
-	return true;
+	owner->m_hasAmbientLight = true;
+	owner->m_ambientColour = parseColourValue(attrs);
 }
 
 
@@ -518,16 +731,15 @@ LoadableSceneLight::attach(Scene *scene)
  * <rotate> within a scene object; the x, y and z attributes are parsed
  * and then applied to the appropriate properties of the parent.
  */
-LoadableSceneTransform::LoadableSceneTransform(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
-	LoadableObject(owner, parent, name, attrs)
+LoadableSceneTransform::LoadableSceneTransform(Scene *owner, LoadableSceneObject *parent, Ogre::String kind, AttrList &attrs):
+	LoadableSceneProperty(owner, parent, kind, attrs)
 {
-	m_discardable = true;
 	m_vector = parseXYZ(attrs);
-	if(!name.compare("scale"))
+	if(!kind.compare("scale"))
 	{
 		parent->m_scale = m_vector;
 	}
-	else if(!name.compare("translate"))
+	else if(!kind.compare("translate"))
 	{
 		parent->m_translate = m_vector;
 	}
@@ -540,8 +752,8 @@ LoadableSceneTransform::LoadableSceneTransform(Scene *owner, LoadableSceneObject
  * scene object; the rad or deg attributes specify radians or degrees
  * respectively.
  */
-LoadableSceneRotation::LoadableSceneRotation(Scene *owner, LoadableSceneObject *parent, Ogre::String name, AttrList &attrs):
-	LoadableObject(owner, parent, name, attrs),
+LoadableSceneRotation::LoadableSceneRotation(Scene *owner, LoadableSceneObject *parent, Ogre::String kind, AttrList &attrs):
+	LoadableSceneProperty(owner, parent, kind, attrs),
 	m_angle()
 {
 	AttrListIterator it;
@@ -560,15 +772,15 @@ LoadableSceneRotation::LoadableSceneRotation(Scene *owner, LoadableSceneObject *
 			m_angle = Ogre::Degree(std::atof(p.second.c_str()));
 		}
 	}
-	if(!name.compare("yaw"))
+	if(!kind.compare("yaw"))
 	{
 		parent->m_yaw = m_angle;
 	}
-	else if(!name.compare("pitch"))
+	else if(!kind.compare("pitch"))
 	{
 		parent->m_pitch = m_angle;
 	}
-	else if(!name.compare("roll"))
+	else if(!kind.compare("roll"))
 	{
 		parent->m_roll = m_angle;
 	}
@@ -581,9 +793,8 @@ LoadableSceneRotation::LoadableSceneRotation(Scene *owner, LoadableSceneObject *
  * <gravity x="n" y="n" z="n" />
  */
 
-LoadableSceneGravity::LoadableSceneGravity(Scene *owner,  Ogre::String name, AttrList &attrs):
-	LoadableObject(owner, NULL, name, attrs)
+LoadableSceneGravity::LoadableSceneGravity(Scene *owner,  Ogre::String kind, AttrList &attrs):
+	LoadableSceneProperty(owner, NULL, kind, attrs)
 {
-	m_discardable = true;
 	owner->m_gravity = ogreVecToBullet(parseXYZ(attrs));
 }

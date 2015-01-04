@@ -29,6 +29,39 @@
 
 using namespace Jyuzau;
 
+Actor::Actor(const Actor &object):
+	Prop::Prop(object),
+	m_character(NULL),
+	m_forward(false), m_backward(false), m_left(false), m_right(false),
+	m_velocity(Ogre::Vector3::ZERO),
+	m_clockwise(false), m_cclockwise(false),
+	m_rotVelocity(0.0f),
+	m_lookUp(false), m_lookDown(false),
+	m_camPitchVelocity(0.0f),
+	m_speed(MS_WALK)
+{
+	m_health = object.m_health;
+	m_level = object.m_level;
+	m_topSpeed = object.m_topSpeed;
+	m_moveAccel = object.m_moveAccel;
+	m_moveDecel = object.m_moveDecel;
+	m_moveDistance = object.m_moveDistance;
+	m_moveRunFactor = object.m_moveRunFactor;
+	m_moveCreepFactor = object.m_moveCreepFactor;
+	m_rotSpeed = object.m_rotSpeed;
+	m_rotStep = object.m_rotStep;
+	m_rotAccel = object.m_rotAccel;
+	m_rotDecel = object.m_rotDecel;
+	m_rotAngle = object.m_rotAngle;
+	m_rotFactor = object.m_rotAngle;
+	m_camPitchSpeed = object.m_camPitchSpeed;
+	m_camPitchStep = object.m_camPitchStep;
+	m_camPitchAccel = object.m_camPitchAccel;
+	m_camPitchDecel = object.m_camPitchDecel;
+	m_camPitchAngle = object.m_camPitchAngle;
+	m_camPitchFactor = object.m_camPitchAngle;
+}
+
 Actor::Actor(Ogre::String name, State *state, Ogre::String kind):
 	Prop::Prop(name, state, kind),
 	m_character(NULL),
@@ -67,8 +100,14 @@ Actor::~Actor()
 {
 }
 
+Loadable *
+Actor::clone(void) const
+{
+	return new Actor(*this);
+}
+
 Character *
-Actor::character(void)
+Actor::character(void) const
 {
 	return m_character;
 }
@@ -77,11 +116,17 @@ void
 Actor::characterAttached(void)
 {
 	m_level = m_character->level();
+	m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+	m_rigidBody->setActivationState(DISABLE_DEACTIVATION);
+	m_rigidBody->setMassProps(0, btVector3(0,0,0));	
 }
 
 void
 Actor::characterDetached(void)
 {
+	m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+	m_rigidBody->setActivationState(0);
+	m_rigidBody->setMassProps(m_mass, btVector3(0,0,0));	
 }
 
 Camera *
@@ -123,25 +168,6 @@ Actor::setActiveCamera(Camera *cam)
 		return;
 	}
 	m_cameras[cam->cameraType] = cam;
-}
-
-bool
-Actor::createPhysics(btDynamicsWorld *dynamics)
-{
-	if(!Prop::createPhysics(dynamics))
-	{
-		return false;
-	}
-	/* This isn't strictly accurate: it should only be players affected this
-	 * way.
-	 */
-	if(m_character)
-	{
-		m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags()|btCollisionObject::CF_KINEMATIC_OBJECT);
-		m_rigidBody->setActivationState(DISABLE_DEACTIVATION);
-		m_rigidBody->setMassProps(0, btVector3(0,0,0));
-	}
-	return true;
 }
 
 void
@@ -241,7 +267,15 @@ Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	if(m_velocity != Ogre::Vector3::ZERO)
 	{
 		translation = m_velocity * evt.timeSinceLastFrame;
-		m_node->translate(translation);
+/*		if(m_rigidBody)
+		{
+			Ogre::Quaternion orientation = m_node->getOrientation();
+			m_rigidBody->applyCentralForce(ogreVecToBullet(translation * 100));
+		}
+		else
+		{ */
+			m_node->translate(translation);
+/*		} */
 	}
 	/* Process rotation */
 	accelerateRotation(m_rotVelocity, m_cclockwise, m_clockwise, m_rotSpeed, m_rotStep, m_rotAccel, m_rotDecel, evt.timeSinceLastFrame);

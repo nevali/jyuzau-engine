@@ -70,24 +70,7 @@ Character::createDummy(State *state, Scene *scene)
 	}
 	if(scene)
 	{
-		actor->attach(scene);
-	}
-	return actor;
-}
-
-Actor *
-Character::createDummy(State *state, Ogre::SceneManager *sceneManager)
-{
-	Actor *actor;
-	
-	actor = new Actor(m_actorName, state);
-	if(!actor)
-	{
-		return NULL;
-	}
-	if(sceneManager)
-	{
-		actor->attach(sceneManager);
+		actor->attachToScene(scene);
 	}
 	return actor;
 }
@@ -108,25 +91,7 @@ Character::createActor(State *state, Scene *scene)
 	}
 	if(scene)
 	{
-		actor->attach(scene);
-	}
-	attach(actor);
-	return actor;
-}
-
-Actor *
-Character::createActor(State *state, Ogre::SceneManager *sceneManager)
-{
-	Actor *actor;
-	
-	actor = new Actor(m_actorName, state);
-	if(!actor)
-	{
-		return NULL;
-	}
-	if(sceneManager)
-	{
-		actor->attach(sceneManager);
+		actor->attachToScene(scene, m_actorName);
 	}
 	attach(actor);
 	return actor;
@@ -157,7 +122,7 @@ Character::actorName(void)
 {
 	if(m_actor)
 	{
-		return m_actor->name();
+		return m_actor->className();
 	}
 	return m_actorName;
 }

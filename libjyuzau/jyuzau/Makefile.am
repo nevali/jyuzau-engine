@@ -17,4 +17,4 @@ jincdir = $(includedir)
 jinc_HEADERS = actor.hh camera.hh character.hh charselect.hh controller.hh \
 	core.hh defs.hh delegate.hh light.hh loadable.hh main.hh mainmenu.hh \
 	menu.hh prop.hh roster.hh scene.hh sceneview.hh scenewalk.hh splash.hh \
-	state.hh
+	state.hh node.hh

@@ -51,7 +51,13 @@
 	<prop id="floor" class="floor" fixed="yes">
 		<scale x="5" y="5" />
 		<translate y="-50" />
-		<yaw deg="-90" />
+		<pitch deg="-90" />
+	</prop>
+
+	<prop id="ceiling" class="floor" fixed="yes">
+		<scale x="5" y="5" />
+		<translate y="450" />
+		<pitch deg="90" />
 	</prop>
 
 	<prop id="back" class="wall" fixed="yes">
@@ -60,20 +66,20 @@
 	</prop>
 
 	<prop id="front" class="wall" fixed="yes">
-		<pitch deg="180" />
+		<yaw deg="180" />
 		<scale x="5" y="2.5" />
 		<translate y="200" z="500" />
 	</prop>
 
 	<prop id="left" class="wall" fixed="yes">
 		<scale x="5" y="2.5" />
-		<pitch deg="90" />
+		<yaw deg="90" />
 		<translate y="200" x="-500" />
 	</prop>
 
 	<prop id="right" class="wall" fixed="yes">
 		<scale x="5" y="2.5" />
-		<pitch deg="-90" />
+		<yaw deg="-90" />
 		<translate y="200" x="500" />
 	</prop>
 

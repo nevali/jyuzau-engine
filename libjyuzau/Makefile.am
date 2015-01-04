@@ -29,10 +29,10 @@ include_HEADERS = jyuzau.hh
 libjyuzau_la_SOURCES = p_utils.hh \
 	app.cc nsapp.mm delegate.mm core.cc loadable.cc state.cc \
 	scene.cc prop.cc actor.cc light.cc character.cc roster.cc \
-	camera.cc controller.cc sceneview.mm splash.mm mainmenu.mm \
-	menu.mm charselect.cc scenewalk.cc
+	camera.cc controller.cc sceneview.cc splash.cc mainmenu.cc \
+	menu.cc charselect.cc scenewalk.cc node.cc
 
-libjyuzau_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
+libjyuzau_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -no-undefined
 
 # Suffix rules for ObjC++
 .mm.o:

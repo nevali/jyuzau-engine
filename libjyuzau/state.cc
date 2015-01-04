@@ -69,6 +69,7 @@ StateOverlapCallback::process(const btBroadphaseProxy* proxy)
 State::State():
 	m_prev(NULL), m_next(NULL), m_loaded(false),
 	m_sceneManager(NULL),
+	m_currentScene(NULL),
 	m_cameras(),
 	m_actors(),
 	m_defaultPlayerCameraType(CT_FIRSTPERSON),
@@ -82,17 +83,20 @@ State::State():
 State::~State()
 {
 	m_core->removeState(this);
-	deletePlayers();
+	if(m_currentScene)
+	{
+		deletePlayers(m_currentScene);
+	}
 }
 
 Ogre::SceneManager *
-State::sceneManager(void)
+State::sceneManager(void) const
 {
 	return m_sceneManager;
 }
 
 int
-State::cameras(void)
+State::cameras(void) const
 {
 	return m_cameras.size();
 }
@@ -108,17 +112,26 @@ State::camera(int index)
 }
 
 btDynamicsWorld *
-State::dynamics(void)
+State::dynamics(void) const
 {
 	return m_dynamics;
+}
+
+bool
+State::overlay(void) const
+{
+	return m_overlay;
 }
 
 void
 State::playersChanged(void)
 {
-	Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: players have changed");
-	deletePlayers();
-	createPlayers();
+	if(m_currentScene)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: players have changed; re-creating");
+		deletePlayers(m_currentScene);
+		createPlayers(m_currentScene);
+	}
 }
 
 void
@@ -128,6 +141,12 @@ State::preload(void)
 	{
 		load();
 	}
+}
+
+/* Add a non-unique asset to the object pool for later re-use */
+void
+State::addToPool(const Loadable *object)
+{
 }
 
 /* Create an instance of an asset */
@@ -165,12 +184,9 @@ State::factory(Ogre::String m_kind, Ogre::String m_name)
 	return loadable;
 }
 
-bool
-State::overlay(void)
-{
-	return m_overlay;
-}
-
+/* Invoked by preload() or activated() to demand-load the resources for the
+ * state.
+ */
 void
 State::load(void)
 {
@@ -178,17 +194,22 @@ State::load(void)
 	createScenes();
 	createSceneManager();
 	attachScenes();
-	createPlayers();
 }
 
+/* This is a utility method invoked by load() which should be overidden to
+ * create and store any Scene objects.
+ */
+
 void
-State::createScenes()
+State::createScenes(void)
 {
-	/* This method should be overridden to perform scene-loading */
 }
 
+/* This is a utility method invoked by load() to create a scene manager for
+ * the State.
+ */
 void
-State::createSceneManager()
+State::createSceneManager(void)
 {
 	/* Create a generic scene manager by default; descendants can override
 	 * this to create specific scene managers as required.
@@ -196,16 +217,19 @@ State::createSceneManager()
 	m_sceneManager = Ogre::Root::getSingletonPtr()->createSceneManager(Ogre::ST_GENERIC);
 }
 
+/* This is a utility method invoked by load() to attach any Scene objects to
+ * the OGRE SceneManager.
+ */
 void
 State::attachScenes(void)
 {
-	/* This method should be overridden to attach the loaded scenes to
-	 * the scene manager and add any players to it.
-	 */
 }
 
+/* This is a utility method invoked by the sceneAttached() callback in order
+ * to create any player-actors and associated cameras.
+ */
 void
-State::createPlayers(void)
+State::createPlayers(Scene *scene)
 {
 	int i, n;
 	Character *c;
@@ -225,7 +249,7 @@ State::createPlayers(void)
 			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to obtain character #" + std::to_string(i));
 			continue;
 		}
-		a = c->createActor(this, m_sceneManager);
+		a = c->createActor(this, scene);
 		if(!a)
 		{
 			Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to create actor for Character '" + c->title() + "'");
@@ -234,7 +258,6 @@ State::createPlayers(void)
 		m_actors.push_back(a);
 		/* Temporary hack until spawn points are implemented */
 		a->setPosition(0, 0, 200);
-		a->attachPhysics();
 		cam = a->createCamera(m_defaultPlayerCameraType);
 		if(!cam)
 		{
@@ -245,8 +268,11 @@ State::createPlayers(void)
 	}
 }
 
+/* This is a utility method invoked primarily by sceneDetached() to remove
+ * any cameras and actors from the scene.
+ */
 void
-State::deletePlayers(void)
+State::deletePlayers(Scene *scene)
 {
 	std::vector<Camera *>::iterator cit;
 	std::vector<Actor *>::iterator ait;
@@ -265,6 +291,9 @@ State::deletePlayers(void)
 	m_actors.clear();
 }
 
+/* This is a utility method invoked by activated() in order to create
+ * viewports for our cameras and bind playable actors to the Controller.
+ */
 void
 State::addViewports(Ogre::RenderWindow *window)
 {
@@ -280,6 +309,7 @@ State::addViewports(Ogre::RenderWindow *window)
 		m_cameras[0]->matchAspectRatio();
 		if(m_cameras[0]->actor)
 		{
+			/* Inform the Actor that the camera is now active */
 			m_cameras[0]->actor->setActiveCamera(m_cameras[0]);
 		}
 	}
@@ -289,6 +319,9 @@ State::addViewports(Ogre::RenderWindow *window)
 	}
 }
 
+/* This is a utility method invoked by deactivated() in order to destroy
+ * any viewports that we created and un-bind any actors from the Controller.
+ */
 void
 State::removeViewports(Ogre::RenderWindow *window)
 {
@@ -298,20 +331,23 @@ State::removeViewports(Ogre::RenderWindow *window)
 	m_controller->unbindAll();
 	for(ait = m_actors.begin(); ait != m_actors.end(); ait++)
 	{
+		/* Note that this does not destroy the cameras, as they are owned
+		 * by us, it merely removes the association (created by
+		 * Actor::setActiveCamera()) between the camera and the actor.
+		 */
 		(*ait)->resetActiveCameras();
 	}
 	for(cit = m_cameras.begin(); cit != m_cameras.end(); cit++)
 	{
+		/* Remove the viewports associated with the cameras */
 		(*cit)->deleteViewport();
 	}
 }
 
-void
-State::sceneAttached(Scene *scene)
-{
-	m_dynamics = scene->dynamics();
-}
-
+/* Utility method invoked by frameEventQueued() to ensure that the dynamics
+ * world is updated before the frame is rendered and to perform any
+ * collision-related processing.
+ */
 void
 State::updatePhysics(btScalar timeSinceLastFrame)
 {
@@ -325,6 +361,29 @@ State::updatePhysics(btScalar timeSinceLastFrame)
 
 /* Event listeners */
 
+/* Invoked by Scene::attach() once a scene has been created and attached to
+ * the scene manager
+ */
+void
+State::sceneAttached(Scene *scene)
+{
+	m_currentScene = scene;
+	m_dynamics = scene->dynamics();
+	createPlayers(scene);
+}
+
+/* Invoked by Scene::detach() when a scene is about to be torn down */
+void
+State::sceneDetached(Scene *scene)
+{
+	deletePlayers(scene);
+	m_dynamics = NULL;
+	m_currentScene = NULL;
+}
+
+/* Invoked by Core::activateState() when this state reaches the head of the
+ * state stack and becomes active.
+ */
 void
 State::activated(Ogre::RenderWindow *window)
 {
@@ -335,6 +394,9 @@ State::activated(Ogre::RenderWindow *window)
 	addViewports(window);
 }
 
+/* Invoked by Core::deactivateState() when this state stops being at the head
+ * of the state stack and so becomes inactive.
+ */
 void
 State::deactivated(Ogre::RenderWindow *window)
 {
@@ -361,6 +423,9 @@ State::resumed(Ogre::RenderWindow *window)
 	}
 }
 
+/* Invoked by Core::frameRenderingQueued() when we are the active state in
+ * order for rendering events to be processed.
+ */
 bool
 State::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
@@ -368,7 +433,6 @@ State::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	
 	if(m_dynamics)
 	{
-		
 		updatePhysics(evt.timeSinceLastFrame);
 	}
 	for(ait = m_actors.begin(); ait != m_actors.end(); ait++)
@@ -378,6 +442,9 @@ State::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	return true;
 }
 
+/* Keyboard and mouse events, forwarded by corresponding Core methods when
+ * we are the active state.
+ */
 bool
 State::keyPressed(const OIS::KeyEvent &arg)
 {

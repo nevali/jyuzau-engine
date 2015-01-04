@@ -40,6 +40,9 @@ namespace Jyuzau
 	 * A Character instance is also used to define the properties of special
 	 * NPCs - those that the player interacts with in particular ways to
 	 * advance the story, for example.
+	 *
+	 * Note that a Character may have multiple Actor instances referring to it
+	 * at any given point.
 	 */
 	class Character
 	{
@@ -52,13 +55,11 @@ namespace Jyuzau
 		 * a scene.
 		 */
 		virtual Actor *createActor(State *state, Scene *scene = NULL);
-		virtual Actor *createActor(State *state, Ogre::SceneManager *sceneManager);
 		
 		/* Create a dummy Actor for the character - that is, an actor which
 		 * represents the character (because it uses the same assets), but is
 		 * not attached to the character itself */
 		virtual Actor *createDummy(State *state, Scene *scene = NULL);
-		virtual Actor *createDummy(State *state, Ogre::SceneManager *sceneManager);
 		
 		/* Attach the character to an existing actor */
 		virtual void attach(Actor *actor);

@@ -46,12 +46,12 @@ namespace Jyuzau
 		Loadable(Ogre::String name, State *state, Ogre::String kind, bool subdir);
 		~Loadable();
 
-		virtual Loadable *clone(void);
+		virtual Loadable *clone(void) const;
 		
 		virtual bool load(void);
 		
 		virtual LoadableObject *root(void) const;
-		virtual Ogre::String name(void) const;
+		virtual Ogre::String className(void) const;
 		virtual Ogre::String kind(void) const;
 		virtual bool unique(void) const;
 		virtual State *state(void) const;
@@ -65,7 +65,7 @@ namespace Jyuzau
 		 */
 		virtual void addObject(Loadable *child);
 	protected:
-		Ogre::String m_name, m_kind, m_path, m_container, m_group;
+		Ogre::String m_className, m_kind, m_path, m_container, m_group;
 		int m_skip;
 		bool m_loaded, m_load_status;
 		LoadableObject *m_root, *m_cur;
@@ -73,11 +73,13 @@ namespace Jyuzau
 		std::vector<Loadable *> m_objects;
 		bool m_unique;
 		State *m_state;
+
+		virtual bool complete(void) const;
 		
 		virtual bool loadDocument(Ogre::String path);
 		
 		virtual void didFinishLoading(void);
-		virtual bool addResources(Ogre::String group);
+		virtual bool addResources(Ogre::String groupName);
 		virtual void discard(void);
 		
 		virtual LoadableObject *factory(Ogre::String name, AttrList &attrs);
@@ -101,17 +103,20 @@ namespace Jyuzau
 		
 	public:
 		LoadableObject(const LoadableObject &object);
-		LoadableObject(Loadable *owner, LoadableObject *parent, Ogre::String name, AttrList &attrs);
+		LoadableObject(Loadable *owner, LoadableObject *parent, Ogre::String kind, AttrList &attrs);
 		virtual ~LoadableObject();
 		virtual LoadableObject *clone(void);
 		
-		virtual Ogre::String name(void) const;
+		virtual Ogre::String kind(void) const;
 		virtual LoadableObject *parent(void) const;
 		virtual bool complete(void) const;
+		
+		virtual bool attach(void);
+		virtual bool detach(void);
 	protected:
 		Loadable *m_owner;
 		LoadableObject *m_parent, *m_first, *m_last, *m_prev, *m_next;
-		Ogre::String m_name;
+		Ogre::String m_kind;
 		bool m_loaded;
 		AttrList m_attrs;
 		bool m_discardable;
