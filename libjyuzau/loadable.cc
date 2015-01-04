@@ -30,32 +30,82 @@ using namespace Jyuzau;
 
 /* Method flow:
  *
- * Loadable::Loadable()                [public constructor]
- * Loadable::load()                    [public]
+ * Loadable::Loadable()                 [public constructor]
+ * Loadable::load()                     [public]
  *  Loadable::loadDocument()
- *   Loadable::startElement()          [via SAX callbacks]
+ *   Loadable::startElement()           [via SAX callbacks]
  *    Loadable::factory()
  *     [LoadableObject or descendant constructor]
  *    Loadable::add()
- *   Loadable::endElement()            [via SAX callbacks]
- *    LoadableObject::loaded()         [may recurse the tree]
+ *   Loadable::endElement()             [via SAX callbacks]
+ *    LoadableObject::didFinishLoding() [may recurse the tree]
  *  Loadable::complete()
- *   LoadableObject::complete()        [may recurse the tree]
- *  Loadable::loaded()
+ *   LoadableObject::complete()         [may recurse the tree]
+ *  Loadable::didFinishLoading()
  *   Loadable::addResources()
- *    LoadableObject::addResources()   [may recurse the tree]
+ *    LoadableObject::addResources()    [may recurse the tree]
  *  Loadable::discard()
- *   delete LoadableObject             [if root is discardable, or...]
- *   LoadableObject::discard()         [may recurse the tree]
+ *   delete LoadableObject              [if root is discardable, or...]
+ *   LoadableObject::discard()          [may recurse the tree]
  * 
  * Descendants will typically include an attach() method which attaches the
  * asset to the scene (or in the case of a Scene, attaches the scene to an
  * Ogre::SceneManager).
  */
 
+Loadable::Loadable():
+	m_name(""),
+	m_kind(""),
+	m_container(""),
+	m_path(""),
+	m_loaded(false),
+	m_load_status(false),
+	m_root(NULL),
+	m_cur(NULL),
+	m_objects(),
+	m_owner(NULL),
+	m_unique(false),
+	m_state(NULL)
+{
+}
+
+/* Note that m_owner is not copied from the source instance */
+Loadable::Loadable(const Loadable &object):
+	m_name(""),
+	m_kind(""),
+	m_container(""),
+	m_path(""),
+	m_loaded(false),
+	m_load_status(false),
+	m_root(NULL),
+	m_cur(NULL),
+	m_objects(),
+	m_owner(NULL),
+	m_unique(false),
+	m_state(NULL)
+{
+	if(!object.m_loaded || !object.m_load_status)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot duplicate a loadable instance which has an incomplete definition");
+		return;
+	}
+	m_name = object.m_name;
+	m_kind = object.m_kind;
+	m_container = object.m_container;
+	m_path = object.m_path;
+	m_loaded = object.m_loaded;
+	m_load_status = object.m_load_status;
+	m_unique = object.m_unique;
+	m_state = object.m_state;
+}
+
 Loadable::Loadable(Ogre::String name, State *state, Ogre::String kind, bool subdir):
 	m_name(name),
 	m_kind(kind),
+	m_container(""),
+	m_path(""),
+	m_loaded(false),
+	m_load_status(false),
 	m_root(NULL),
 	m_cur(NULL),
 	m_objects(),
@@ -65,7 +115,6 @@ Loadable::Loadable(Ogre::String name, State *state, Ogre::String kind, bool subd
 {
 	Ogre::String base;
 	
-	m_loaded = m_load_status = false;
 	if (!Ogre::StringUtil::startsWith(name, "/", false))
 	{
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
@@ -101,34 +150,40 @@ Loadable::~Loadable()
 	}
 }
 
+Loadable *
+Loadable::clone(void)
+{
+	return new Loadable(*this);
+}
+
 /* Property handlers */
 Ogre::String
-Loadable::name(void)
+Loadable::name(void) const
 {
 	return m_name;
 }
 
 Ogre::String
-Loadable::kind(void)
+Loadable::kind(void) const
 {
 	return m_kind;
 }
 
 LoadableObject *
-Loadable::root(void)
+Loadable::root(void) const
 {
 	return m_root;
 }
 
 /* A unique object is never added to a state's object pool */
 bool
-Loadable::unique(void)
+Loadable::unique(void) const
 {
 	return m_unique;
 }
 
 State *
-Loadable::state(void)
+Loadable::state(void) const
 {
 	return m_state;
 }
@@ -146,6 +201,11 @@ Loadable::load(void)
 	}
 	m_loaded = true;
 	m_load_status = false;
+	if(!m_path.length())
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to load " + m_name + "[" + m_kind + "] which has no path");
+		return false;
+	}
 	if(!loadDocument(m_path))
 	{
 		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: failed to load " + m_name + "[" + m_kind + "] from " + m_path);
@@ -163,17 +223,17 @@ Loadable::load(void)
 		return false;
 	}
 	m_load_status = true;
-	loaded();
+	didFinishLoading();
 	discard();
 	return true;
 }
 
-/* loaded() is invoked by load() once the document has been parsed and the
- * LoadableObject tree has been constructed. By default, loaded() invokes
- * addResources().
+/* didFinishLoading() is invoked by load() once the document has been
+ * parsed and the LoadableObject tree has been constructed. By default,
+ * loaded() invokes addResources().
  */
 void
-Loadable::loaded(void)
+Loadable::didFinishLoading(void)
 {
 	if(!addResources(m_group))
 	{
@@ -183,9 +243,9 @@ Loadable::loaded(void)
 	}
 }
 
-/* Invoked by loaded() to trigger the LoadableObject tree to load or create any
- * associated resources. Note at this point there is no scene manager to
- * attach objects to.
+/* Invoked by didFinishLoading() to trigger the LoadableObject tree to load or
+ * create any associated resources. Note at this point there is no scene
+ * manager to attach objects to.
  */
 bool
 Loadable::addResources(Ogre::String group)
@@ -260,7 +320,7 @@ Loadable::loadDocument(Ogre::String path)
  * will be destroyed by this object's destructor.
  */
 void
-Loadable::add(Loadable *child)
+Loadable::addObject(Loadable *child)
 {
 	child->m_owner = this;
 	m_objects.push_back(child);
@@ -309,7 +369,7 @@ Loadable::startElement(const xmlChar *localname, const xmlChar *prefix, const xm
 	}
 	if(m_cur)
 	{
-		if(!m_cur->add(obj))
+		if(!m_cur->addChild(obj))
 		{
 			delete obj;
 			m_skip++;
@@ -336,7 +396,7 @@ Loadable::endElement(const xmlChar *localname, const xmlChar *prefix, const xmlC
 	}
 	else if(m_cur)
 	{
-		m_cur->loaded();
+		m_cur->didFinishLoading();
 		m_cur = m_cur->parent();
 	}
 }
@@ -365,10 +425,37 @@ Loadable::sax_endElement(void *ctx, const xmlChar *localname, const xmlChar *pre
  * Specialisations of LoadableObject deal with different kinds of element
  * in different contexts.
  *
- * Note that specifying a parent here is NOT the equivalent of calling
- * parent->add(self): that step must still be explicitly taken (as it is
- * by Loadable::startElement()).
+ * Note that specifying a parent in the construction call is NOT the equivalent
+ * of calling parent->add(Childself): that step must still be explicitly taken
+ * (as it is by Loadable::startElement()) -- the parent instance, if any, is
+ * supplied only as a hint.
  */
+
+LoadableObject::LoadableObject(const LoadableObject &object):
+	m_owner(NULL),
+	m_name(""),
+	m_attrs(),
+	m_discardable(true)
+{
+	m_first = m_last = m_prev = m_next = m_parent = NULL;
+	m_loaded = false;
+	if(!object.complete())
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot duplicate a loadable object instance which is incomplete");
+		return;
+	}
+	if(object.m_discardable)
+	{
+		Ogre::LogManager::getSingletonPtr()->logMessage("Jyuzau: cannot duplicate a loadable object instance which is discardable");
+		return;	
+	}
+	m_name = object.m_name;
+	m_attrs = object.m_attrs;
+	m_discardable = object.m_discardable;
+	m_loaded = object.m_loaded;
+	/* TODO: duplicate children */
+}
+
 
 LoadableObject::LoadableObject(Loadable *owner, LoadableObject *parent, Ogre::String name, AttrList &attrs):
 	m_owner(owner),
@@ -393,14 +480,20 @@ LoadableObject::~LoadableObject()
 	}
 }
 
+LoadableObject *
+LoadableObject::clone(void)
+{
+	return new LoadableObject(*this);
+}
+
 Ogre::String
-LoadableObject::name(void)
+LoadableObject::name(void) const
 {
 	return m_name;
 }
 
 LoadableObject *
-LoadableObject::parent(void)
+LoadableObject::parent(void) const
 {
 	return m_parent;
 }
@@ -411,10 +504,14 @@ LoadableObject::parent(void)
  * children within the tree.
  */
 bool
-LoadableObject::complete(void)
+LoadableObject::complete(void) const
 {
 	LoadableObject *p;
 	
+	if(!m_loaded)
+	{
+		return false;
+	}
 	for(p = m_first; p; p = p->m_next)
 	{
 		if(!p->complete())
@@ -430,7 +527,7 @@ LoadableObject::complete(void)
  * by Loadable::factory().
  */
 bool
-LoadableObject::add(LoadableObject *child)
+LoadableObject::addChild(LoadableObject *child)
 {
 	child->m_parent = this;
 	if(m_last)
@@ -454,7 +551,7 @@ LoadableObject::add(LoadableObject *child)
  * some means other than as a result of the XML parsing callbacks).
  */
 void
-LoadableObject::loaded()
+LoadableObject::didFinishLoading()
 {
 	LoadableObject *p;
 	
@@ -463,7 +560,7 @@ LoadableObject::loaded()
 	{
 		if(!p->m_loaded)
 		{
-			p->loaded();
+			p->didFinishLoading();
 		}
 	}
 }
@@ -472,6 +569,8 @@ LoadableObject::loaded()
  * loading; for example, a scene object might load meshes, materials and
  * textures ready for use.
  * This default implementation simply recurses the call down the tree.
+ *
+ * Scene objects should NOT be created by this method.
  */
 bool
 LoadableObject::addResources(Ogre::String group)
@@ -492,6 +591,7 @@ LoadableObject::discard(void)
 {
 	LoadableObject *p;
 	
+	m_attrs.clear();
 	for(p = m_first; p; p = p->m_next)
 	{
 		if(p->m_discardable)
@@ -519,6 +619,7 @@ LoadableObject::discard(void)
 	}
 }
 
+/* Utility method to parse a colour value specified in the attribute list */
 Ogre::ColourValue
 LoadableObject::parseColourValue(AttrList &attrs)
 {
@@ -549,6 +650,9 @@ LoadableObject::parseColourValue(AttrList &attrs)
 	return Ogre::ColourValue(red, green, blue, alpha);
 }
 
+/* Utility method to parse a set of X/Y/Z co-ordinates specified in the
+ * attribute list.
+ */
 Ogre::Vector3
 LoadableObject::parseXYZ(AttrList &attrs, double x, double y, double z)
 {

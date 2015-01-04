@@ -41,16 +41,20 @@ namespace Jyuzau
 	class Loadable
 	{
 	public:
+		Loadable();
+		Loadable(const Loadable &object);
 		Loadable(Ogre::String name, State *state, Ogre::String kind, bool subdir);
 		~Loadable();
+
+		virtual Loadable *clone(void);
 		
 		virtual bool load(void);
 		
-		virtual LoadableObject *root(void);
-		virtual Ogre::String name(void);
-		virtual Ogre::String kind(void);
-		virtual bool unique(void);
-		virtual State *state(void);
+		virtual LoadableObject *root(void) const;
+		virtual Ogre::String name(void) const;
+		virtual Ogre::String kind(void) const;
+		virtual bool unique(void) const;
+		virtual State *state(void) const;
 		
 		/* SAX callbacks */
 		static void sax_startElement(void *ctx, const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces, int nb_attributes, int nb_defaulted, const xmlChar **attributes);
@@ -59,7 +63,7 @@ namespace Jyuzau
 		/* This is public only because one cannot make all descendants of
 		 * a class a friend
 		 */
-		virtual void add(Loadable *child);
+		virtual void addObject(Loadable *child);
 	protected:
 		Ogre::String m_name, m_kind, m_path, m_container, m_group;
 		int m_skip;
@@ -72,7 +76,7 @@ namespace Jyuzau
 		
 		virtual bool loadDocument(Ogre::String path);
 		
-		virtual void loaded(void);
+		virtual void didFinishLoading(void);
 		virtual bool addResources(Ogre::String group);
 		virtual void discard(void);
 		
@@ -96,12 +100,14 @@ namespace Jyuzau
 		friend class Loadable;
 		
 	public:
+		LoadableObject(const LoadableObject &object);
 		LoadableObject(Loadable *owner, LoadableObject *parent, Ogre::String name, AttrList &attrs);
 		virtual ~LoadableObject();
-	
-		virtual Ogre::String name(void);
-		virtual LoadableObject *parent(void);
-		virtual bool complete(void);
+		virtual LoadableObject *clone(void);
+		
+		virtual Ogre::String name(void) const;
+		virtual LoadableObject *parent(void) const;
+		virtual bool complete(void) const;
 	protected:
 		Loadable *m_owner;
 		LoadableObject *m_parent, *m_first, *m_last, *m_prev, *m_next;
@@ -110,8 +116,8 @@ namespace Jyuzau
 		AttrList m_attrs;
 		bool m_discardable;
 		
-		virtual bool add(LoadableObject *child);
-		virtual void loaded(void);
+		virtual bool addChild(LoadableObject *child);
+		virtual void didFinishLoading(void);
 		virtual bool addResources(Ogre::String group);
 		virtual void discard(void);
 		
