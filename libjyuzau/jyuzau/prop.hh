@@ -51,6 +51,11 @@ namespace Jyuzau
 	
 		virtual Loadable *clone(void) const;
 	
+		Ogre::Entity *entity(void) const;
+		btRigidBody *rigidBody(void) const;
+		virtual btScalar mass(void) const;
+		virtual btVector3 inertia(void) const;
+		
 		virtual void setFixed(bool isFixed = false);
 
 		/* btMotionState interface */

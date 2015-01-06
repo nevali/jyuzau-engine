@@ -1,4 +1,4 @@
-/* Copyright 2014 Mo McRoberts.
+/* Copyright 2014-2015 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@
 #include "jyuzau/actor.hh"
 #include "jyuzau/character.hh"
 #include "jyuzau/camera.hh"
+#include "jyuzau/scene.hh"
+#include "jyuzau/kinematics.hh"
 
 #include <OGRE/OgreCamera.h>
 #include <OGRE/OgreSceneNode.h>
@@ -38,7 +40,8 @@ Actor::Actor(const Actor &object):
 	m_rotVelocity(0.0f),
 	m_lookUp(false), m_lookDown(false),
 	m_camPitchVelocity(0.0f),
-	m_speed(MS_WALK)
+	m_speed(MS_WALK),
+	m_kinematics(NULL)
 {
 	m_health = object.m_health;
 	m_level = object.m_level;
@@ -91,7 +94,8 @@ Actor::Actor(Ogre::String name, State *state, Ogre::String kind):
 	m_camPitchDecel(ACTOR_CAM_PITCH_DECEL),
 	m_camPitchAngle(ACTOR_CAM_PITCH_ANGLE),
 	m_camPitchFactor(ACTOR_CAM_PITCH_FACTOR),
-	m_speed(MS_WALK)
+	m_speed(MS_WALK),
+	m_kinematics(NULL)
 {
 	resetActiveCameras();
 }
@@ -116,17 +120,14 @@ void
 Actor::characterAttached(void)
 {
 	m_level = m_character->level();
-	m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-	m_rigidBody->setActivationState(DISABLE_DEACTIVATION);
-	m_rigidBody->setMassProps(0, btVector3(0,0,0));	
+	m_kinematics = new Kinematics(this);	
 }
 
 void
 Actor::characterDetached(void)
 {
-	m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
-	m_rigidBody->setActivationState(0);
-	m_rigidBody->setMassProps(m_mass, btVector3(0,0,0));	
+	delete m_kinematics;
+	m_kinematics = NULL;
 }
 
 Camera *
@@ -149,7 +150,7 @@ Actor::createCamera(CameraType type)
 	/* By default, limit the pitch angle from -90 to +90 degrees */
 	cam->limitPitch = true;
 	/* TODO adjust position, orientation, etc. */
-	cam->node->translate(0, 75, 150);
+	cam->node->translate(0, 0, 0);
 	setActiveCamera(cam);
 	return cam;
 }
@@ -158,6 +159,10 @@ void
 Actor::resetActiveCameras(void)
 {
 	memset(m_cameras, 0, sizeof(m_cameras));
+	if(m_node)
+	{
+		m_node->setVisible(true);
+	}
 }
 
 void
@@ -168,6 +173,11 @@ Actor::setActiveCamera(Camera *cam)
 		return;
 	}
 	m_cameras[cam->cameraType] = cam;
+	if(cam->cameraType == CT_FIRSTPERSON && m_node)
+	{
+		cam->camera->setNearClipDistance(1);
+		m_node->setVisible(false);
+	}
 }
 
 void
@@ -260,6 +270,10 @@ Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
 		return false;
 	}
+	if(m_kinematics)
+	{
+		m_kinematics->frameRenderingQueued(evt);
+	}
 	/* Process movement based upon m_forward, m_backward, m_left, m_right and
 	 * m_speed
 	 */
@@ -267,15 +281,14 @@ Actor::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	if(m_velocity != Ogre::Vector3::ZERO)
 	{
 		translation = m_velocity * evt.timeSinceLastFrame;
-/*		if(m_rigidBody)
+		if(m_kinematics)
 		{
-			Ogre::Quaternion orientation = m_node->getOrientation();
-			m_rigidBody->applyCentralForce(ogreVecToBullet(translation * 100));
+			m_kinematics->walkDirection(translation);
 		}
 		else
-		{ */
+		{
 			m_node->translate(translation);
-/*		} */
+		}
 	}
 	/* Process rotation */
 	accelerateRotation(m_rotVelocity, m_cclockwise, m_clockwise, m_rotSpeed, m_rotStep, m_rotAccel, m_rotDecel, evt.timeSinceLastFrame);
@@ -666,6 +679,11 @@ Actor::jump(void)
 {
 	if(!m_node)
 	{
+		return;
+	}
+	if(m_kinematics)
+	{
+		m_kinematics->jump();
 		return;
 	}
 }

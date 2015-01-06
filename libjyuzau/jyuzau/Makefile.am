@@ -1,4 +1,4 @@
-## Copyright 2014 Mo McRoberts.
+## Copyright 2014-2015 Mo McRoberts.
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -17,4 +17,4 @@ jincdir = $(includedir)
 jinc_HEADERS = actor.hh camera.hh character.hh charselect.hh controller.hh \
 	core.hh defs.hh delegate.hh light.hh loadable.hh main.hh mainmenu.hh \
 	menu.hh prop.hh roster.hh scene.hh sceneview.hh scenewalk.hh splash.hh \
-	state.hh node.hh
+	state.hh node.hh kinematics.hh

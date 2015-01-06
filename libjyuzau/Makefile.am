@@ -1,4 +1,4 @@
-## Copyright 2014 Mo McRoberts.
+## Copyright 2014-2015 Mo McRoberts.
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ libjyuzau_la_SOURCES = p_utils.hh \
 	app.cc nsapp.mm delegate.mm core.cc loadable.cc state.cc \
 	scene.cc prop.cc actor.cc light.cc character.cc roster.cc \
 	camera.cc controller.cc sceneview.cc splash.cc mainmenu.cc \
-	menu.cc charselect.cc scenewalk.cc node.cc
+	menu.cc charselect.cc scenewalk.cc node.cc kinematics.cc
 
 libjyuzau_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -no-undefined
 

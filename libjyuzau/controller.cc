@@ -161,6 +161,9 @@ Controller::keyReleased(const OIS::KeyEvent &arg)
 			case OIS::KC_RSHIFT:
 				m_actors[0]->endRun();
 				break;
+			case OIS::KC_SPACE:
+				m_actors[0]->jump();
+				break;
 			default:
 				/* No-op */;
 		}

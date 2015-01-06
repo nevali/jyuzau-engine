@@ -98,6 +98,13 @@ Scene::dynamics(void) const
 	return m_dynamics;
 }
 
+btBroadphaseInterface *
+Scene::broadphase(void) const
+{
+	return m_broadphase;
+}
+
+
 Ogre::Vector3
 Scene::gravity(void) const
 {
@@ -127,7 +134,6 @@ Scene::setGravity(const btVector3 &vec)
 	m_dynamics->setGravity(m_gravity);
 	return true;
 }
-
 
 /* Attach the loaded objects to the State's scene manager */
 bool

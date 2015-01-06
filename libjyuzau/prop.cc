@@ -88,6 +88,30 @@ Prop::clone(void) const
 	return new Prop(*this);
 }
 
+Ogre::Entity *
+Prop::entity(void) const
+{
+	return m_entity;
+}
+
+btRigidBody *
+Prop::rigidBody(void) const
+{
+	return m_rigidBody;
+}
+
+btScalar
+Prop::mass(void) const
+{
+	return m_mass;
+}
+
+btVector3
+Prop::inertia(void) const
+{
+	return m_inertia;
+}
+
 /* Define this object as physically immovable (used for walls, etc.) */
 void
 Prop::setFixed(bool isFixed)

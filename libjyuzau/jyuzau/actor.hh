@@ -1,4 +1,4 @@
-/* Copyright 2014 Mo McRoberts.
+/* Copyright 2014-2015 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,11 +21,16 @@
 
 # include <OGRE/OgreFrameListener.h>
 
+class btPairCachingGhostObject;
+class btKinematicCharacterController;
+class btBroadphaseInterface;
+
 namespace Jyuzau
 {
 	class Camera;
 	class Character;
-
+	class Kinematics;
+	
 	/* An actor is a kind of prop which can have autonomous behaviours
 	 * and cameras attached to it.
 	 */
@@ -133,6 +138,9 @@ namespace Jyuzau
 		Ogre::Real m_camPitchAngle;
 		Ogre::Real m_camPitchFactor;
 		
+		/* Physics */
+		Kinematics *m_kinematics;
+
 		virtual void characterAttached(void);
 		virtual void characterDetached(void);
 		

@@ -56,10 +56,12 @@ namespace Jyuzau
 		Ogre::SceneManager *sceneManager(void) const;
 		Ogre::SceneNode *rootNode(void) const;
 		virtual btDynamicsWorld *dynamics(void) const;
+		virtual btBroadphaseInterface *broadphase(void) const;
 		virtual Ogre::Vector3 gravity(void) const;
 		virtual bool setGravity(const Ogre::Vector3 &vec);
 		virtual bool setGravity(const btVector3 &vec);
-		
+
+
 		bool attach(void);
 		bool detach(void);
 		
